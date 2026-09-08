@@ -31,13 +31,23 @@ fi
 echo "[+] Checking Python dependencies..."
 PYTHON_BIN=$(command -v python3 || command -v python)
 if [ -n "$PYTHON_BIN" ]; then
-  $PYTHON_BIN -m pip install --quiet pypdf pyyaml
-  echo "[OK] Python dependencies installed (pypdf, pyyaml)."
+  $PYTHON_BIN -m pip install --quiet pypdf pyyaml python-telegram-bot psutil python-dotenv aiohttp playwright camoufox
+  if command -v camoufox &> /dev/null || $PYTHON_BIN -m camoufox --help &> /dev/null; then
+    echo "[+] Fetching Camoufox anti-detect browser binary..."
+    $PYTHON_BIN -m camoufox fetch || true
+  fi
+  echo "[OK] Python dependencies installed (Camoufox, Playwright, Telegram Bot, PyPDF, YAML)."
 else
   echo "[!] Python 3 not found. Please install Python 3.10+."
 fi
 
-# 3. Check & Install TinyTeX (User space - no sudo needed)
+# 3. Environment Config Setup
+if [ ! -f .env ] && [ -f .env.example ]; then
+  cp .env.example .env
+  echo "[OK] Created .env from template."
+fi
+
+# 4. Check & Install TinyTeX (User space - no sudo needed)
 if ! command -v lualatex &> /dev/null && [ ! -d "$HOME/Library/TinyTeX" ]; then
   echo "[+] Installing lightweight TinyTeX for compiling PDF resumes..."
   curl -fsSL https://yihui.org/tinytex/install-bin-unix.sh -o /tmp/tinytex-install.sh
@@ -53,14 +63,14 @@ else
   echo "[OK] LaTeX compilation engine ready."
 fi
 
-# 4. Register Antigravity Global Skill
+# 5. Register Antigravity Global Skill
 echo "[+] Registering Antigravity global skill..."
 GLOBAL_SKILL_DIR="$HOME/.gemini/config/skills/ai-job-auto-applier"
 mkdir -p "$GLOBAL_SKILL_DIR"
 cp -f .agents/skills/ai-job-auto-applier/SKILL.md "$GLOBAL_SKILL_DIR/SKILL.md"
 echo "[OK] Registered in $GLOBAL_SKILL_DIR."
 
-# 5. Quick Configuration Check
+# 6. Quick Configuration Check
 if grep -q "\[YOUR_NAME\]" CLAUDE.md 2>/dev/null; then
   echo ""
   echo "-----------------------------------------------------------------"
@@ -84,11 +94,14 @@ fi
 
 echo ""
 echo "================================================================="
-echo "   🎉 SETUP COMPLETE!                                           "
+echo "   🎉 SETUP COMPLETE! AI JOB AUTO-APPLIER v2 READY               "
 echo "================================================================="
-echo "Open this folder in Google Antigravity and you can immediately run:"
-echo "  /run-jobs-search     -> Starts autonomous continuous job search"
-echo "  /scrape              -> Scrape matching jobs on demand"
-echo "  /apply <job_url>     -> Generate tailored CV & cover letter PDF"
+echo "You can now run:"
+echo "  1. Autonomous Daemon:   python3 tools/daemon_job_runner.py --interval-mins 60"
+echo "  2. Anti-Detect Apply:   python3 tools/browser_autofill.py <url> --mode semi-auto"
+echo "  3. Telegram Mobile Bot: python3 tools/telegram_bot.py"
+echo "  4. Build Daily Project: python3 tools/project_scaffolder.py --skill <skill>"
+echo "  5. Recruiter Discovery: python3 tools/recruiter_finder.py --company <name>"
+echo "  6. Funnel Analytics:    python3 tools/funnel_analytics.py"
 echo "================================================================="
 echo ""

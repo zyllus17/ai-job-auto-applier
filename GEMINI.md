@@ -56,6 +56,19 @@ Once the user provides these 3 items:
    - Prepares application form answers in `documents/applications/<company>_<role>/form_fields.txt`.
 5. **/interview**: Stage-specific prep pack with real STAR stories.
 6. **/upskill**: Deep skill gap heatmap and targeted learning resources.
+7. **/auto-apply <url>**:
+   - Launches Camoufox anti-detect browser (0 AI tokens) and fills ATS forms (Greenhouse, Lever, Ashby, Workday, etc.).
+   - Checks `CompanyFilter` to prevent applying to current employer (`Floor Boss`).
+   - Supports `--mode semi-auto` (pause for confirmation) and `--mode full-auto`.
+8. **/build-project <skill>**:
+   - Generates 1 visual mini-project per day (`tools/project_scaffolder.py`) with frontend for LinkedIn demos.
+   - Pushes to GitHub and provides LinkedIn hooks.
+9. **/recruiter <company>**:
+   - Passive Google X-Ray search to discover hiring managers and draft cold emails + LinkedIn connection requests.
+10. **/telegram-bot**:
+    - Launches self-hosted Telegram bot (`tools/telegram_bot.py`) for mobile commands (`/ping`, `/jobs`, `/enable`, `/disable`).
+11. **/analytics**:
+    - Generates funnel conversion report and LinkedIn profile optimization suggestions.
 
 --------------------------------------------------------------------------------
 
@@ -71,4 +84,5 @@ Whenever evaluating a job where the candidate lacks a required skill (e.g. LangG
 - TinyTeX / LuaLaTeX: `~/Library/TinyTeX/bin/universal-darwin/lualatex` (or in PATH)
 - XeLaTeX: `~/Library/TinyTeX/bin/universal-darwin/xelatex` (or in PATH)
 - Bun: `/opt/homebrew/bin/bun` (or in PATH)
-- Python: Python 3.10+ with `pypdf`, `pyyaml`
+- Camoufox: Python package + C++ Firefox anti-detect binary
+- Python: Python 3.10+ with `pypdf`, `pyyaml`, `camoufox`, `playwright`, `python-telegram-bot`

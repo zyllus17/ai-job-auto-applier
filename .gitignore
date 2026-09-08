@@ -33,6 +33,7 @@ linkedin_Profile.pdf
 # fetching service; the .env holding it must never be committed.
 .env
 .env.*
+!.env.example
 
 # Personal photos and signatures
 *.jpg
@@ -121,3 +122,7 @@ company_research/*.json
 seen_jobs.json
 google_sheet_config.json
 *.log
+scratch/
+last_project_date.txt
+daemon_enabled.flag
+.job-autoapply-profile/

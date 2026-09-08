@@ -213,6 +213,21 @@ I am an AI Automation Engineer and Senior Flutter Developer with 5+ years of exp
         if Path(XELATEX_BIN).exists():
             compile_latex(XELATEX_BIN, target_cover_tex, app_dir)
             
+    # 4. Generate cold outreach draft (Email + LinkedIn connection request)
+    try:
+        from tools.outreach_drafter import draft_outreach
+        role_title = job.get('title', 'AI Automation Engineer')
+        company_name = job.get('company', 'Company')
+        draft_outreach(
+            recruiter_name="Hiring Manager",
+            company=company_name,
+            role_title=role_title,
+            candidate_achievement="orchestrated high-throughput Gemini AI Slack agents cutting reporting time by 70%",
+            candidate_linkedin="https://linkedin.com/in/maruf-hassan"
+        )
+    except Exception as e:
+        pass
+
     print(f"[STAGED] Application assets prepared at: {app_dir.relative_to(REPO_ROOT)}")
     return app_dir
 
@@ -228,6 +243,18 @@ def run_search_cycle(dry_run=False, limit=5) -> list:
         except Exception:
             all_seen_dict = {}
             
+    # Load candidate profile for company exclusion
+    company_filter = None
+    profile_path = REPO_ROOT / "tools" / "candidate_profile.json"
+    if profile_path.exists():
+        try:
+            with open(profile_path, "r", encoding="utf-8") as f:
+                prof = json.load(f)
+                from tools.browser_autofill import CompanyFilter
+                company_filter = CompanyFilter(prof)
+        except Exception:
+            pass
+
     new_staged = []
     print(f"\n[DAEMON] === Running Discovery Cycle at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===")
 
@@ -255,6 +282,10 @@ def run_search_cycle(dry_run=False, limit=5) -> list:
                     company = item.get("company", "")
                     url = item.get("url", "")
                     
+                    if company_filter and company_filter.should_skip(company):
+                        print(f"  [EXCLUSION] Skipping job at current employer: {company}")
+                        continue
+                        
                     # Fetch detail
                     det_out = run_cli_command([BUN_BIN, str(linkedin_cli), "detail", str(item.get("id")), "--format", "json"])
                     desc = ""
@@ -315,6 +346,10 @@ def run_search_cycle(dry_run=False, limit=5) -> list:
                     url = item.get("url", "")
                     desc = item.get("description", "")
                     
+                    if company_filter and company_filter.should_skip(company):
+                        print(f"  [EXCLUSION] Skipping FreeHire job at current employer: {company}")
+                        continue
+                        
                     fit_score, missing_skill, suggested_project = score_job_fit(title, desc)
                     all_seen_dict[job_id] = {
                         "title": title,

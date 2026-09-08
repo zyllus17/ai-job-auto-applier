@@ -1,8 +1,8 @@
 <p align="center">
-  <h1 align="center">🤖 AI Job Auto-Applier: Autonomous Career Engine</h1>
+  <h1 align="center">🤖 AI Job Auto-Applier v2: Autonomous Career Engine</h1>
   <p align="center">
-    <b>The continuous, self-driving job application framework that runs on your laptop.</b><br>
-    <i>Automated Discovery • ATS Tailored 2-Page CVs • 1-Page Cover Letters • Continuous Hunting • Google Sheets Daily Tracking • 1–2 Hr Recruiter Hook Projects</i>
+    <b>The continuous, self-driving career acquisition framework that runs locally on your laptop.</b><br>
+    <i>Automated Discovery • Anti-Detect Form Auto-Filling • 0 AI Tokens Form Filler • ATS Tailored 2-Page CVs • 1-Page Cover Letters • Daily Frontend Demo Projects • Recruiter Cold Outreach • Free Self-Hosted Telegram Bot • Google Sheets Daily Tracking</i>
   </p>
 </p>
 
@@ -10,15 +10,17 @@
 
 ## 🌟 Why This Exists
 
-Most job searches are exhausting: hours spent browsing boards, rewriting resumes, drafting cover letters, and manually updating spreadsheets.
+Most job searches are exhausting: hours spent browsing boards, rewriting resumes, drafting cover letters, filling identical application forms, and manually updating spreadsheets.
 
-**AI Job Auto-Applier** turns your AI coding assistant (**Google Antigravity, Claude Code, Cursor, Windsurf, Copilot, or Gemini CLI**) into an autonomous job hunter that:
-1. **Scrapes active postings** on LinkedIn and global tech aggregators (FreeHire, etc.) 24/7.
-2. **Evaluates fit (0–100)** against your real work experience.
+**AI Job Auto-Applier** turns your AI assistant (**Google Antigravity, Claude Code, Cursor, Windsurf, Copilot, or Gemini CLI**) into an autonomous job hunter that:
+1. **Scrapes active postings** on LinkedIn, FreeHire, and global aggregators 24/7.
+2. **Evaluates fit (0–100)** against your real work experience while **automatically skipping your current employer**.
 3. **Compiles tailored 2-page ModernCV PDFs** (`lualatex`) and **1-page Cover Letters** (`xelatex`) for every matching role.
-4. **Identifies skill gaps & designs 1–2 hour demo projects** (with 45s video demo scripts) to prove hands-on competence to recruiters.
-5. **Syncs applications into Google Sheets** with a **dedicated new tab created automatically for each day** (`YYYY-MM-DD`).
-6. **Runs continuously in the background** on your laptop until you tell it to stop.
+4. **Auto-fills and submits application forms** on Greenhouse, Lever, Ashby, Workday, SmartRecruiters, LinkedIn Easy Apply, Indeed, Naukri, and Monster with **Camoufox C++ anti-detect browser engine (0 AI tokens consumed)**.
+5. **Scaffolds 1 visual demo project per day** (with Streamlit/Gradio frontend for LinkedIn video recordings) and automatically creates/pushes repos to your GitHub.
+6. **Discovers hiring managers and recruiters** via Google X-Ray search (zero LinkedIn ban risk) and drafts personalized 4-sentence emails and LinkedIn connection requests.
+7. **Pushes real-time alerts to your Telegram bot** with inline buttons to view PDFs and trigger actions directly from your phone.
+8. **Tracks the full lifecycle** in Google Sheets with a **dedicated new tab created automatically for each day** (`YYYY-MM-DD`).
 
 ---
 
@@ -39,13 +41,11 @@ Ask me only the 3 essential things you need from me, and automate all other setu
 2. **Your Target Roles & Location**: (e.g. *AI Automation Engineer, Senior Flutter Developer, Remote Worldwide, India, US, Europe*).
 3. **Google Sheets Webhook URL (Optional)**: If you want real-time tracking with a new tab created each day (see setup below).
 
-**That's it!** The AI installs Bun, Python libraries, and TinyTeX in user-space, compiles your master CV PDF, and launches discovery.
+**That's it!** The AI installs Bun, Python libraries, Camoufox, and TinyTeX in user-space, compiles your master CV PDF, and launches discovery.
 
 ---
 
-## 💻 Alternative: 1-Command Terminal Setup
-
-If you prefer terminal installation:
+## 💻 1-Command Terminal Setup
 
 ```bash
 git clone https://github.com/zyllus17/ai-job-auto-applier.git
@@ -53,34 +53,100 @@ cd ai-job-auto-applier
 bash quickstart.sh
 ```
 
-The script automatically detects your OS, installs Bun and TinyTeX, prompts for your profile details, registers the global Antigravity skill, and sets up your workspace.
+The script automatically detects your OS, installs Bun, TinyTeX, Camoufox, and Telegram dependencies, prompts for your profile details, registers the global Antigravity skill, and sets up your workspace.
 
 ---
 
-## ⚡ The 4 Core Superpowers
+## ⚡ The 6 Core Superpowers (v2)
 
-### 1. 🔄 Continuous Background Daemon (`/run-jobs-search`)
-Runs quietly on your laptop and searches for new roles on an automated schedule (e.g., hourly).
+### 1. 🤖 Anti-Detect Browser Auto-Filling (0 AI Tokens)
+- **Engine**: Powered by **[Camoufox](https://github.com/daijro/camoufox)**, a custom C++ Firefox engine that completely eliminates Chromium CDP leaks (`Runtime.enable`), achieving best-in-class bypass rates against Cloudflare Turnstile, DataDome, and Akamai.
+- **Zero AI Vision Tokens**: Uses deterministic CSS selectors and ARIA accessibility labels (`tools/ats_selectors.json`) across **Greenhouse, Lever, Ashby, Workday, SmartRecruiters, LinkedIn Easy Apply, Indeed, Naukri, and Monster.com**.
+- **Human Behavioral Simulation (`tools/humanizer.py`)**:
+  - Bézier curves with Fitts's Law acceleration profiles and micro-jitter.
+  - Log-normal keystroke delays (65ms–180ms/key) with cognitive punctuation pauses.
+  - Smooth inertial momentum scrolling.
+  - Realistic form completion pacing (45–150s).
+- **Persistent Profile & 1-Time Login**: Saves cookies in `~/.job-autoapply-profile` so you log into portals once and all subsequent applications are automatic.
+- **Privacy Shield**: Automatically identifies your current employer from `candidate_profile.json` and skips applying to avoid workplace exposure.
+
+```bash
+# Semi-auto mode (fills all fields and pauses for review before submitting)
+python3 tools/browser_autofill.py "https://jobs.lever.co/company/job-id" --mode semi-auto
+
+# Full-auto mode (fills and submits after a 10s human-like countdown)
+python3 tools/browser_autofill.py "https://jobs.lever.co/company/job-id" --mode full-auto --dry-run
+```
+
+---
+
+### 2. 🛠️ Daily Visual Project Scaffolder (`tools/project_scaffolder.py`)
+- Automatically generates **1 high-impact working proof-of-concept project per day** to bridge detected skill gaps (e.g. LangGraph, Vector DBs, Model Context Protocol, FastAPI Gateways, Computer Vision).
+- **Includes an Interactive Frontend** (Streamlit, Gradio, Swagger UI, or Flutter web) specifically designed for screen-recording 45-second demo videos for LinkedIn impressions.
+- **Auto-Push to GitHub**: Automatically runs `git init`, creates a public repo via `gh repo create zyllus17/<name>`, and pushes clean code with MIT license and badges.
+- **LinkedIn Sharing Hook**: Provides a punchy, ready-to-publish hook (e.g. *"Built a multi-agent RAG system in 2 hours with LangGraph!"*).
+
+```bash
+python3 tools/project_scaffolder.py --skill langgraph
+```
+
+---
+
+### 3. 🎯 Recruiter Discovery & Cold Outreach Auto-Drafter
+- **Passive Google X-Ray Search** (`tools/recruiter_finder.py`): Finds Engineering Managers, Talent Acquisition leads, and recruiters via public Google/DuckDuckGo indexing without using your personal LinkedIn account (0% account ban risk).
+- **Corporate Email Permutations**: Generates verified corporate email guesses (`john.doe@company.com`, `jdoe@company.com`).
+- **Cold Outreach Drafter** (`tools/outreach_drafter.py`): Automatically writes:
+  1. **4-Sentence High-Impact Email** highlighting your strongest quantifiable achievement.
+  2. **Informal LinkedIn Connection Request** (≤300 chars): *"Hey [Name], I saw you posted a [Role] role at [Company]. I have worked on similar technology and stuff, if you got a min, please check my Linkedin Profile to check the cool stuff I have built!"*
+- Automatically saved into `documents/applications/<company>_<role>/outreach.md`.
+
+```bash
+python3 tools/recruiter_finder.py --company "Stellantis"
+python3 tools/outreach_drafter.py --company "Stellantis" --role "AI Automation Engineer"
+```
+
+---
+
+### 4. 📱 Free Self-Hosted Telegram Bot (`tools/telegram_bot.py`)
+- **100% Free Forever**: Runs locally on your laptop using Telegram's official Bot API via `@BotFather`. Zero server costs, zero subscription fees.
+- **Laptop Health & Remote Daemon Control**:
+  - `/ping`: Responds with laptop uptime, battery percentage, and background status.
+  - `/enable` & `/disable`: Remotely toggle autonomous scanning from your phone.
+  - `/status`: Real-time daemon uptime and application totals.
+  - `/jobs`: Summarizes the top 5 highest-fit opportunities with direct links.
+  - `/scan`: Triggers an immediate background discovery cycle.
+  - `/apply <slug>`: Generates tailored CV and cover letter PDFs and uploads them directly to your Telegram chat.
+  - `/analytics`: Funnel conversion stats and top in-demand skills.
+- **Sleep/Wake Safe**: Telegram cloud servers hold queued messages for up to 24 hours while your laptop is asleep, delivering them seamlessly when you wake up. Stale commands older than 5 minutes are safely discarded.
+
+```bash
+# Setup: Put TELEGRAM_BOT_TOKEN and TELEGRAM_ALLOWED_USER_ID in .env
+python3 tools/telegram_bot.py
+```
+
+---
+
+### 5. 🔄 Continuous Background Daemon (`tools/daemon_job_runner.py`)
+Runs quietly on your laptop and searches for new roles on an automated schedule.
 - **Deduplication**: Remembers every job in `seen_jobs.json` so you never process the same posting twice.
-- **Application Staging**: For every job scoring $\ge 70\%$ fit, it automatically generates a tailored ModernCV PDF, a custom cover letter PDF, form answers, and a briefing in `documents/applications/<company>_<role>/`.
-- **Model Limit Resilience**: Handles rate limits with exponential backoff and keeps going indefinitely until killed.
+- **Application Staging**: For every job scoring $\ge 70\%$ fit, it automatically generates a tailored ModernCV PDF, a custom cover letter PDF, form answers, and cold outreach drafts in `documents/applications/<company>_<role>/`.
+- **Model Limit Resilience**: Handles rate limits with exponential backoff and runs indefinitely.
 
-### 2. 📄 Automated ATS-Compliant PDF Generation
-- **CV Engine**: Compiles a sleek 2-page ModernCV banking style in blue accents via `lualatex`.
-- **Cover Letter Engine**: Compiles a 1-page letter with custom typography via `xelatex`.
-- **ATS Validator**: Checks extracted text and layout readability using `pypdf`.
+```bash
+python3 tools/daemon_job_runner.py --interval-mins 60
+```
 
-### 3. 💡 High-Demand Skill Gaps & 1–2 Hour Recruiter Hook Projects
-When an otherwise perfect job requires a skill you don't list (e.g., *LangGraph, Vector DBs, Model Context Protocol, AWS Bedrock, Kotlin Multiplatform*):
-- The assistant identifies the highest-demand missing skill.
-- Designs a **minimal 1–2 hour working mini-project** (clean architecture, lightweight libraries).
-- Suggests a **45-second screen recording / GIF demonstration** you can attach to your application note or share on LinkedIn to immediately prove competence to the recruiter.
+---
 
-### 4. 📊 Google Sheets Sync with Daily Tabs (`YYYY-MM-DD`)
-Every evaluated and staged job is logged in real-time to Google Sheets:
-- Creates a fresh tab for each day (e.g., `2026-09-08`, `2026-09-09`).
-- Beautifully formatted headers: *Timestamp, Company, Job Title, Fit Score, Status, Missing High-Demand Skill, Suggested 1-2 Hr Project, Location, Job URL, Notes*.
-- Always saves an offline local backup in `job_search_tracker.csv`.
+### 6. 📊 Google Sheets Sync with Daily Tabs & Funnel Analytics
+- **Daily Tabs**: Logs every evaluated job in real-time to a dedicated tab for each day (e.g., `2026-09-08`, `2026-09-09`).
+- **Funnel Analytics (`tools/funnel_analytics.py`)**: Tracks the complete candidate pipeline:
+  $$\text{Discovered} \to \text{Staged} \to \text{Applied} \to \text{Interview} \to \text{Offer}$$
+- **LinkedIn Profile Optimizer**: Aggregates keywords across all evaluated jobs and generates specific headline, about section, and skills endorsement recommendations.
+
+```bash
+python3 tools/funnel_analytics.py
+```
 
 ---
 
@@ -99,16 +165,20 @@ Every evaluated and staged job is logged in real-time to Google Sheets:
 
 ---
 
-## 🎮 Command Cheatsheet
+## 🎮 Telegram Bot Slash Commands
 
 | Command | What It Does |
 | :--- | :--- |
-| **`/run-jobs-search`** | Starts the autonomous background daemon on your laptop. Runs continuously until stopped. |
-| **`/scrape`** | Executes an on-demand scrape across LinkedIn and FreeHire portals. |
-| **`/rank`** | Batch-scores and shortlists recently scraped postings against your profile. |
-| **`/apply <url or text>`** | Evaluates a single job, identifies skill gaps + 1-2 hr demo project, drafts tailored CV & cover letter PDFs, and prepares portal form answers. |
-| **`/interview`** | Generates stage-specific interview prep packs mapping your real STAR stories to the job. |
-| **`/upskill`** | Produces a skill-gap heatmap and targeted learning roadmaps across target postings. |
+| **`/start`** | Welcome message and initial configuration check. |
+| **`/status`** | Displays daemon state (Active/Paused) and total jobs tracked. |
+| **`/jobs`** | Lists the top 5 highest-fit opportunities with match percentage and gaps. |
+| **`/scan`** | Triggers an immediate discovery scan across portals in the background. |
+| **`/apply <slug>`** | Generates tailored CV and cover letter PDFs for the given job and uploads to chat. |
+| **`/ping`** | Checks if your laptop is awake; returns battery %, uptime, and memory. |
+| **`/enable`** | Remotely enables the autonomous search daemon. |
+| **`/disable`** | Remotely pauses the autonomous search daemon. |
+| **`/analytics`** | Outputs the job funnel conversion report and top skills demanded. |
+| **`/help`** | Shows all available commands. |
 
 ---
 
@@ -116,7 +186,7 @@ Every evaluated and staged job is logged in real-time to Google Sheets:
 
 ```text
 ai-job-auto-applier/
-├── .agents/skills/               # Universal Agent Skills (LinkedIn, FreeHire, Application, Upskill)
+├── .agents/skills/               # Antigravity & Agent Skills (LinkedIn, FreeHire, Application, Upskill)
 ├── .claude/                      # Core workflow methodology, commands & prompt templates
 │   ├── commands/                 # Slash commands (/run-jobs-search, /scrape, /apply, etc.)
 │   └── skills/                   # Evaluator, writer, and reviewer pipelines
@@ -127,13 +197,25 @@ ai-job-auto-applier/
 │   ├── cover_example.tex         # Master 1-page XeLaTeX cover letter
 │   └── cover.cls                 # Class definitions & fonts
 ├── documents/
-│   ├── applications/             # Auto-generated application packages (CV PDF, Cover PDF, briefing)
+│   ├── applications/             # Auto-generated application packages (CV PDF, Cover PDF, outreach.md)
 │   └── cv/                       # Your raw resumes / PDFs
-├── tools/                        # Python & JavaScript automation toolchain
+├── scratch/
+│   └── projects/                 # Auto-generated daily visual demo projects (Streamlit, Gradio)
+├── tools/                        # Python & TypeScript automation toolchain
+│   ├── ats_selectors.json        # CSS & ARIA selector map for 9 major ATS platforms
+│   ├── browser_autofill.py       # Camoufox anti-detect form auto-filler & submitter
+│   ├── humanizer.py              # Bézier mouse curves, log-normal typing, scroll momentum
+│   ├── project_scaffolder.py     # 1-project-per-day visual code generator & GitHub publisher
+│   ├── recruiter_finder.py       # Google X-Ray passive recruiter discovery & email guesser
+│   ├── outreach_drafter.py       # 4-sentence email & informal LinkedIn request drafter
+│   ├── telegram_bot.py           # Self-hosted Telegram bot with laptop health & remote control
+│   ├── telegram_notifier.py      # Standalone webhook helper for Telegram alert cards
+│   ├── funnel_analytics.py       # Application funnel tracker & LinkedIn profile optimizer
 │   ├── daemon_job_runner.py      # Continuous autonomous job search daemon
 │   ├── google_sheets_sync.py     # Multi-tab Google Sheets sync utility
 │   ├── google_apps_script.js     # 25-line Apps Script Webhook template
 │   └── verify_pdf.py             # ATS text extraction validator (pypdf)
+├── .env.example                  # Environment template (Telegram token, user ID, webhook)
 ├── AGENTS.md                     # Universal instructions for all AI coding agents
 ├── GEMINI.md                     # Antigravity native configuration & zero-touch protocol
 ├── quickstart.sh                 # 1-command cross-platform bash installer
@@ -142,38 +224,20 @@ ai-job-auto-applier/
 
 ---
 
-## 📤 How to Push to Your Own GitHub
-
-To push this framework to your personal GitHub account so you can share it with others:
-
-```bash
-# 1. Create a new repository on GitHub (e.g. ai-job-auto-applier)
-# 2. Update your git remote
-git remote set-url origin https://github.com/zyllus17/ai-job-auto-applier.git
-
-# 3. Stage and commit all changes
-git add .
-git commit -m "feat: complete autonomous AI job search engine with continuous daemon, PDF automation, and Google Sheets sync"
-
-# 4. Push to your repository
-git push -u origin master
-```
-
----
-
 ## 💛 Acknowledgements & Upgrades
 
 This project is a fork and enhanced evolution of the original [ai-job-search](https://github.com/MadsLorentzen/ai-job-search) by [Mads Lorentzen](https://github.com/MadsLorentzen).
 
-### Key Upgrades in `ai-job-auto-applier`:
-- **AI Skill-Gap Bot & 1–2 Hour Project Recommendations**: When a job requires a skill you don't yet have on your resume, the assistant doesn't just filter it out—it identifies the highest-demand missing skill and designs a **concrete 1–2 hour proof-of-concept project** (with architecture, deliverables, and a 45-second screen recording blueprint) so you can build it, showcase real competence to recruiters, and continuously level up your profile.
-- **Autonomous Continuous Background Daemon (`/run-jobs-search`)**: Runs quietly 24/7 on your laptop, periodically discovering fresh roles, deduplicating, compiling PDFs, and staging application packets.
-- **Real-time Google Sheets Sync with Daily Tabs (`YYYY-MM-DD`)**: Automatically generates a dedicated, color-coded tab for every single day to track all applications, status, and project ideas.
-- **Universal Zero-Touch AI Onboarding**: Ready out-of-the-box for Google Antigravity, Claude Code, Cursor, Windsurf, Copilot, and Gemini CLI to configure the entire system with only 3 user questions.
+### Key Upgrades in `ai-job-auto-applier v2`:
+- **Camoufox Anti-Detect Auto-Apply (0 Tokens)**: Seamless browser automation without consuming AI vision tokens, using deterministic DOM selectors across Greenhouse, Lever, Ashby, Workday, SmartRecruiters, LinkedIn Easy Apply, Indeed, Naukri, and Monster.
+- **Current Employer Shield**: Automatic company exclusion protecting your active employment.
+- **Daily Visual Proof-of-Concept Scaffolder**: Builds 1 mini-project per day with a visual frontend (Streamlit/Gradio) for LinkedIn demo recordings, automatically committed and pushed to GitHub.
+- **Google X-Ray Recruiter Discovery & Cold Outreach**: Zero-risk hiring manager finding with email permutation guessing and tailored outreach generation.
+- **Self-Hosted Telegram Mobile Bot**: Free mobile control center for checking laptop health (`/ping`), viewing discovered jobs (`/jobs`), triggering scans (`/scan`), and toggling daemon status (`/enable`, `/disable`).
+- **Funnel Analytics & LinkedIn Profile Optimizer**: End-to-end lifecycle tracking with headline and skills endorsement advice.
 
 ---
 
 <p align="center">
   <i>Built with ❤️ for autonomous career development. Fork it, customize it, and land your next role on autopilot.</i>
 </p>
-

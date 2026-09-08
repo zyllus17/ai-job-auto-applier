@@ -1,0 +1,35 @@
+{
+  "first_name": "Maruf",
+  "last_name": "Hassan",
+  "full_name": "Maruf Hassan",
+  "email": "csengineer.maruf@gmail.com",
+  "phone": "+91 79803 56852",
+  "linkedin_url": "https://linkedin.com/in/maruf-hassan",
+  "github_url": "https://github.com/zyllus17",
+  "portfolio_url": "",
+  "location": "Kolkata, West Bengal, India",
+  "city": "Kolkata",
+  "country": "India",
+  "current_company": "Floor Boss",
+  "current_title": "AI Automation Engineer",
+  "work_authorization": {
+    "authorized_india": true,
+    "authorized_us": false,
+    "requires_sponsorship": true
+  },
+  "education": {
+    "degree": "B.Tech Computer Science Engineering",
+    "university": "Aliah University",
+    "graduation_year": "2020",
+    "gpa": "7.1"
+  },
+  "years_experience": 5,
+  "resume_pdf_path": "cv/main_example.pdf",
+  "cover_letter_pdf_path": "cover_letters/cover_example.pdf",
+  "eeo_responses": {
+    "gender": "Male",
+    "race_ethnicity": "Decline to self-identify",
+    "veteran_status": "I am not a protected veteran",
+    "disability_status": "I do not wish to answer"
+  }
+}

@@ -1,8 +1,4 @@
----
-description: Run the continuous autonomous job search daemon on your laptop
----
-
-# /run-jobs-search
+# /run-jobs-search - Autonomous Continuous Job Search Daemon
 
 Starts the autonomous continuous background job search daemon.
 
