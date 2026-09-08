@@ -2,7 +2,7 @@
 framework_version: 1.1.0
 ---
 
-# Universal Agent Guidelines: AI Job Search
+# Universal Agent Guidelines: AI Job Auto-Applier
 
 This workspace powers an end-to-end, autonomous job search and application engine compatible with **ALL major AI coding assistants**:
 - **Google Antigravity (AGY)**
@@ -21,7 +21,7 @@ Check if `CLAUDE.md` or `cv/main_example.tex` contains default candidate data or
 
 ### Step 2: Ask the User ONLY 3 Things
 Do NOT ask the user to install packages, configure paths, or run complex commands. Ask only:
-> "Welcome to AI Job Search! I will configure your autonomous job search engine on your system and handle all setup automatically. I only need 3 things from you:
+> "Welcome to AI Job Auto-Applier! I will configure your autonomous job search engine on your system and handle all setup automatically. I only need 3 things from you:
 > 
 > 1. **Your Resume / CV**: Paste your resume text here, attach your CV file, or drop your PDF into `documents/cv/`.
 > 2. **Target Roles & Location**: What roles do you want (e.g. AI Automation Engineer, Senior Flutter, Fullstack, ML Engineer) and what is your preference (Remote Worldwide, Remote India, US, Europe relocation)?

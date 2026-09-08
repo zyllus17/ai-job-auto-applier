@@ -2,7 +2,7 @@
 framework_version: 1.0.0
 ---
 
-# Antigravity Workspace Guidelines: AI Job Search
+# Antigravity Workspace Guidelines: AI Job Auto-Applier
 
 This workspace powers an autonomous job evaluation, scraping, resume tailoring, and interview preparation assistant.
 
@@ -15,7 +15,7 @@ If you are an Antigravity agent running in this workspace on a NEW user's comput
 Do all technical work (installing Bun, Python packages, TinyTeX, LaTeX libraries) automatically behind the scenes.
 
 Ask the user ONLY for these **3 Essential Items**:
-> "Welcome to AI Job Search! I will configure and run your autonomous job search engine on your machine. I only need 3 things from you:
+> "Welcome to AI Job Auto-Applier! I will configure and run your autonomous job search engine on your machine. I only need 3 things from you:
 > 
 > 1. **Your Resume / CV**: Paste your resume text here, attach your CV file, or drop your PDF into `documents/cv/`.
 > 2. **Target Roles & Location**: What roles do you want (e.g. AI Engineer, Senior Flutter, Fullstack) and what is your work preference (Remote Worldwide, specific country, relocation)?

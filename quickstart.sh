@@ -7,7 +7,7 @@ set -e
 
 echo ""
 echo "================================================================="
-echo "   AI JOB SEARCH - AUTONOMOUS FRAMEWORK SETUP FOR ANTIGRAVITY    "
+echo "   AI JOB AUTO-APPLIER - AUTONOMOUS FRAMEWORK SETUP FOR ANTIGRAVITY    "
 echo "================================================================="
 echo "Setting up your automated job search, CV generator, and tracker..."
 echo ""
@@ -55,9 +55,9 @@ fi
 
 # 4. Register Antigravity Global Skill
 echo "[+] Registering Antigravity global skill..."
-GLOBAL_SKILL_DIR="$HOME/.gemini/config/skills/ai-job-search"
+GLOBAL_SKILL_DIR="$HOME/.gemini/config/skills/ai-job-auto-applier"
 mkdir -p "$GLOBAL_SKILL_DIR"
-cp -f .agents/skills/ai-job-search/SKILL.md "$GLOBAL_SKILL_DIR/SKILL.md"
+cp -f .agents/skills/ai-job-auto-applier/SKILL.md "$GLOBAL_SKILL_DIR/SKILL.md"
 echo "[OK] Registered in $GLOBAL_SKILL_DIR."
 
 # 5. Quick Configuration Check

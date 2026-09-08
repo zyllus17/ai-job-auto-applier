@@ -1,5 +1,5 @@
 ---
-name: ai-job-search
+name: ai-job-auto-applier
 description: >-
   Automate job searching, posting evaluation, CV tailoring, cover letter writing,
   interview preparation, and skill-gap upskilling with proof-of-concept project recommendations.
@@ -7,7 +7,7 @@ description: >-
   tailor their resume/cover letter, or identify missing skills and 1-2 hour demo projects.
 ---
 
-# AI Job Search Automation
+# AI Job Auto-Applier Automation
 
 This skill automates the end-to-end job application and search lifecycle for **Maruf Hassan**.
 

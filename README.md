@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">🤖 AI Job Search: Autonomous Career Engine</h1>
+  <h1 align="center">🤖 AI Job Auto-Applier: Autonomous Career Engine</h1>
   <p align="center">
     <b>The continuous, self-driving job application framework that runs on your laptop.</b><br>
     <i>Automated Discovery • ATS Tailored 2-Page CVs • 1-Page Cover Letters • Continuous Hunting • Google Sheets Daily Tracking • 1–2 Hr Recruiter Hook Projects</i>
@@ -12,7 +12,7 @@
 
 Most job searches are exhausting: hours spent browsing boards, rewriting resumes, drafting cover letters, and manually updating spreadsheets.
 
-**AI Job Search** turns your AI coding assistant (**Google Antigravity, Claude Code, Cursor, Windsurf, Copilot, or Gemini CLI**) into an autonomous job hunter that:
+**AI Job Auto-Applier** turns your AI coding assistant (**Google Antigravity, Claude Code, Cursor, Windsurf, Copilot, or Gemini CLI**) into an autonomous job hunter that:
 1. **Scrapes active postings** on LinkedIn and global tech aggregators (FreeHire, etc.) 24/7.
 2. **Evaluates fit (0–100)** against your real work experience.
 3. **Compiles tailored 2-page ModernCV PDFs** (`lualatex`) and **1-page Cover Letters** (`xelatex`) for every matching role.
@@ -29,7 +29,7 @@ You don't need to manually install dependencies or configure complex environment
 ### Just copy and paste this prompt into your AI:
 
 ```text
-Clone and set up this autonomous job search engine: https://github.com/<your-username>/ai-job-search
+Clone and set up this autonomous job search engine: https://github.com/zyllus17/ai-job-auto-applier
 Follow the instructions in GEMINI.md and AGENTS.md. 
 Ask me only the 3 essential things you need from me, and automate all other setup behind the scenes.
 ```
@@ -48,8 +48,8 @@ Ask me only the 3 essential things you need from me, and automate all other setu
 If you prefer terminal installation:
 
 ```bash
-git clone https://github.com/<your-username>/ai-job-search.git
-cd ai-job-search
+git clone https://github.com/zyllus17/ai-job-auto-applier.git
+cd ai-job-auto-applier
 bash quickstart.sh
 ```
 
@@ -115,7 +115,7 @@ Every evaluated and staged job is logged in real-time to Google Sheets:
 ## 📂 Repository Architecture
 
 ```text
-ai-job-search/
+ai-job-auto-applier/
 ├── .agents/skills/               # Universal Agent Skills (LinkedIn, FreeHire, Application, Upskill)
 ├── .claude/                      # Core workflow methodology, commands & prompt templates
 │   ├── commands/                 # Slash commands (/run-jobs-search, /scrape, /apply, etc.)
@@ -147,9 +147,9 @@ ai-job-search/
 To push this framework to your personal GitHub account so you can share it with others:
 
 ```bash
-# 1. Create a new repository on GitHub (e.g. ai-job-search)
+# 1. Create a new repository on GitHub (e.g. ai-job-auto-applier)
 # 2. Update your git remote
-git remote set-url origin https://github.com/<your-username>/ai-job-search.git
+git remote set-url origin https://github.com/zyllus17/ai-job-auto-applier.git
 
 # 3. Stage and commit all changes
 git add .

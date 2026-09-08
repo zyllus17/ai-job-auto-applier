@@ -1,4 +1,4 @@
-# How to Share & Run AI Job Search on Any Computer
+# How to Share & Run AI Job Auto-Applier on Any Computer
 
 This framework is completely portable and built for **Google Antigravity**. Any developer can clone this repository and have a fully autonomous job application and tracking system running on their machine in under 2 minutes with **zero manual configuration**.
 
@@ -10,7 +10,7 @@ If the person already uses Google Antigravity, they don't even need to touch the
 
 1. Clone or open this repository in Google Antigravity:
    ```text
-   Set up this job search repository for me: https://github.com/<your-username>/ai-job-search
+   Set up this job search repository for me: https://github.com/zyllus17/ai-job-auto-applier
    ```
 2. Antigravity immediately reads the built-in `GEMINI.md` protocol and will automatically ask them **only 3 things**:
    - **Their CV**: Paste resume text or drop their PDF into `documents/cv/`.
@@ -29,8 +29,8 @@ If the person already uses Google Antigravity, they don't even need to touch the
 If they prefer running from the command line:
 
 ```bash
-git clone https://github.com/<your-username>/ai-job-search.git
-cd ai-job-search
+git clone https://github.com/zyllus17/ai-job-auto-applier.git
+cd ai-job-auto-applier
 bash quickstart.sh
 ```
 
