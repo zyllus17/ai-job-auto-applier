@@ -161,6 +161,19 @@ git push -u origin master
 
 ---
 
+## 💛 Acknowledgements & Upgrades
+
+This project is a fork and enhanced evolution of the original [ai-job-search](https://github.com/MadsLorentzen/ai-job-search) by [Mads Lorentzen](https://github.com/MadsLorentzen).
+
+### Key Upgrades in `ai-job-auto-applier`:
+- **AI Skill-Gap Bot & 1–2 Hour Project Recommendations**: When a job requires a skill you don't yet have on your resume, the assistant doesn't just filter it out—it identifies the highest-demand missing skill and designs a **concrete 1–2 hour proof-of-concept project** (with architecture, deliverables, and a 45-second screen recording blueprint) so you can build it, showcase real competence to recruiters, and continuously level up your profile.
+- **Autonomous Continuous Background Daemon (`/run-jobs-search`)**: Runs quietly 24/7 on your laptop, periodically discovering fresh roles, deduplicating, compiling PDFs, and staging application packets.
+- **Real-time Google Sheets Sync with Daily Tabs (`YYYY-MM-DD`)**: Automatically generates a dedicated, color-coded tab for every single day to track all applications, status, and project ideas.
+- **Universal Zero-Touch AI Onboarding**: Ready out-of-the-box for Google Antigravity, Claude Code, Cursor, Windsurf, Copilot, and Gemini CLI to configure the entire system with only 3 user questions.
+
+---
+
 <p align="center">
   <i>Built with ❤️ for autonomous career development. Fork it, customize it, and land your next role on autopilot.</i>
 </p>
+
