@@ -1,21 +1,12 @@
-%% Example CV - [YOUR_NAME]
+%% Master CV - Maruf Hassan
 %% Comprehensive overview of all competencies, experience, and achievements.
 %% Use as a master reference when tailoring role-specific CVs.
-%%
-%% SETUP: Run /setup to populate this with your actual information.
 %% Compile with: lualatex main_example.tex
-%% (pdflatex often fails on modern MiKTeX with fontawesome5 font-expansion errors.)
 
 \documentclass[11pt,a4paper,sans]{moderncv}
 \moderncvstyle{banking}
 \moderncvcolor{blue}
 
-% Force the name and section headings to render in moderncv blue (color1).
-% Default banking leaves them black: moderncvstylebanking.sty's \colorlet
-% copies (not aliases) the pre-scheme accent colour, so the name colours are
-% frozen before \moderncvcolor runs. Re-let them after. \namefont is the hook
-% every name-style macro routes through, so this also works on moderncv 2.3.1
-% (Debian/Ubuntu apt), which has no \firstnamestyle/\lastnamestyle at all.
 \renewcommand*{\namefont}{\fontsize{34}{36}\bfseries\upshape}
 \colorlet{firstnamecolor}{color1}
 \colorlet{lastnamecolor}{color1}
@@ -23,33 +14,23 @@
 \renewcommand*{\sectionstyle}[1]{{\sectionfont\color{color1}#1}}
 
 \usepackage[utf8]{inputenc}
-% moderncv loads hyperref itself in an \AtEndPreamble hook, so \hypersetup
-% must go in an \AtEndPreamble of our own: on moderncv < 2.4 a top-level
-% \usepackage{hyperref} clashes with the class's own
-% \RequirePackage[unicode]{hyperref}. From 2.4.0 the class passes its options
-% through \PassOptionsToPackage instead, which is what removes that clash.
 \AtEndPreamble{\hypersetup{
     colorlinks=true,
     linkcolor=blue,
     filecolor=magenta,
     urlcolor=blue,
-    pdftitle={[YOUR_NAME] - CV},
-    % Keep pdfpagemode=UseNone: this block runs after moderncv's own
-    % \AtEndPreamble (moderncv.cls sets pdfpagemode there), so a FullScreen
-    % value here would win and open every CV in fullscreen presentation mode.
+    pdftitle={Maruf Hassan - CV},
     pdfpagemode=UseNone,
 }}
-\usepackage[scale=0.80]{geometry}
+\usepackage[scale=0.82]{geometry}
 \usepackage{import}
 
 % personal data
-\name{[First]}{[Last]}
-% If you have no address to list, DELETE this whole line. \address{}{}{} fails
-% with "There's no line here to end" on every moderncv version.
-\address{[Your Address, City, Country]}{}{}
-\phone[mobile]{[+XX XXXXXXXXXX]}
-\email{[your.email@example.com]}
-\extrainfo{\href{[https://linkedin.com/in/your-profile]}{LinkedIn}, \href{[https://github.com/your-username]}{GitHub}}
+\name{Maruf}{Hassan}
+\address{Kolkata, West Bengal, India}{}{}
+\phone[mobile]{+91 79803 56852}
+\email{csengineer.maruf@gmail.com}
+\extrainfo{\href{https://linkedin.com/in/maruf-hassan}{LinkedIn}, \href{https://github.com/zyllus17}{GitHub}}
 
 \begin{document}
 
@@ -59,8 +40,8 @@
 %     PROFILE STATEMENT
 % ============================================================
 
-\vspace{6pt}
-\small{[Write a 3-5 line profile statement tailored to the role you're applying for. Focus on what makes you uniquely qualified. Example: "Data scientist with a PhD in [field] and X years of industry experience. Combines deep domain expertise in [domain] with strong applied machine learning and Python development skills. Experienced in developing end-to-end ML pipelines, from data ingestion to stakeholder-facing dashboards."]}
+\vspace{4pt}
+\small{AI Automation Engineer and cross-platform mobile developer with 5+ years of experience shipping award-winning products used by millions, including ELSA Speak (100M+ downloads) and SuperBrains (Golden Dutch Interactive Award winner). Proven expertise in architecting conversational AI agents using Google Gemini, multi-API orchestration, and prompt caching. Creator of Flutter Snippets, used by 150,000+ developers worldwide daily.}
 
 % ============================================================
 %     CORE COMPETENCIES
@@ -70,15 +51,15 @@
 \vspace{1pt}
 \begin{itemize}
 
-\item \textbf{[Skill Category 1]}: [Specific skills, frameworks, tools. Be concrete.]
+\item \textbf{AI \& LLM Integration}: Google Gemini (1.5/2.0 Flash \& Pro), OpenAI API, Prompt Engineering, Agentic Tool Orchestration, Slack Bot DM Interfaces, Prompt Caching, Context Window Optimization.
 
-\item \textbf{[Skill Category 2]}: [Specific skills, frameworks, tools.]
+\item \textbf{Cross-Platform Development}: Dart, Flutter 3, Riverpod, GoRouter, Provider, Custom Animations, Platform Channels, MVVM / Clean Architecture.
 
-\item \textbf{[Skill Category 3]}: [Specific skills, frameworks, tools.]
+\item \textbf{Backend \& APIs}: Python, RESTful APIs, GraphQL, Multi-API Consolidation, Fast / Async Pipelines.
 
-\item \textbf{[Skill Category 4]}: [Domain expertise, methods, approaches.]
+\item \textbf{Cloud, Storage \& DevOps}: Google Cloud Platform (GCP), Firebase (Auth, Remote Config, Firestore), Sentry, Amplitude, CI/CD, Git.
 
-\item \textbf{[Skill Category 5]}: [Tools, platforms, software.]
+\item \textbf{Product \& Quality}: Unit \& Integration Testing, Mobile Performance Tuning (60fps rendering), Agile / Scrum.
 
 \end{itemize}
 
@@ -90,34 +71,48 @@
 \vspace{3pt}
 \begin{itemize}
 
-% --- Most Recent Role ---
-\item{\cventry{[YYYY-Present]}{[Job Title]}{[Company]}{[City, Country]}{}{\vspace{1pt}
+% --- Floor Boss ---
+\item{\cventry{2025--Present}{AI Automation Engineer}{Floor Boss (Independent Product)}{Remote}{}{\vspace{1pt}
 \begin{itemize}
-    \item {[Achievement or responsibility 1 - be specific, use numbers where possible]}
-    \item {[Achievement or responsibility 2]}
-    \item {[Achievement or responsibility 3]}
-    \item {[Achievement or responsibility 4]}
+    \item {Architected a Slack DM-based AI assistant for restaurant general managers on Google Gemini, consolidating POS, scheduling, and review data from 6+ external APIs into one conversational interface.}
+    \item {Designed end-to-end message-flow pipeline covering intent handling, tool orchestration, and automated daily briefings, cutting GM manual reporting time by an estimated 70\%.}
+    \item {Reduced LLM cost per conversation $\sim$40\% via prompt caching and model-tier routing while keeping p95 response latency under 3 seconds.}
 \end{itemize}}}
 
 \vspace{3pt}
 
-% --- Previous Role ---
-\item{\cventry{[YYYY-YYYY]}{[Job Title]}{[Company]}{[City, Country]}{}{\vspace{1pt}
+% --- Paiteq / Pietech Solution ---
+\item{\cventry{2022--Present}{Flutter Developer}{Paiteq Solution}{Remote / Kolkata}{}{\vspace{1pt}
 \begin{itemize}
-    \item {[Achievement or responsibility 1]}
-    \item {[Achievement or responsibility 2]}
-    \item {[Achievement or responsibility 3]}
+    \item {Led the migration of ELSA Speak (AI language-learning app, 100M+ Google Play downloads) from native to Flutter 3, heading a cross-functional team and porting Google, Apple, Facebook, SSO, and email auth flows.}
+    \item {Boosted signup retention by 30\% (tracked via Amplitude) by rebuilding ELSA's onboarding into a smoother flow personalizing AI lessons from user input.}
+    \item {Developed HLP/SuperBrains, a gamified mental-wellness app used by clinics across the Netherlands, recognized with the Golden Dutch Interactive Award for outstanding healthcare UX.}
+    \item {Shipped an Instagram Reels-style video feed, group chat, and social features for Nyburs, a hyperlocal Indian social platform, using Riverpod and custom animations.}
 \end{itemize}}}
 
 \vspace{3pt}
 
-% --- Earlier Role ---
-\item{\cventry{[YYYY-YYYY]}{[Job Title]}{[Company]}{[City, Country]}{}{\vspace{1pt}
+% --- QuestHopp ---
+\item{\cventry{2021--2022}{Flutter Developer}{QuestHopp}{Remote}{}{\vspace{1pt}
 \begin{itemize}
-    \item {[Achievement or responsibility 1]}
-    \item {[Achievement or responsibility 2]}
+    \item {Designed and developed cross-platform Flutter apps for Android and iOS from concept through release, owning features end to end.}
+    \item {Focused on performance tuning and UI responsiveness, cutting screen load times and eliminating frame drops on low-end Android devices.}
+    \item {Standardized state management and API-integration patterns adopted across subsequent projects.}
 \end{itemize}}}
 
+\end{itemize}
+
+% ============================================================
+%     KEY PROJECTS & OPEN SOURCE
+% ============================================================
+
+\section{Key Projects \& Open Source}
+\vspace{1pt}
+\begin{itemize}
+\item{\textbf{Flutter Snippets}: Curated library of Flutter snippets and architecture blocks used daily by 150,000+ developers worldwide.}
+\item{\textbf{Ultimate Flutter Extension Pack}: VS Code extension bundle to supercharge Flutter development with error handling and UI optimizations.}
+\item{\textbf{SubStrackt}: Cross-platform subscription tracking app using Flutter with smart reminders and freemium monetization.}
+\item{\textbf{Medium Articles}: Authored production engineering series on widget key management, internationalization, and app performance.}
 \end{itemize}
 
 % ============================================================
@@ -128,14 +123,8 @@
 \vspace{1pt}
 \begin{itemize}
 
-\item{\cventry{[YYYY-YYYY]}{[Degree] in [Field]}{[Institution]}{[City, Country]}{}{\vspace{1pt}
-Thesis: ``[Thesis Title].'' [Brief description of research focus.]
-}}
-
-\vspace{3pt}
-
-\item{\cventry{[YYYY-YYYY]}{[Degree] in [Field]}{[Institution]}{[City, Country]}{}{\vspace{1pt}
-[Brief description or key topics.]
+\item{\cventry{2016--2020}{B.Tech in Computer Science \& Engineering}{Aliah University}{Kolkata, India}{}{\vspace{1pt}
+CGPA: 7.1 / 10. Core coursework in Data Structures, Algorithms, Software Engineering, AI Fundamentals.
 }}
 
 \end{itemize}
@@ -147,27 +136,18 @@ Thesis: ``[Thesis Title].'' [Brief description of research focus.]
 \section{Languages}
 \vspace{1pt}
 \begin{itemize}
-\item {[Language 1] (native), [Language 2] (fluent), [Language 3] (intermediate).}
+\item {English (Professional working proficiency), Bengali (Native), Hindi (Native / Fluent).}
 \end{itemize}
 
 % ============================================================
-%     PUBLICATIONS (optional)
-% ============================================================
-
-\section{Publications}
-\vspace{1pt}
-\begin{itemize}
-\item {[Author(s)] ([Year]). [Title]. [Journal/Conference]. \href{[DOI_URL]}{DOI link}}
-\end{itemize}
-
-% ============================================================
-%     HONORS AND AWARDS (optional)
+%     HONORS AND AWARDS
 % ============================================================
 
 \section{Honors and Awards}
 \vspace{1pt}
 \begin{itemize}
-\item{\textbf{[Award Name]} -- [Event/Organization] ([Year]).}
+\item{\textbf{Golden Dutch Interactive Award} -- SuperBrains recognized for outstanding UX in healthcare tech (Netherlands).}
+\item{\textbf{Google Cloud Skills Boost} -- Introduction to Generative AI Certification.}
 \end{itemize}
 
 % ============================================================
@@ -181,3 +161,4 @@ Thesis: ``[Thesis Title].'' [Brief description of research focus.]
 \end{itemize}
 
 \end{document}
+

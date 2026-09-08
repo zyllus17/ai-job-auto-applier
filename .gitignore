@@ -116,3 +116,8 @@ company_research/*.json
 
 # Brainstorm mockups (superpowers visual companion) - never ship
 .superpowers/
+
+# Local state & caches (never commit)
+seen_jobs.json
+google_sheet_config.json
+*.log

@@ -1,91 +1,94 @@
-# Job Application Assistant for [YOUR_NAME]
+# Job Application Assistant for Maruf Hassan
 
-<!-- SETUP: This file is populated by running /setup -->
-<!-- After running /setup, all [PLACEHOLDER] tokens will be replaced with your actual information -->
+<!-- Candidate profile configured for Maruf Hassan -->
 
 ## Role
-This repo is a job application workspace. Claude acts as a career advisor and application assistant for [YOUR_NAME], helping with:
+This repo is a job application workspace. Antigravity/Claude acts as a career advisor and application assistant for Maruf Hassan, helping with:
 1. **Job fit evaluation** - Assess job postings against your profile (skills, experience, behavioral traits)
 2. **CV tailoring** - Adapt existing CV templates (LaTeX/moderncv) to target specific roles
 3. **Cover letter writing** - Draft targeted cover letters using existing templates (LaTeX)
 4. **Interview preparation** - Prepare answers, questions, and talking points for interviews
-5. **Career strategy** - Advise on positioning and personal branding
+5. **Career strategy & Upskilling** - Advise on positioning, identify high-demand skill gaps, and suggest 1-2 hour quick proof-of-concept projects to demonstrate competence to recruiters
 
 ## Candidate Profile
 
-<!-- This section is auto-populated by /setup. You can also fill it in manually. -->
-
 ### Identity
-- **Name:** [YOUR_NAME]
-- **Location:** [YOUR_CITY], [YOUR_COUNTRY] ([YOUR_COMMUTE_CONSTRAINTS])
+- **Name:** Maruf Hassan
+- **Location:** Kolkata, West Bengal, India (Open to Remote Worldwide, Remote India, and Relocation to Europe, US, Middle East, APAC)
 - **Languages:**
   | Language | Level |
   |----------|-------|
-  | [LANGUAGE] | [LEVEL] |
-  <!-- Every language you work in professionally, with your level (CEFR, "native," "professional
-  working proficiency," whatever your CV/LinkedIn use - no need to force it into one scale). An
-  undeclared language is a hard deal-breaker if a posting requires it; a declared language at a
-  lower level than a posting wants is flagged for your own judgment, not auto-rejected. See
-  04-job-evaluation.md's Language Gate. -->
-- **CV language:** [YOUR_CV_LANGUAGE] <!-- English unless your market expects otherwise; /setup asks -->
-
-- **Status:** [YOUR_EMPLOYMENT_STATUS]
-- **LinkedIn headline:** "[YOUR_LINKEDIN_HEADLINE]"
+  | English | Professional working proficiency |
+  | Bengali | Native |
+  | Hindi | Native / Fluent |
+- **CV language:** English
+- **Status:** Actively seeking AI Automation Engineer / Senior Flutter Developer roles
+- **LinkedIn headline:** "AI Automation Engineer & Cross-Platform Developer | 5+ YOE | Google Gemini, Multi-API Automation & Scaled Apps (100M+ Downloads)"
+- **Email:** csengineer.maruf@gmail.com
+- **Phone:** +91 79803 56852
+- **LinkedIn:** https://www.linkedin.com/in/maruf-hassan
+- **GitHub:** https://github.com/zyllus17
 
 ### Education
-<!-- List your degrees, most recent first -->
-- **[DEGREE_LEVEL] in [FIELD]** ([YEAR_START]-[YEAR_END]) - [INSTITUTION]
-  - Thesis: "[THESIS_TITLE]"
-  - Topics: [KEY_TOPICS]
+- **B.Tech in Computer Science & Engineering** (2016–2020) - Aliah University, Kolkata
+  - CGPA: 7.1 / 10
+- **Class XII (Higher Secondary)** (2014–2016) - Tribeni Tissue Vidyapith | Score: 76%
+- **Class X (Secondary)** (2008–2014) - Tribeni Tissue Vidyapith | Score: 80%
 
 ### Professional Experience
-<!-- List your roles, most recent first -->
-- **[JOB_TITLE]** ([START_DATE] - [END_DATE]) - **[COMPANY]** ([LOCATION])
-  - [KEY_RESPONSIBILITY_1]
-  - [KEY_RESPONSIBILITY_2]
-  - [KEY_ACHIEVEMENT]
+- **AI Automation Engineer** (2025–Present) - **Floor Boss (Independent Product)** (Remote)
+  - Architected and built a Slack DM-based AI assistant for restaurant general managers on Google Gemini, consolidating POS, scheduling, and review data from 6+ external APIs into one conversational interface.
+  - Designed end-to-end message-flow pipeline covering intent handling, tool orchestration, and automated daily briefings, cutting GM manual reporting time by an estimated 70%.
+  - Reduced LLM cost per conversation ~40% via prompt caching and model-tier routing while keeping p95 response latency under 3 seconds.
+
+- **Flutter Developer** (July 2022–Present) - **Paiteq / Pietech Solution** (Remote/Hybrid)
+  - Led the migration of ELSA Speak (AI language-learning app, 100M+ Google Play downloads) from native to Flutter 3, heading a cross-functional team and porting Google, Apple, Facebook, SSO, and email auth flows.
+  - Boosted signup retention by 30% (tracked via Amplitude) by rebuilding ELSA's onboarding into a smoother, faster flow personalizing AI lessons from user input.
+  - Developed HLP/SuperBrains, a gamified mental-wellness app used by clinics across the Netherlands, recognized with the Golden Dutch Interactive Award for outstanding healthcare UX.
+  - Shipped an Instagram Reels-style video feed, group chat, and social features for Nyburs, a hyperlocal Indian social platform, using Riverpod and custom animations.
+
+- **Flutter Developer** (September 2021–June 2022) - **QuestHopp** (Remote)
+  - Designed and developed cross-platform Flutter apps for Android and iOS from concept through release, owning features end to end.
+  - Focused on performance tuning and UI responsiveness, cutting screen load times and eliminating frame drops on low-end Android devices.
+  - Standardized state management and API-integration patterns adopted across subsequent projects.
+
+### Personal & Open Source Projects
+- **Floor Boss**: Slack DM AI assistant for restaurant GMs using Google Gemini, multi-API consolidation, and automated briefings.
+- **Flutter Snippets**: Curated library of Flutter snippets and state management patterns used daily by 150,000+ developers worldwide.
+- **Ultimate Flutter Extension Pack**: VS Code extension bundle to supercharge Flutter development with error handling and UI optimizations.
+- **SubStrackt**: Cross-platform subscription tracking app with smart reminders and freemium monetization.
+- **FlutterHub**: Platform showcasing Flutter UI/UX designs and custom animations.
+- **Figma Community**: Published open-source UI/UX kits for modern mobile app interfaces.
+- **Medium Articles**: Published technical series on production practices, i18n, and widget key management.
 
 ### Technical Skills
-- **Primary:** [YOUR_PRIMARY_SKILLS]
-- **Secondary:** [YOUR_SECONDARY_SKILLS]
-- **Domain:** [YOUR_DOMAIN_EXPERTISE]
-- **Software:** [YOUR_TOOLS_AND_SOFTWARE]
+- **Primary:** Dart, Flutter, Python, LLM Integration (Google Gemini), Slack Bot Development, Prompt Engineering, Workflow Automation, Multi-API Consolidation
+- **Secondary:** REST APIs, GraphQL, Firebase (Auth, Remote Config), Riverpod, GoRouter, Google Cloud Platform (GCP), Sentry, Amplitude, Figma, HTML/CSS
+- **Practices:** Clean Architecture, MVVM, MVC, Unit & Integration Testing, Agile Development, CI/CD
 
 ### Certifications
-<!-- List relevant certifications with dates -->
-- **[CERTIFICATION_NAME]** - [HOURS]h - completed [DATE]
-
-### Publications
-<!-- List peer-reviewed publications, if any -->
-- [AUTHOR_LIST] ([YEAR]). [TITLE]. [JOURNAL].
+- Google Cloud — Introduction to Generative AI (Google Cloud Skills Boost)
+- Flutter & Dart — The Complete Guide (Udemy)
+- Published Flutter engineering series on Medium
 
 ### Awards
-<!-- List relevant awards, hackathons, competitions -->
-- [AWARD_NAME] - [EVENT] ([YEAR])
+- Golden Dutch Interactive Award (SuperBrains) - Recognized for outstanding UX in healthcare tech (Netherlands)
 
 ### Behavioral Profile
-<!-- Your behavioral assessment results (PI, DISC, Myers-Briggs, or self-assessment) -->
-- **[TRAIT_1]** - [DESCRIPTION]
-- **[TRAIT_2]** - [DESCRIPTION]
-- **Strengths:** [YOUR_STRENGTHS]
-- **Growth areas:** [YOUR_GROWTH_AREAS]
-- **Thrives in:** [YOUR_IDEAL_ENVIRONMENT]
+- **Autonomous Builder & Problem Solver**: Thrives taking ambiguous problems and shipping clean end-to-end solutions.
+- **High Product Empathy**: Balances technical robustness with user experience, retention metrics, and UI polish.
+- **Strengths:** System integration, agentic workflows, mobile performance tuning, developer tooling.
+- **Thrives in:** Fast-paced product teams, AI-first startups, remote-first engineering cultures.
 
-### What Excites You
-<!-- What motivates you professionally -->
-- [PASSION_1]
-- [PASSION_2]
-
-### Target Sectors
-<!-- Industries and companies you're targeting -->
-- [SECTOR_1]: [EXAMPLE_COMPANIES]
-- [SECTOR_2]: [EXAMPLE_COMPANIES]
+### Target Roles & Sectors
+- **Roles:** AI Automation Engineer, LLM Engineer, Agentic AI Developer, Senior Flutter Engineer, Mobile AI Developer
+- **Target Sectors:** AI Startups, SaaS, Mobile Apps, Enterprise Automation, Consumer Tech
+- **Work Model:** Remote Worldwide, Remote India, Hybrid Kolkata, Relocation open
 
 ### Deal-breakers
-<!-- Hard constraints on job search. Language requirements are handled separately and
-automatically from your Languages table above - don't duplicate them here. -->
-- [DEALBREAKER_1]
-- [DEALBREAKER_2]
+- Purely non-technical management roles with zero coding
+- Unpaid test assignments or exploitative hiring funnels
+- Roles requiring uncompensated onsite relocation without visa/support
 
 ## Repo Structure
 - `cv/` - LaTeX CV variants (moderncv template, banking style)
