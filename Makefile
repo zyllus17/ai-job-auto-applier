@@ -19,8 +19,8 @@ help: ## Show this help
 
 install: ## Install Python dependencies
 	@echo "📦 Installing dependencies..."
-	@$(PYTHON) -m pip install --quiet fastapi uvicorn psutil python-dotenv 2>/dev/null || \
-		$(PYTHON) -m pip install fastapi uvicorn psutil python-dotenv
+	@$(PYTHON) -m pip install --quiet fastapi "uvicorn[standard]" websockets psutil python-dotenv 2>/dev/null || \
+		$(PYTHON) -m pip install fastapi "uvicorn[standard]" websockets psutil python-dotenv
 	@echo "✅ Dependencies installed"
 
 run: install ## Start the dashboard and open browser

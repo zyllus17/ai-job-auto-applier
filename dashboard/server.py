@@ -264,6 +264,10 @@ async def shutdown():
 async def index():
     return FileResponse(str(Path(__file__).parent / 'static' / 'index.html'))
 
+@app.get('/favicon.ico')
+async def favicon():
+    return HTMLResponse(content="", status_code=204)
+
 @app.get('/api/services')
 async def get_services():
     return manager.get_all_statuses()

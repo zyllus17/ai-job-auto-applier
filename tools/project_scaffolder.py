@@ -252,16 +252,56 @@ python app.py
             "frontend_type": template.get("frontend_type", "CLI")
         }
 
+    def get_top_skill_gap(self) -> str:
+        """Find the top missing skill from job_search_tracker.csv, or default to 'langgraph'."""
+        tracker_file = REPO_ROOT / "job_search_tracker.csv"
+        if not tracker_file.exists():
+            return "langgraph"
+        try:
+            import csv
+            from collections import Counter
+            skills = []
+            with open(tracker_file, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    ms = row.get('missingSkill', '')
+                    if ms and ms.lower() not in ('none', 'n/a', '-', ''):
+                        for part in ms.split(','):
+                            for s in part.split('/'):
+                                cleaned = s.strip()
+                                if cleaned and cleaned.lower() not in ('none', 'n/a', '-', ''):
+                                    skills.append(cleaned)
+            if skills:
+                top_skill, _ = Counter(skills).most_common(1)[0]
+                top_lower = top_skill.lower()
+                for key in PROJECT_REGISTRY.keys():
+                    if key in top_lower or top_lower in key:
+                        return key
+                if 'vector' in top_lower or 'rag' in top_lower or 'chroma' in top_lower:
+                    return 'vector_db'
+                if 'mcp' in top_lower:
+                    return 'mcp_server'
+                if 'fastapi' in top_lower:
+                    return 'fastapi_gateway'
+                if 'vision' in top_lower or 'yolo' in top_lower:
+                    return 'computer_vision'
+                return top_skill.lower().replace(' ', '_')
+        except Exception:
+            pass
+        return "langgraph"
+
 
 if __name__ == "__main__":
     import argparse
     import os
     parser = argparse.ArgumentParser(description="Scaffold a proof-of-concept project for a skill gap")
-    parser.add_argument("--skill", required=True, help="Skill slug to scaffold (e.g. langgraph, vector_db, mcp_server)")
+    parser.add_argument("--skill", default=None, help="Skill slug to scaffold (defaults to auto-detected top gap)")
     parser.add_argument("--dry-run", action="store_true", help="Generate files locally without committing or pushing")
     parser.add_argument("--force", action="store_true", help="Bypass the 1-project-per-day limit")
     args = parser.parse_args()
     
     scaffolder = ProjectScaffolder()
-    res = scaffolder.scaffold(args.skill, dry_run=args.dry_run, force=args.force)
+    skill = args.skill or scaffolder.get_top_skill_gap()
+    print(f"Scaffolding project for skill: {skill}")
+    res = scaffolder.scaffold(skill, dry_run=args.dry_run, force=args.force)
     print(json.dumps(res, indent=2))
