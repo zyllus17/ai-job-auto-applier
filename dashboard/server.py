@@ -33,7 +33,7 @@ SERVICE_REGISTRY = {
     'job_daemon': {
         'name': 'Job Search Daemon',
         'description': 'Continuous job scanning across portals',
-        'command': [sys.executable, str(TOOLS_DIR / 'daemon_job_runner.py'), '--interval-mins', '60'],
+        'command': [sys.executable, str(TOOLS_DIR / 'daemon_job_runner.py'), '--interval-mins', '15'],
         'icon': '🔍',
         'color': '#22c55e',  # green
     },
@@ -126,11 +126,11 @@ class ProcessManager:
 
     async def stop_service(self, service_id: str) -> dict:
         current = self.processes.get(service_id)
-        if not current or current['status'] != 'running' or not current['process']:
+        if not current:
             return self.get_status(service_id)
             
-        proc = current['process']
-        if proc.returncode is None:
+        proc = current.get('process')
+        if proc and proc.returncode is None:
             try:
                 parent = psutil.Process(proc.pid)
                 children = parent.children(recursive=True)
@@ -147,7 +147,7 @@ class ProcessManager:
                     pass
                     
                 # Wait
-                _, alive = psutil.wait_procs(children + [parent], timeout=5.0)
+                _, alive = psutil.wait_procs(children + [parent], timeout=2.0)
                 
                 # SIGKILL for alive
                 for p in alive:
@@ -159,14 +159,23 @@ class ProcessManager:
             except psutil.NoSuchProcess:
                 pass
             except Exception as e:
-                logging.error(f"Error killing process {proc.pid}: {e}")
+                logging.error(f"Error killing process: {e}")
                 
             try:
                 proc.kill()
-            except ProcessLookupError:
+            except Exception:
                 pass
                 
-        self.processes[service_id]['status'] = 'idle'
+            try:
+                await asyncio.wait_for(proc.wait(), timeout=2.0)
+            except Exception:
+                pass
+                
+        self.processes[service_id] = {
+            'process': None,
+            'start_time': 0,
+            'status': 'idle'
+        }
         status = self.get_status(service_id)
         await self.broadcast({'type': 'status_update', 'service': status})
         return status
@@ -189,13 +198,11 @@ class ProcessManager:
         current = self.processes.get(service_id)
         if current:
             proc = current.get('process')
-            if proc and proc.returncode is None:
+            if proc and proc.returncode is None and current.get('status') == 'running':
                 res['status'] = 'running'
-                res['uptime_seconds'] = int(time.time() - current['start_time'])
+                res['uptime_seconds'] = int(time.time() - current.get('start_time', time.time()))
             else:
-                if current['status'] == 'running':
-                    current['status'] = 'idle'
-                res['status'] = current['status']
+                res['status'] = current.get('status', 'idle')
                 
         return res
 
@@ -229,7 +236,9 @@ class ProcessManager:
             
         # Process ended
         if self.processes.get(service_id):
-            self.processes[service_id]['status'] = 'idle' if process.returncode == 0 else 'error'
+            if self.processes[service_id].get('status') == 'running':
+                self.processes[service_id]['status'] = 'idle' if process.returncode in (0, -15, -9, 143, 137) else 'error'
+            self.processes[service_id]['process'] = None
         status = self.get_status(service_id)
         await self.broadcast({'type': 'status_update', 'service': status})
 

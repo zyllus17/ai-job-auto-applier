@@ -44,6 +44,10 @@ SEARCH_CATEGORIES = [
     {"query": "Generative AI Engineer", "location": "Remote"},
     {"query": "Senior Flutter Developer", "location": "Remote"},
     {"query": "LLM Engineer", "location": "Remote"},
+    {"query": "AI Engineer", "location": "Remote"},
+    {"query": "Python AI Developer", "location": "Remote"},
+    {"query": "Machine Learning Engineer", "location": "Remote"},
+    {"query": "Flutter Mobile Engineer", "location": "Remote"},
 ]
 
 RUNNING = True
@@ -231,7 +235,108 @@ I am an AI Automation Engineer and Senior Flutter Developer with 5+ years of exp
     print(f"[STAGED] Application assets prepared at: {app_dir.relative_to(REPO_ROOT)}")
     return app_dir
 
-def run_search_cycle(dry_run=False, limit=5) -> list:
+def search_arbeitnow_jobs(query: str, limit: int = 15) -> list:
+    """Fetch live remote developer and AI jobs from Arbeitnow public API."""
+    import urllib.request
+    results = []
+    try:
+        req = urllib.request.Request(
+            'https://www.arbeitnow.com/api/job-board-api',
+            headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'}
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode())
+            keywords = [w.lower() for w in query.split() if len(w) > 2]
+            for item in data.get('data', []):
+                title = item.get('title', '')
+                desc = item.get('description', '')
+                tags = " ".join(item.get('tags', []))
+                text = f"{title} {desc} {tags}".lower()
+                if any(kw in text for kw in keywords):
+                    results.append({
+                        "id": f"arbeitnow_{item.get('slug', '')}",
+                        "title": title,
+                        "company": item.get('company_name', 'Tech Company'),
+                        "url": item.get('url', ''),
+                        "location": item.get('location', 'Remote'),
+                        "description": desc,
+                        "source": "Arbeitnow"
+                    })
+                    if len(results) >= limit:
+                        break
+    except Exception as e:
+        print(f"  [SOURCE WARN] Arbeitnow: {e}", file=sys.stderr)
+    return results
+
+def search_remotive_jobs(query: str, limit: int = 15) -> list:
+    """Fetch live remote software and AI jobs from Remotive API."""
+    import urllib.request
+    results = []
+    try:
+        req = urllib.request.Request(
+            'https://remotive.com/api/remote-jobs?category=software-dev',
+            headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'}
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode())
+            keywords = [w.lower() for w in query.split() if len(w) > 2]
+            for item in data.get('jobs', []):
+                title = item.get('title', '')
+                desc = item.get('description', '')
+                tags = " ".join(item.get('tags', []))
+                text = f"{title} {desc} {tags}".lower()
+                if any(kw in text for kw in keywords):
+                    results.append({
+                        "id": f"remotive_{item.get('id', '')}",
+                        "title": title,
+                        "company": item.get('company_name', 'Tech Company'),
+                        "url": item.get('url', ''),
+                        "location": item.get('candidate_required_location', 'Remote Worldwide'),
+                        "description": desc,
+                        "source": "Remotive"
+                    })
+                    if len(results) >= limit:
+                        break
+    except Exception as e:
+        print(f"  [SOURCE WARN] Remotive: {e}", file=sys.stderr)
+    return results
+
+def search_remoteok_jobs(query: str, limit: int = 15) -> list:
+    """Fetch live remote developer and AI jobs from RemoteOK API."""
+    import urllib.request
+    results = []
+    try:
+        req = urllib.request.Request(
+            'https://remoteok.com/api?tag=dev',
+            headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'}
+        )
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            data = json.loads(resp.read().decode())
+            keywords = [w.lower() for w in query.split() if len(w) > 2]
+            for item in data:
+                if not isinstance(item, dict) or not item.get('position'):
+                    continue
+                title = item.get('position', '')
+                desc = item.get('description', '')
+                tags = " ".join(item.get('tags', []))
+                text = f"{title} {desc} {tags}".lower()
+                if any(kw in text for kw in keywords):
+                    results.append({
+                        "id": f"remoteok_{item.get('id', '')}",
+                        "title": title,
+                        "company": item.get('company', 'Tech Company'),
+                        "url": item.get('url', ''),
+                        "location": item.get('location', 'Remote'),
+                        "description": desc,
+                        "source": "RemoteOK"
+                    })
+                    if len(results) >= limit:
+                        break
+    except Exception as e:
+        print(f"  [SOURCE WARN] RemoteOK: {e}", file=sys.stderr)
+    return results
+
+def run_search_cycle(dry_run=False, limit=15) -> list:
     seen = load_seen_jobs()
     all_seen_dict = {}
     if SEEN_JOBS_FILE.exists():
@@ -264,7 +369,7 @@ def run_search_cycle(dry_run=False, limit=5) -> list:
             
         q = cat["query"]
         loc = cat["location"]
-        print(f"[SEARCH] Querying: '{q}' in '{loc}'...")
+        print(f"[SEARCH] Querying '{q}' across 5 sources (LinkedIn, FreeHire, Arbeitnow, Remotive, RemoteOK)...")
         
         # 1. Search LinkedIn
         linkedin_cli = REPO_ROOT / ".agents/skills/linkedin-search/cli/src/cli.ts"
@@ -331,9 +436,9 @@ def run_search_cycle(dry_run=False, limit=5) -> list:
         # 2. Search FreeHire
         freehire_cli = REPO_ROOT / ".agents/skills/freehire-search/cli/src/cli.ts"
         if freehire_cli.exists():
-            out = run_cli_command([BUN_BIN, str(freehire_cli), "search", "-q", q, "--remote", "remote", "--limit", str(limit), "--format", "json"])
+            out = run_cli_command([BUN_BIN, str(freehire_cli), "search", "-q", q, "--remote", "remote", "--limit", "5", "--format", "json"])
             try:
-                data = json.loads(out)
+                data = json.loads(out, strict=False)
                 results = data.get("results", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
                 for item in results:
                     slug = item.get("id") or item.get("company_slug", "")
@@ -382,6 +487,138 @@ def run_search_cycle(dry_run=False, limit=5) -> list:
             except Exception as e:
                 print(f"[SEARCH WARN] FreeHire parse error: {e}", file=sys.stderr)
 
+        # 3. Search Arbeitnow (live remote developer & AI board)
+        try:
+            arbeitnow_results = search_arbeitnow_jobs(q, limit=limit)
+            for item in arbeitnow_results:
+                job_id = item["id"]
+                if job_id in seen:
+                    continue
+                title = item.get("title", "")
+                company = item.get("company", "")
+                url = item.get("url", "")
+                desc = item.get("description", "")
+                if company_filter and company_filter.should_skip(company):
+                    print(f"  [EXCLUSION] Skipping Arbeitnow job at current employer: {company}")
+                    continue
+                fit_score, missing_skill, suggested_project = score_job_fit(title, desc)
+                all_seen_dict[job_id] = {
+                    "title": title,
+                    "company": company,
+                    "url": url,
+                    "fitScore": fit_score,
+                    "date": datetime.now().strftime("%Y-%m-%d")
+                }
+                seen.add(job_id)
+                print(f"  -> [Arbeitnow] Found: {title} @ {company} (Fit: {fit_score}/100)")
+                if fit_score >= 70:
+                    row = {
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "company": company,
+                        "title": title,
+                        "fitScore": fit_score,
+                        "status": "Staged - Ready to Submit",
+                        "missingSkill": missing_skill,
+                        "suggestedProject": suggested_project,
+                        "location": item.get("location", "Remote"),
+                        "url": url,
+                        "notes": f"High fit ({fit_score}%). Generated tailored CV & cover letter."
+                    }
+                    if not dry_run:
+                        stage_dir = stage_application(item, missing_skill, suggested_project, fit_score)
+                        row["notes"] += f" Staged at {stage_dir.name}"
+                    new_staged.append(row)
+        except Exception as e:
+            print(f"[SEARCH WARN] Arbeitnow error: {e}", file=sys.stderr)
+
+        # 4. Search Remotive (live remote software development board)
+        try:
+            remotive_results = search_remotive_jobs(q, limit=limit)
+            for item in remotive_results:
+                job_id = item["id"]
+                if job_id in seen:
+                    continue
+                title = item.get("title", "")
+                company = item.get("company", "")
+                url = item.get("url", "")
+                desc = item.get("description", "")
+                if company_filter and company_filter.should_skip(company):
+                    print(f"  [EXCLUSION] Skipping Remotive job at current employer: {company}")
+                    continue
+                fit_score, missing_skill, suggested_project = score_job_fit(title, desc)
+                all_seen_dict[job_id] = {
+                    "title": title,
+                    "company": company,
+                    "url": url,
+                    "fitScore": fit_score,
+                    "date": datetime.now().strftime("%Y-%m-%d")
+                }
+                seen.add(job_id)
+                print(f"  -> [Remotive] Found: {title} @ {company} (Fit: {fit_score}/100)")
+                if fit_score >= 70:
+                    row = {
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "company": company,
+                        "title": title,
+                        "fitScore": fit_score,
+                        "status": "Staged - Ready to Submit",
+                        "missingSkill": missing_skill,
+                        "suggestedProject": suggested_project,
+                        "location": item.get("location", "Remote Worldwide"),
+                        "url": url,
+                        "notes": f"High fit ({fit_score}%). Generated tailored CV & cover letter."
+                    }
+                    if not dry_run:
+                        stage_dir = stage_application(item, missing_skill, suggested_project, fit_score)
+                        row["notes"] += f" Staged at {stage_dir.name}"
+                    new_staged.append(row)
+        except Exception as e:
+            print(f"[SEARCH WARN] Remotive error: {e}", file=sys.stderr)
+
+        # 5. Search RemoteOK (live remote developer board)
+        try:
+            remoteok_results = search_remoteok_jobs(q, limit=limit)
+            for item in remoteok_results:
+                job_id = item["id"]
+                if job_id in seen:
+                    continue
+                title = item.get("title", "")
+                company = item.get("company", "")
+                url = item.get("url", "")
+                desc = item.get("description", "")
+                if company_filter and company_filter.should_skip(company):
+                    print(f"  [EXCLUSION] Skipping RemoteOK job at current employer: {company}")
+                    continue
+                fit_score, missing_skill, suggested_project = score_job_fit(title, desc)
+                all_seen_dict[job_id] = {
+                    "title": title,
+                    "company": company,
+                    "url": url,
+                    "fitScore": fit_score,
+                    "date": datetime.now().strftime("%Y-%m-%d")
+                }
+                seen.add(job_id)
+                print(f"  -> [RemoteOK] Found: {title} @ {company} (Fit: {fit_score}/100)")
+                if fit_score >= 70:
+                    row = {
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "company": company,
+                        "title": title,
+                        "fitScore": fit_score,
+                        "status": "Staged - Ready to Submit",
+                        "missingSkill": missing_skill,
+                        "suggestedProject": suggested_project,
+                        "location": item.get("location", "Remote"),
+                        "url": url,
+                        "notes": f"High fit ({fit_score}%). Generated tailored CV & cover letter."
+                    }
+                    if not dry_run:
+                        stage_dir = stage_application(item, missing_skill, suggested_project, fit_score)
+                        row["notes"] += f" Staged at {stage_dir.name}"
+                    new_staged.append(row)
+        except Exception as e:
+            print(f"[SEARCH WARN] RemoteOK error: {e}", file=sys.stderr)
+
     # Save seen cache
     save_seen_jobs(all_seen_dict)
     
@@ -398,10 +635,10 @@ def run_search_cycle(dry_run=False, limit=5) -> list:
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Antigravity Autonomous Job Search Daemon")
-    parser.add_argument("--interval-mins", type=int, default=60, help="Interval between discovery cycles in minutes")
+    parser.add_argument("--interval-mins", type=int, default=15, help="Interval between discovery cycles in minutes")
     parser.add_argument("--once", action="store_true", help="Run a single cycle and exit")
     parser.add_argument("--dry-run", action="store_true", help="Search and rank without generating application files")
-    parser.add_argument("--limit", type=int, default=5, help="Max results per search category")
+    parser.add_argument("--limit", type=int, default=15, help="Max results per search category")
     args = parser.parse_args()
 
     print("=========================================================")
