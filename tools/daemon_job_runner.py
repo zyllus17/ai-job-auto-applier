@@ -39,16 +39,34 @@ BUN_BIN = shutil.which("bun") or "/opt/homebrew/bin/bun"
 LUALATEX_BIN = shutil.which("lualatex") or str(Path.home() / "Library/TinyTeX/bin/universal-darwin/lualatex")
 XELATEX_BIN = shutil.which("xelatex") or str(Path.home() / "Library/TinyTeX/bin/universal-darwin/xelatex")
 
-SEARCH_CATEGORIES = [
-    {"query": "AI Automation Engineer", "location": "Remote"},
-    {"query": "Generative AI Engineer", "location": "Remote"},
-    {"query": "Senior Flutter Developer", "location": "Remote"},
-    {"query": "LLM Engineer", "location": "Remote"},
-    {"query": "AI Engineer", "location": "Remote"},
-    {"query": "Python AI Developer", "location": "Remote"},
-    {"query": "Machine Learning Engineer", "location": "Remote"},
-    {"query": "Flutter Mobile Engineer", "location": "Remote"},
-]
+def load_candidate_profile() -> dict:
+    profile_path = REPO_ROOT / "tools" / "candidate_profile.json"
+    if profile_path.exists():
+        try:
+            with open(profile_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def get_search_categories(profile: dict = None) -> list[dict]:
+    if not profile:
+        profile = load_candidate_profile()
+    
+    roles = profile.get("target_roles", [])
+    if not roles:
+        title = profile.get("current_title")
+        roles = [title] if title else ["Software Engineer"]
+        
+    locations = profile.get("target_locations", [])
+    if not locations:
+        locations = ["Remote"]
+        
+    categories = []
+    for r in roles:
+        loc = locations[0] if locations else "Remote"
+        categories.append({"query": r.strip(), "location": loc.strip()})
+    return categories
 
 RUNNING = True
 
@@ -78,53 +96,68 @@ def sanitize_slug(text: str) -> str:
     text = re.sub(r'[^a-zA-Z0-9_\-]+', '_', text.strip().lower())
     return re.sub(r'_+', '_', text).strip('_')[:40]
 
-def score_job_fit(title: str, description: str) -> tuple[int, str, str]:
+def score_job_fit(title: str, description: str, profile: dict = None) -> tuple[int, str, str]:
+    if not profile:
+        profile = load_candidate_profile()
+        
     text = f"{title} {description}".lower()
+    title_lower = title.lower()
     
-    score = 50
+    target_roles = profile.get("target_roles", [])
+    candidate_skills = profile.get("skills", [])
+    
+    score = 40
+    
+    # 1. Target Role & Title Relevance (up to +40 points)
+    title_matched = False
+    for r in target_roles:
+        r_words = [w.lower() for w in r.split() if len(w) > 2]
+        if r.lower() in title_lower:
+            score += 40
+            title_matched = True
+            break
+        elif any(w in title_lower for w in r_words):
+            score += 25
+            title_matched = True
+            break
+            
+    if not title_matched and target_roles:
+        if any(r.lower() in text for r in target_roles):
+            score += 15
+            
+    # 2. Skill Match Points (up to +30 points)
     matched_skills = []
-    
-    # Core competencies
-    if "flutter" in text:
-        score += 25
-        matched_skills.append("Flutter")
-    if "ai" in text or "llm" in text or "generative" in text:
-        score += 25
-        matched_skills.append("AI/LLM")
-    if "python" in text:
-        score += 15
-        matched_skills.append("Python")
-    if "gemini" in text:
-        score += 15
-        matched_skills.append("Google Gemini")
-    if "automation" in text or "agent" in text or "slack" in text:
-        score += 15
-        matched_skills.append("Agentic Automation")
-    if "riverpod" in text or "dart" in text:
-        score += 10
-        matched_skills.append("Dart/Riverpod")
-
+    for s in candidate_skills:
+        s_clean = s.strip().lower()
+        if not s_clean:
+            continue
+        if re.search(r'\b' + re.escape(s_clean) + r'\b', text):
+            matched_skills.append(s)
+            score += 6
+            
     score = min(score, 98)
     
-    # Identify highest-demand missing skill and project suggestion
+    # 3. Detect Missing Skills & Recommend Relevant Demo Project
     missing_skill = "None"
-    suggested_project = "Portfolio ready (Floor Boss & ELSA Speak highlight)"
+    suggested_project = f"Portfolio highlight: Showcase top relevant skills ({', '.join(matched_skills[:3]) if matched_skills else 'Core skills'})"
     
-    if "langgraph" in text or "crewai" in text or "autogen" in text:
-        missing_skill = "LangGraph / Multi-Agent Orchestration"
-        suggested_project = "FastRAG-Agent: 2-node LangGraph Doc QA with Gemini 2.0 Flash + 45s demo video"
-    elif "rag" in text or "vector" in text or "pinecone" in text or "chroma" in text:
-        missing_skill = "RAG & Vector Databases (Chroma / Pinecone)"
-        suggested_project = "Semantic Doc Search: 100-line ChromaDB + Gemini synthesis with source citation screen recording"
-    elif "mcp" in text or "model context protocol" in text:
-        missing_skill = "Model Context Protocol (MCP) Server Integration"
-        suggested_project = "Custom Slack-MCP Bridge: An MCP server providing restaurant POS/tool data to agents"
-    elif "aws" in text or "bedrock" in text:
-        missing_skill = "AWS Bedrock / Cloud MLOps"
-        suggested_project = "Bedrock-Gemini Dual Router: Fast API gateway routing tasks between Bedrock and Gemini"
-    elif "kotlin multiplatform" in text or "kmp" in text:
-        missing_skill = "Kotlin Multiplatform (KMP)"
-        suggested_project = "Shared Logic KMP Demo: Clean shared networking engine powering a Flutter/Compose view"
+    common_tech_keywords = [
+        "Kubernetes", "Docker", "AWS", "GCP", "Azure", "Kafka", "GraphQL", "Redis", 
+        "PostgreSQL", "MongoDB", "Elasticsearch", "LangGraph", "LangChain", "Vector DB", 
+        "Pinecone", "ChromaDB", "FastAPI", "Spring Boot", "Microservices", "React", 
+        "Next.js", "TypeScript", "Node.js", "Flutter", "SwiftUI", "Jetpack Compose", 
+        "Figma", "Design Systems", "Prototyping", "CI/CD", "Terraform", "PyTorch", "TensorFlow"
+    ]
+    
+    cand_skills_lower = [s.lower() for s in candidate_skills]
+    potential_gaps = []
+    for tech in common_tech_keywords:
+        if tech.lower() not in cand_skills_lower and re.search(r'\b' + re.escape(tech.lower()) + r'\b', text):
+            potential_gaps.append(tech)
+            
+    if potential_gaps:
+        missing_skill = potential_gaps[0]
+        suggested_project = f"Quick Demo: 1-2 hour proof-of-concept demonstrating {missing_skill} integration with interactive frontend/API + 45s screen recording for LinkedIn."
         
     return score, missing_skill, suggested_project
 
@@ -348,22 +381,23 @@ def run_search_cycle(dry_run=False, limit=15) -> list:
         except Exception:
             all_seen_dict = {}
             
-    # Load candidate profile for company exclusion
+    # Load candidate profile for company exclusion & dynamic role queries
+    prof = load_candidate_profile()
     company_filter = None
-    profile_path = REPO_ROOT / "tools" / "candidate_profile.json"
-    if profile_path.exists():
+    if prof:
         try:
-            with open(profile_path, "r", encoding="utf-8") as f:
-                prof = json.load(f)
-                from tools.browser_autofill import CompanyFilter
-                company_filter = CompanyFilter(prof)
+            from tools.browser_autofill import CompanyFilter
+            company_filter = CompanyFilter(prof)
         except Exception:
             pass
 
+    categories = get_search_categories(prof)
     new_staged = []
     print(f"\n[DAEMON] === Running Discovery Cycle at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===")
+    target_roles_str = ", ".join(prof.get("target_roles", ["General Tech"]))
+    print(f"[PROFILE] Target Roles: {target_roles_str}")
 
-    for cat in SEARCH_CATEGORIES:
+    for cat in categories:
         if not RUNNING:
             break
             
@@ -400,7 +434,7 @@ def run_search_cycle(dry_run=False, limit=15) -> list:
                     except Exception:
                         pass
                         
-                    fit_score, missing_skill, suggested_project = score_job_fit(title, desc)
+                    fit_score, missing_skill, suggested_project = score_job_fit(title, desc, profile=prof)
                     
                     all_seen_dict[job_id] = {
                         "title": title,
@@ -455,7 +489,7 @@ def run_search_cycle(dry_run=False, limit=15) -> list:
                         print(f"  [EXCLUSION] Skipping FreeHire job at current employer: {company}")
                         continue
                         
-                    fit_score, missing_skill, suggested_project = score_job_fit(title, desc)
+                    fit_score, missing_skill, suggested_project = score_job_fit(title, desc, profile=prof)
                     all_seen_dict[job_id] = {
                         "title": title,
                         "company": company,
@@ -501,7 +535,7 @@ def run_search_cycle(dry_run=False, limit=15) -> list:
                 if company_filter and company_filter.should_skip(company):
                     print(f"  [EXCLUSION] Skipping Arbeitnow job at current employer: {company}")
                     continue
-                fit_score, missing_skill, suggested_project = score_job_fit(title, desc)
+                fit_score, missing_skill, suggested_project = score_job_fit(title, desc, profile=prof)
                 all_seen_dict[job_id] = {
                     "title": title,
                     "company": company,
@@ -545,7 +579,7 @@ def run_search_cycle(dry_run=False, limit=15) -> list:
                 if company_filter and company_filter.should_skip(company):
                     print(f"  [EXCLUSION] Skipping Remotive job at current employer: {company}")
                     continue
-                fit_score, missing_skill, suggested_project = score_job_fit(title, desc)
+                fit_score, missing_skill, suggested_project = score_job_fit(title, desc, profile=prof)
                 all_seen_dict[job_id] = {
                     "title": title,
                     "company": company,
@@ -589,7 +623,7 @@ def run_search_cycle(dry_run=False, limit=15) -> list:
                 if company_filter and company_filter.should_skip(company):
                     print(f"  [EXCLUSION] Skipping RemoteOK job at current employer: {company}")
                     continue
-                fit_score, missing_skill, suggested_project = score_job_fit(title, desc)
+                fit_score, missing_skill, suggested_project = score_job_fit(title, desc, profile=prof)
                 all_seen_dict[job_id] = {
                     "title": title,
                     "company": company,

@@ -503,8 +503,16 @@ async def update_settings(data: SettingsInput):
                 
     if data.candidate_profile:
         CANDIDATE_PROFILE.parent.mkdir(parents=True, exist_ok=True)
+        current_profile = {}
+        if CANDIDATE_PROFILE.exists():
+            try:
+                with open(CANDIDATE_PROFILE, 'r') as f:
+                    current_profile = json.load(f)
+            except Exception:
+                pass
+        current_profile.update(data.candidate_profile)
         with open(CANDIDATE_PROFILE, 'w') as f:
-            json.dump(data.candidate_profile, f, indent=2)
+            json.dump(current_profile, f, indent=2)
             
     return {"status": "success"}
 

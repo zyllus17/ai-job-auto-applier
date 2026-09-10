@@ -12,6 +12,28 @@
   "country": "India",
   "current_company": "Floor Boss",
   "current_title": "AI Automation Engineer",
+  "target_roles": [
+    "AI Automation Engineer",
+    "Generative AI Engineer",
+    "Senior Flutter Developer",
+    "LLM Engineer"
+  ],
+  "skills": [
+    "Python",
+    "Google Gemini",
+    "LLMs",
+    "Flutter",
+    "Dart",
+    "Riverpod",
+    "LangGraph",
+    "FastAPI",
+    "Automation"
+  ],
+  "target_locations": [
+    "Remote",
+    "Worldwide",
+    "India"
+  ],
   "work_authorization": {
     "authorized_india": true,
     "authorized_us": false,

@@ -349,6 +349,24 @@
     <!-- SETTINGS PAGE -->
     <section id="page-settings">
       <div class="settings-grid">
+        <div class="settings-card" style="grid-column: 1 / -1;">
+          <h3>🎯 Career & Target Roles (Customizable for Anyone)</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+            Set your desired roles and skills below. The engine dynamically searches LinkedIn, FreeHire, Arbeitnow, Remotive, and RemoteOK for these exact roles, whether you're a Designer, Java Developer, Mobile Engineer, or Data Scientist.
+          </p>
+          <div class="form-group">
+            <label>Target Job Roles / Titles (comma-separated)</label>
+            <input type="text" class="form-control" id="setting-target-roles" placeholder="e.g. Java Backend Developer, Spring Boot Engineer OR UI/UX Designer, Product Designer">
+          </div>
+          <div class="form-group">
+            <label>Core Skills & Technologies (comma-separated)</label>
+            <input type="text" class="form-control" id="setting-skills" placeholder="e.g. Java, Spring Boot, Microservices, Kafka OR Figma, Wireframing, Prototyping, Design Systems">
+          </div>
+          <div class="form-group">
+            <label>Preferred Locations / Work Mode (comma-separated)</label>
+            <input type="text" class="form-control" id="setting-locations" placeholder="e.g. Remote, Worldwide, United States, Europe, India">
+          </div>
+        </div>
         <div class="settings-card">
           <h3>Telegram Configuration</h3>
           <div class="form-group">
@@ -860,10 +878,17 @@
       document.getElementById('setting-github').value = data.GITHUB_USERNAME || '';
       if (data.candidate_profile) {
         document.getElementById('setting-company').value = data.candidate_profile.current_company || '';
+        const roles = data.candidate_profile.target_roles || [];
+        document.getElementById('setting-target-roles').value = roles.join(', ');
+        const skills = data.candidate_profile.skills || [];
+        document.getElementById('setting-skills').value = skills.join(', ');
+        const locs = data.candidate_profile.target_locations || [];
+        document.getElementById('setting-locations').value = locs.join(', ');
       }
     }
 
     async function saveSettings() {
+      const parseList = val => val.split(',').map(s => s.trim()).filter(Boolean);
       const payload = {
         env_vars: {
           TELEGRAM_BOT_TOKEN: document.getElementById('setting-tg-token').value,
@@ -874,12 +899,15 @@
           GITHUB_USERNAME: document.getElementById('setting-github').value
         },
         candidate_profile: {
-          current_company: document.getElementById('setting-company').value
+          current_company: document.getElementById('setting-company').value,
+          target_roles: parseList(document.getElementById('setting-target-roles').value),
+          skills: parseList(document.getElementById('setting-skills').value),
+          target_locations: parseList(document.getElementById('setting-locations').value)
         }
       };
       
       await apiCall('/api/settings', 'POST', payload);
-      showToast('Settings saved successfully', 'success');
+      showToast('Settings & career profile saved successfully!', 'success');
     }
 
     // Toast
