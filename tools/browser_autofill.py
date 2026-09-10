@@ -259,8 +259,13 @@ class AutoApplier:
             elif self.browser_type in ['playwright', 'patchright'] and BROWSER_TYPE != 'none':
                 await self._run_with_playwright(application_url, resume_path, cover_letter_path, dry_run, candidate)
             else:
-                logger.error("No valid browser implementation available.")
-                return {"status": "failed", "error": "No browser"}
+                platform = self.detector.detect(application_url)
+                logger.warning(f"⚠️ [BROWSER SIMULATION] No headless browser engine installed (Camoufox / Playwright).")
+                logger.info(f"   Target URL: {application_url} (Platform detected: {platform.upper()})")
+                logger.info(f"   Mapped candidate: {candidate.get('full_name')} ({candidate.get('email')})")
+                logger.info("   To enable live anti-detect browser auto-submission, run:")
+                logger.info("     pip install playwright && python3 -m playwright install chromium")
+                return {"status": "simulated", "platform": platform}
                 
             return {"status": "success"}
         except Exception as e:
@@ -311,9 +316,17 @@ class AutoApplier:
             except Exception as e:
                 logger.error(f"Could not submit form: {e}")
 
-async def run_autofill_daemon(mode='semi-auto', browser_type='camoufox', profile_dir='~/.job-autoapply-profile', dry_run=False):
+async def run_autofill_daemon(mode='semi-auto', browser_type=None, profile_dir='~/.job-autoapply-profile', dry_run=False):
+    if browser_type is None:
+        browser_type = BROWSER_TYPE if BROWSER_TYPE != 'none' else 'playwright'
     logger.info("🤖 Browser Auto-Apply Daemon started.")
-    logger.info(f"   Mode: {mode} | Browser engine: {browser_type} | Profile: {profile_dir}")
+    logger.info(f"   Mode: {mode} | Active engine: {browser_type} | Profile: {profile_dir}")
+    if BROWSER_TYPE == 'none':
+        logger.warning("⚠️ [NOTICE] Neither Camoufox nor Playwright installed. Running in simulation mode.")
+        logger.info("   Install command: python3 -m pip install playwright && python3 -m playwright install chromium")
+    else:
+        logger.info(f"✅ Browser automation engine detected: {BROWSER_TYPE}")
+        
     tracker_path = Path(__file__).parent.parent / "job_search_tracker.csv"
     applier = AutoApplier(mode=mode, browser_type=browser_type, profile_dir=profile_dir)
     
@@ -352,7 +365,8 @@ if __name__ == '__main__':
     parser.add_argument('--resume', default='cv/main_example.pdf', help='Path to resume PDF')
     parser.add_argument('--cover-letter', help='Path to cover letter PDF')
     parser.add_argument('--mode', choices=['semi-auto', 'full-auto'], default='semi-auto')
-    parser.add_argument('--browser', choices=['camoufox', 'patchright', 'playwright'], default='camoufox')
+    default_b = BROWSER_TYPE if BROWSER_TYPE != 'none' else 'playwright'
+    parser.add_argument('--browser', choices=['camoufox', 'patchright', 'playwright'], default=default_b)
     parser.add_argument('--dry-run', action='store_true', help='Fill form but never submit')
     parser.add_argument('--profile-dir', default='~/.job-autoapply-profile', help='Persistent browser profile dir')
     args = parser.parse_args()

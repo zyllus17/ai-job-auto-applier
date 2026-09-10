@@ -4,6 +4,7 @@ import signal
 import json
 import csv
 import os
+import re
 import time
 import logging
 import subprocess
@@ -108,6 +109,16 @@ class ProcessManager:
                 'status': 'running'
             }
             
+            start_entry = {
+                'timestamp': datetime.now().isoformat(),
+                'service_id': service_id,
+                'service_name': 'Supervisor',
+                'message': f"🚀 Service '{svc['name']}' started (PID {process.pid}) | CMD: {' '.join(cmd[-2:])}",
+                'level': 'SUCCESS'
+            }
+            self.log_buffer.append(start_entry)
+            await self.broadcast({'type': 'log', 'log': start_entry})
+            
             asyncio.create_task(self._stream_logs(service_id, process))
             
             status = self.get_status(service_id)
@@ -120,6 +131,15 @@ class ProcessManager:
                 'start_time': time.time(),
                 'status': 'error'
             }
+            err_entry = {
+                'timestamp': datetime.now().isoformat(),
+                'service_id': service_id,
+                'service_name': 'Supervisor',
+                'message': f"❌ Failed to start '{svc['name']}': {e}",
+                'level': 'ERROR'
+            }
+            self.log_buffer.append(err_entry)
+            await self.broadcast({'type': 'log', 'log': err_entry})
             status = self.get_status(service_id)
             await self.broadcast({'type': 'status_update', 'service': status})
             raise HTTPException(status_code=500, detail=str(e))
@@ -130,7 +150,18 @@ class ProcessManager:
             return self.get_status(service_id)
             
         proc = current.get('process')
+        svc_name = SERVICE_REGISTRY.get(service_id, {}).get('name', service_id)
         if proc and proc.returncode is None:
+            stop_req_entry = {
+                'timestamp': datetime.now().isoformat(),
+                'service_id': service_id,
+                'service_name': 'Supervisor',
+                'message': f"🛑 Gracefully stopping '{svc_name}' (PID {proc.pid})...",
+                'level': 'INFO'
+            }
+            self.log_buffer.append(stop_req_entry)
+            await self.broadcast({'type': 'log', 'log': stop_req_entry})
+            
             try:
                 parent = psutil.Process(proc.pid)
                 children = parent.children(recursive=True)
@@ -176,6 +207,17 @@ class ProcessManager:
             'start_time': 0,
             'status': 'idle'
         }
+        
+        stop_done_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'service_id': service_id,
+            'service_name': 'Supervisor',
+            'message': f"⏹️ Service '{svc_name}' stopped.",
+            'level': 'INFO'
+        }
+        self.log_buffer.append(stop_done_entry)
+        await self.broadcast({'type': 'log', 'log': stop_done_entry})
+        
         status = self.get_status(service_id)
         await self.broadcast({'type': 'status_update', 'service': status})
         return status
@@ -192,7 +234,10 @@ class ProcessManager:
             'color': svc['color'],
             'description': svc['description'],
             'status': 'idle',
-            'uptime_seconds': 0
+            'uptime_seconds': 0,
+            'pid': None,
+            'memory_mb': 0.0,
+            'cpu_percent': 0.0
         }
         
         current = self.processes.get(service_id)
@@ -201,6 +246,13 @@ class ProcessManager:
             if proc and proc.returncode is None and current.get('status') == 'running':
                 res['status'] = 'running'
                 res['uptime_seconds'] = int(time.time() - current.get('start_time', time.time()))
+                res['pid'] = proc.pid
+                try:
+                    p = psutil.Process(proc.pid)
+                    res['memory_mb'] = round(p.memory_info().rss / (1024 * 1024), 1)
+                    res['cpu_percent'] = round(p.cpu_percent(), 1)
+                except Exception:
+                    pass
             else:
                 res['status'] = current.get('status', 'idle')
                 
@@ -217,11 +269,16 @@ class ProcessManager:
                 break
                 
             text = line.decode('utf-8', errors='replace').rstrip('\n')
+            if not text:
+                continue
+                
             level = 'INFO'
-            if 'ERROR' in text or 'Exception' in text:
+            if 'ERROR' in text or 'Exception' in text or 'Traceback' in text:
                 level = 'ERROR'
             elif 'WARN' in text:
                 level = 'WARNING'
+            elif '✅' in text or '[OK]' in text or 'success' in text.lower():
+                level = 'SUCCESS'
                 
             entry = {
                 'timestamp': datetime.now().isoformat(),
@@ -234,10 +291,34 @@ class ProcessManager:
             self.log_buffer.append(entry)
             await self.broadcast({'type': 'log', 'log': entry})
             
+        # Wait for exit code
+        try:
+            await process.wait()
+        except Exception:
+            pass
+            
+        exit_code = process.returncode
+        clean_exit = exit_code in (0, -15, -9, 143, 137, None)
+        exit_level = 'INFO' if clean_exit else 'ERROR'
+        exit_msg = (
+            f"⏹️ [EXIT] Service '{svc_name}' stopped cleanly (code {exit_code})."
+            if clean_exit
+            else f"❌ [EXIT ALERT] Service '{svc_name}' terminated unexpectedly with code {exit_code}."
+        )
+        exit_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'service_id': service_id,
+            'service_name': 'Supervisor',
+            'message': exit_msg,
+            'level': exit_level
+        }
+        self.log_buffer.append(exit_entry)
+        await self.broadcast({'type': 'log', 'log': exit_entry})
+        
         # Process ended
         if self.processes.get(service_id):
             if self.processes[service_id].get('status') == 'running':
-                self.processes[service_id]['status'] = 'idle' if process.returncode in (0, -15, -9, 143, 137) else 'error'
+                self.processes[service_id]['status'] = 'idle' if clean_exit else 'error'
             self.processes[service_id]['process'] = None
         status = self.get_status(service_id)
         await self.broadcast({'type': 'status_update', 'service': status})
@@ -374,6 +455,11 @@ async def get_jobs(search: str = '', sort_by: str = '', sort_order: str = 'asc',
             
     start = (page - 1) * per_page
     end = start + per_page
+    
+    # Attach stable indices
+    for i, r in enumerate(rows):
+        r['idx'] = i
+        
     paginated = rows[start:end]
     
     return {
@@ -382,6 +468,104 @@ async def get_jobs(search: str = '', sort_by: str = '', sort_order: str = 'asc',
         'page': page,
         'per_page': per_page
     }
+
+def get_job_app_dir(company: str, title: str) -> Path:
+    safe_c = re.sub(r'[^a-zA-Z0-9_\-]+', '_', company.strip()).strip('_')
+    safe_t = re.sub(r'[^a-zA-Z0-9_\-]+', '_', title.strip()).strip('_')
+    return REPO_ROOT / "documents" / "applications" / f"{safe_c}_{safe_t}"
+
+@app.get('/api/jobs/{idx}')
+async def get_job_detail(idx: int):
+    rows = read_tracker_csv()
+    if idx < 0 or idx >= len(rows):
+        raise HTTPException(status_code=404, detail="Job not found")
+    job = rows[idx]
+    job['idx'] = idx
+    
+    comp = job.get('company', '')
+    title = job.get('title', '')
+    app_dir = get_job_app_dir(comp, title)
+    
+    outreach_file = app_dir / "outreach.md"
+    outreach_data = None
+    if outreach_file.exists():
+        try:
+            outreach_data = outreach_file.read_text(encoding='utf-8')
+        except Exception:
+            pass
+            
+    has_cv = (app_dir / "cv.pdf").exists()
+    has_cover = (app_dir / "cover_letter.pdf").exists()
+    
+    return {
+        'job': job,
+        'has_outreach': bool(outreach_data),
+        'outreach_content': outreach_data,
+        'has_cv': has_cv,
+        'has_cover_letter': has_cover,
+        'app_dir': str(app_dir)
+    }
+
+class JobStatusUpdate(BaseModel):
+    status: str
+
+@app.post('/api/jobs/{idx}/status')
+async def update_job_status(idx: int, data: JobStatusUpdate):
+    rows = read_tracker_csv()
+    if idx < 0 or idx >= len(rows):
+        raise HTTPException(status_code=404, detail="Job not found")
+    rows[idx]['status'] = data.status
+    
+    fieldnames = [
+        "timestamp", "company", "title", "fitScore", "status",
+        "missingSkill", "suggestedProject", "location", "url", "notes"
+    ]
+    with open(TRACKER_CSV, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
+        writer.writeheader()
+        writer.writerows(rows)
+        
+    await manager.broadcast({'type': 'job_updated', 'idx': idx, 'status': data.status})
+    return {'status': 'success', 'new_status': data.status}
+
+@app.post('/api/jobs/{idx}/outreach')
+async def generate_job_outreach(idx: int):
+    rows = read_tracker_csv()
+    if idx < 0 or idx >= len(rows):
+        raise HTTPException(status_code=404, detail="Job not found")
+    job = rows[idx]
+    
+    try:
+        from tools.outreach_drafter import draft_outreach
+        profile = {}
+        if CANDIDATE_PROFILE.exists():
+            with open(CANDIDATE_PROFILE, 'r') as f:
+                profile = json.load(f)
+                
+        linkedin = profile.get('linkedin_url', 'https://linkedin.com/in/maruf-hassan')
+        draft = draft_outreach(
+            recruiter_name="Hiring Manager",
+            company=job.get('company', 'Company'),
+            role_title=job.get('title', 'Engineer'),
+            candidate_achievement="architected high-throughput AI automation systems cutting processing time by 70%",
+            candidate_linkedin=linkedin
+        )
+        return {'status': 'success', 'draft': draft}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete('/api/logs')
+async def clear_logs():
+    manager.log_buffer.clear()
+    await manager.broadcast({'type': 'logs_cleared'})
+    return {'status': 'cleared'}
+
+@app.get('/api/logs/export')
+async def export_logs():
+    lines = [f"[{e.get('timestamp')}] [{e.get('level')}] [{e.get('service_name')}] {e.get('message')}" for e in manager.log_buffer]
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse(content="\n".join(lines), media_type="text/plain", headers={"Content-Disposition": "attachment; filename=autoapplier_logs.txt"})
+
 
 @app.get('/api/analytics')
 async def get_analytics():
@@ -554,6 +738,35 @@ async def get_health():
         'cpu_percent': cpu,
         'memory_percent': mem,
         'internet': internet
+    }
+
+@app.get('/api/system/diagnostics')
+async def get_system_diagnostics():
+    mem = psutil.virtual_memory()
+    disk = psutil.disk_usage(str(REPO_ROOT))
+    uptime = time.time() - psutil.boot_time()
+    
+    services_info = []
+    for sid in SERVICE_REGISTRY.keys():
+        st = manager.get_status(sid)
+        services_info.append(st)
+        
+    return {
+        'timestamp': datetime.now().isoformat(),
+        'system': {
+            'python_version': sys.version.split()[0],
+            'uptime_seconds': int(uptime),
+            'cpu_count': psutil.cpu_count(),
+            'cpu_percent': psutil.cpu_percent(interval=0.1),
+            'memory_total_gb': round(mem.total / (1024**3), 2),
+            'memory_used_gb': round(mem.used / (1024**3), 2),
+            'memory_percent': mem.percent,
+            'disk_free_gb': round(disk.free / (1024**3), 2),
+            'disk_percent': disk.percent
+        },
+        'services': services_info,
+        'active_ws_clients': len(manager.ws_clients),
+        'log_buffer_count': len(manager.log_buffer)
     }
 
 @app.websocket('/ws')

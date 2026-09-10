@@ -137,13 +137,20 @@ def run_sheets_daemon(interval_mins=5):
         time.sleep(interval_mins * 60)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "--set-webhook":
-        if len(sys.argv) > 2:
-            set_webhook_url(sys.argv[2])
-        else:
-            print("Error: Provide the webhook URL. Example: --set-webhook https://script.google.com/...")
-            sys.exit(1)
-    elif len(sys.argv) > 1 and sys.argv[1] == "--test-row":
+    import argparse
+    parser = argparse.ArgumentParser(description="Google Sheets Sync Daemon & Utilities")
+    parser.add_argument("--set-webhook", type=str, help="Set the Google Apps Script Webhook URL")
+    parser.add_argument("--test-row", action="store_true", help="Send a test row to Google Sheet to verify connection")
+    parser.add_argument("--file", type=str, help="Sync JSON file to Google Sheet")
+    parser.add_argument("--once", action="store_true", help="Run a single sync from job_search_tracker.csv and exit")
+    parser.add_argument("--check", action="store_true", help="Check webhook configuration status and exit")
+    parser.add_argument("--daemon", action="store_true", help="Run continuous background sync daemon")
+    
+    args = parser.parse_args()
+    
+    if args.set_webhook:
+        set_webhook_url(args.set_webhook)
+    elif args.test_row:
         test_data = [{
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "company": "Test Company Inc.",
@@ -158,18 +165,28 @@ if __name__ == "__main__":
         }]
         res = sync_jobs_to_sheet(test_data)
         print(json.dumps(res, indent=2))
-    elif len(sys.argv) > 1 and sys.argv[1] == "--file":
-        with open(sys.argv[2], "r", encoding="utf-8") as f:
+    elif args.file:
+        with open(args.file, "r", encoding="utf-8") as f:
             data = json.load(f)
             rows = data if isinstance(data, list) else [data]
             res = sync_jobs_to_sheet(rows)
             print(json.dumps(res, indent=2))
-    elif len(sys.argv) > 1 and sys.argv[1] == "--once":
-        import csv
+    elif args.check:
+        url = get_webhook_url()
+        if url:
+            print(f"[OK] Google Sheets Webhook configured: {url[:20]}...{url[-10:] if len(url)>30 else ''}")
+        else:
+            print("[INFO] Google Sheets Webhook not configured yet.")
+    elif args.once:
         tracker_csv = REPO_ROOT / "job_search_tracker.csv"
         if tracker_csv.exists():
+            import csv
             with open(tracker_csv, "r", encoding="utf-8") as f:
                 reader = list(csv.DictReader(f))
+            print(f"Syncing {len(reader)} rows from {tracker_csv}...")
             sync_jobs_to_sheet(reader)
+        else:
+            print("[INFO] job_search_tracker.csv does not exist yet.")
     else:
         run_sheets_daemon()
+

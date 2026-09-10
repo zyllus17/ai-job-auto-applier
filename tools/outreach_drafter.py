@@ -19,8 +19,11 @@ def draft_outreach(recruiter_name: str, company: str, role_title: str, candidate
              f"I've attached my resume for your review and would love to chat if you think there might be a fit. "
              f"Thanks for your time!\n\nBest,\n[Your Name]\n{candidate_linkedin}")
              
+    import re
     repo_root = Path(__file__).parent.parent.resolve()
-    out_dir = repo_root / "documents" / "applications" / f"{company.replace(' ', '_')}_{role_title.replace(' ', '_')}"
+    safe_c = re.sub(r'[^a-zA-Z0-9_\-]+', '_', company.strip()).strip('_')
+    safe_t = re.sub(r'[^a-zA-Z0-9_\-]+', '_', role_title.strip()).strip('_')
+    out_dir = repo_root / "documents" / "applications" / f"{safe_c}_{safe_t}"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_file = out_dir / "outreach.md"
     

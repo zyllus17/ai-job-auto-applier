@@ -19,8 +19,8 @@ help: ## Show this help
 
 install: ## Install Python dependencies
 	@echo "📦 Installing dependencies..."
-	@$(PYTHON) -m pip install --quiet fastapi "uvicorn[standard]" websockets psutil python-dotenv 2>/dev/null || \
-		$(PYTHON) -m pip install fastapi "uvicorn[standard]" websockets psutil python-dotenv
+	@$(PYTHON) -m pip install --quiet fastapi "uvicorn[standard]" websockets psutil python-dotenv playwright 2>/dev/null || \
+		$(PYTHON) -m pip install fastapi "uvicorn[standard]" websockets psutil python-dotenv playwright
 	@echo "✅ Dependencies installed"
 
 run: clean install ## Kill previous run, install deps, and start a fresh dashboard
