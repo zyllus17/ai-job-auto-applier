@@ -1,9 +1,13 @@
 <p align="center">
-  <h1 align="center">🤖 AI Job Auto-Applier v2: Autonomous Career Engine</h1>
+  <h1 align="center">🤖 AI Job Auto-Applier v3: Autonomous Career Engine</h1>
   <p align="center">
     <b>The continuous, self-driving career acquisition framework that runs locally on your laptop.</b><br>
-    <i>Automated Discovery • Anti-Detect Form Auto-Filling • 0 AI Tokens Form Filler • ATS Tailored 2-Page CVs • 1-Page Cover Letters • Daily Frontend Demo Projects • Recruiter Cold Outreach • Free Self-Hosted Telegram Bot • Google Sheets Daily Tracking</i>
+    <i>Visual Web Dashboard • Anti-Detect Form Auto-Filling • 0 AI Tokens • ATS Tailored 2-Page CVs • 1-Page Cover Letters • Daily Frontend Demo Projects • Recruiter Cold Outreach • Free Self-Hosted Telegram Bot • Google Sheets Daily Tracking</i>
   </p>
+</p>
+
+<p align="center">
+  <img src="assets/dashboard_preview.jpg" alt="AI Job Auto-Applier Web Dashboard" width="100%" style="border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);" />
 </p>
 
 ---
@@ -64,6 +68,10 @@ Prefer a visual control panel over terminal commands?
 ```bash
 make run
 ```
+
+<p align="center">
+  <img src="assets/dashboard_live.png" alt="Live AI Job Auto-Applier Dashboard" width="100%" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
+</p>
 
 This single command:
 1. Installs dashboard dependencies (`fastapi`, `uvicorn`, `psutil`).
