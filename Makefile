@@ -23,7 +23,7 @@ install: ## Install Python dependencies
 		$(PYTHON) -m pip install fastapi "uvicorn[standard]" websockets psutil python-dotenv
 	@echo "✅ Dependencies installed"
 
-run: install ## Start the dashboard and open browser
+run: clean install ## Kill previous run, install deps, and start a fresh dashboard
 	@echo ""
 	@echo "🚀 Starting AI Job Auto-Applier Dashboard..."
 	@echo "   URL: $(URL)"
@@ -33,6 +33,9 @@ run: install ## Start the dashboard and open browser
 	@$(PYTHON) -m uvicorn dashboard.server:app --host 0.0.0.0 --port $(PORT) --reload
 
 clean: ## Stop any running dashboard processes
-	@echo "🧹 Stopping dashboard..."
+	@echo "🧹 Stopping any previous dashboard run..."
+	@-PIDS=$$(lsof -t -i :$(PORT) 2>/dev/null); if [ -n "$$PIDS" ]; then echo "$$PIDS" | xargs kill -9 2>/dev/null || true; fi
 	@-pkill -f "uvicorn dashboard.server" 2>/dev/null || true
+	@-pkill -f "dashboard/server.py" 2>/dev/null || true
+	@sleep 0.5
 	@echo "✅ Cleaned up"
