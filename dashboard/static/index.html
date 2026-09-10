@@ -9,68 +9,110 @@
   <link id="antd-theme-link" rel="stylesheet" href="/static/antd.dark.min.css">
   
   <style>
-    /* Custom Ant Design Pro Polish */
+    /* ==========================================================================
+       LUXURY DESIGN SYSTEM & VIBRANT COLOR HARMONY
+       ========================================================================== */
     :root {
-      --primary-color: #1677ff;
-      --success-color: #52c41a;
-      --warning-color: #faad14;
-      --error-color: #ff4d4f;
+      --primary: #3b82f6;
+      --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+      --accent-emerald: #10b981;
+      --accent-cyan: #06b6d4;
+      --accent-amber: #f59e0b;
+      --accent-rose: #ec4899;
+      --accent-purple: #8b5cf6;
+      
+      --bg-base: #07090e;
+      --bg-card: rgba(15, 21, 37, 0.75);
+      --bg-card-hover: rgba(22, 30, 52, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(99, 102, 241, 0.3);
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-family: var(--font-stack);
       height: 100vh;
       overflow: hidden;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      background-image: 
+        radial-gradient(circle at 12% 12%, rgba(59, 130, 246, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 88% 18%, rgba(139, 92, 246, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.10) 0%, transparent 50%);
+      background-attachment: fixed;
     }
 
     .app-layout {
       height: 100vh;
       display: flex;
       flex-direction: row;
+      background: transparent;
     }
 
-    /* Ant Design Sider */
+    /* ==========================================================================
+       SIDEBAR (ANT DESIGN PRO INSPIRED)
+       ========================================================================== */
     .app-sider {
-      width: 240px;
+      width: 250px;
       flex-shrink: 0;
-      background: #001529;
+      background: rgba(10, 14, 24, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       display: flex;
       flex-direction: column;
-      border-right: 1px solid rgba(255,255,255,0.08);
+      border-right: 1px solid var(--border-subtle);
       z-index: 100;
     }
+
     .sider-logo {
-      height: 64px;
+      height: 68px;
       padding: 0 20px;
       display: flex;
       align-items: center;
       gap: 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid var(--border-subtle);
     }
     .sider-logo-icon {
-      width: 32px;
-      height: 32px;
-      background: #1677ff;
-      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      background: var(--primary-gradient);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 18px;
+      font-size: 20px;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+      animation: iconFloat 4s ease-in-out infinite;
     }
+    @keyframes iconFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-3px); }
+    }
+
     .sider-logo-text {
       color: #fff;
       font-weight: 700;
       font-size: 15px;
-      letter-spacing: -0.2px;
+      letter-spacing: -0.3px;
       white-space: nowrap;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     }
 
     .sider-menu {
       flex: 1;
-      padding: 12px 8px;
+      padding: 16px 10px;
       list-style: none;
       margin: 0;
       overflow-y: auto;
@@ -80,83 +122,189 @@
       align-items: center;
       gap: 12px;
       padding: 12px 16px;
-      border-radius: 8px;
-      color: rgba(255,255,255,0.65);
+      border-radius: 10px;
+      color: var(--text-muted);
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 500;
-      margin-bottom: 4px;
-      transition: all 0.2s ease;
+      margin-bottom: 6px;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .menu-item:hover {
       color: #fff;
-      background: rgba(255,255,255,0.08);
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateX(4px);
     }
     .menu-item.active {
       color: #fff;
-      background: #1677ff;
-      box-shadow: 0 2px 8px rgba(22, 119, 255, 0.35);
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(99, 102, 241, 0.25) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      box-shadow: 0 4px 16px -2px rgba(59, 130, 246, 0.3);
+    }
+    .menu-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      bottom: 10px;
+      width: 4px;
+      border-radius: 0 4px 4px 0;
+      background: #38bdf8;
+      box-shadow: 0 0 10px #38bdf8;
     }
     .menu-badge {
       margin-left: auto;
       font-size: 11px;
-      padding: 1px 7px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.15);
-      color: #fff;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .menu-item.active .menu-badge {
+      background: rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+      border: 1px solid rgba(147, 197, 253, 0.3);
     }
 
     .sider-footer {
       padding: 16px 20px;
-      border-top: 1px solid rgba(255,255,255,0.08);
+      border-top: 1px solid var(--border-subtle);
       font-size: 12px;
-      color: rgba(255,255,255,0.45);
+      color: var(--text-dim);
     }
 
-    /* Main Content Area */
+    /* ==========================================================================
+       MAIN APP & HEADER
+       ========================================================================== */
     .app-main {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: #141414;
+      background: transparent;
     }
 
-    /* Ant Design Header */
     .app-header {
-      height: 64px;
-      padding: 0 24px;
+      height: 68px;
+      padding: 0 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      background: #1f1f1f;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(10, 14, 24, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       flex-shrink: 0;
-    }
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+      z-index: 10;
     }
     .header-breadcrumb {
       font-size: 14px;
-      color: rgba(255,255,255,0.45);
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     .header-breadcrumb strong {
       color: #fff;
-      margin-left: 6px;
+      font-weight: 600;
     }
     .header-right {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
+    }
+
+    /* Connectivity Pill */
+    .conn-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      font-size: 12.5px;
+      color: #6ee7b7;
+    }
+    .conn-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      position: relative;
+    }
+    .conn-pulse-dot::after {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      border-radius: 50%;
+      border: 2px solid #10b981;
+      animation: radarPulse 2s infinite cubic-bezier(0.2, 0, 0, 1);
+    }
+    @keyframes radarPulse {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(2.8); opacity: 0; }
+    }
+
+    /* Action Buttons */
+    .btn-glow {
+      position: relative;
+      overflow: hidden;
+      background: var(--primary-gradient) !important;
+      border: none !important;
+      color: white !important;
+      font-weight: 600 !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4) !important;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      cursor: pointer;
+    }
+    .btn-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6) !important;
+    }
+    .btn-glow:active {
+      transform: scale(0.97);
+    }
+    .btn-glow::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: linear-gradient(60deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: rotate(30deg) translateX(-100%);
+      animation: sheen 4s infinite linear;
+    }
+    @keyframes sheen {
+      0% { transform: rotate(30deg) translateX(-100%); }
+      20%, 100% { transform: rotate(30deg) translateX(100%); }
+    }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #e2e8f0 !important;
+      border-radius: 8px !important;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      cursor: pointer;
+    }
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border-color: rgba(255, 255, 255, 0.25) !important;
+      color: #fff !important;
+      transform: translateY(-1px);
+    }
+    .btn-glass:active {
+      transform: scale(0.97);
     }
 
     /* Scrollable Page Content */
     .app-content {
       flex: 1;
       overflow-y: auto;
-      padding: 24px;
+      padding: 28px;
     }
 
     .page-section {
@@ -164,127 +312,208 @@
     }
     .page-section.active {
       display: block;
-      animation: antFadeIn 0.2s ease;
+      animation: pageCascade 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    @keyframes antFadeIn {
-      from { opacity: 0; transform: translateY(4px); }
+    @keyframes pageCascade {
+      from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     /* Page Header */
     .ant-page-header {
-      padding: 0 0 20px 0;
+      padding: 0 0 24px 0;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
     }
     .ant-page-header-title {
-      font-size: 20px;
-      font-weight: 600;
+      font-size: 22px;
+      font-weight: 700;
       color: #fff;
       margin: 0;
+      letter-spacing: -0.4px;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .ant-page-header-sub {
-      font-size: 13px;
-      color: rgba(255,255,255,0.45);
-      margin-top: 4px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 5px;
     }
 
-    /* Top Statistics Cards */
+    /* ==========================================================================
+       4 STATS CARDS (ANIMATED COUNTERS & COLOR ACCENTS)
+       ========================================================================== */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
+      gap: 18px;
+      margin-bottom: 28px;
     }
     .stat-card {
-      background: #1f1f1f;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px;
-      padding: 18px 20px;
-      transition: all 0.2s;
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 20px 22px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: cardEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
+    @keyframes cardEntrance {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .stats-grid .stat-card:nth-child(1) { animation-delay: 0.04s; }
+    .stats-grid .stat-card:nth-child(2) { animation-delay: 0.08s; }
+    .stats-grid .stat-card:nth-child(3) { animation-delay: 0.12s; }
+    .stats-grid .stat-card:nth-child(4) { animation-delay: 0.16s; }
+
     .stat-card:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-      border-color: rgba(255,255,255,0.15);
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
     }
-    .stat-title {
-      font-size: 13px;
-      color: rgba(255,255,255,0.45);
-      margin-bottom: 6px;
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    }
+    .stat-card.stat-blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .stat-card.stat-amber::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .stat-card.stat-emerald::before { background: linear-gradient(90deg, #10b981, #34d399); }
+    .stat-card.stat-purple::before { background: linear-gradient(90deg, #8b5cf6, #c084fc); }
+
+    .stat-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .stat-title {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .stat-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
     }
     .stat-value {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      line-height: 1.1;
+      margin-bottom: 8px;
       color: #fff;
-      line-height: 1.2;
     }
+    .stat-blue .stat-value { color: #60a5fa; text-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+    .stat-amber .stat-value { color: #fbbf24; text-shadow: 0 0 20px rgba(245, 158, 11, 0.4); }
+    .stat-emerald .stat-value { color: #34d399; text-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+    .stat-purple .stat-value { color: #c084fc; text-shadow: 0 0 20px rgba(139, 92, 246, 0.4); }
+
     .stat-footer {
       font-size: 12px;
-      color: rgba(255,255,255,0.45);
-      margin-top: 6px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    /* Services Grid */
+    /* ==========================================================================
+       6 WORKER SERVICES (INDIVIDUAL COLOR IDENTITIES & AURA GLOW)
+       ========================================================================== */
     .services-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
+      gap: 18px;
+      margin-bottom: 28px;
     }
     .service-card {
-      background: #1f1f1f;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px;
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: all 0.2s;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
+      box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+      animation: cardEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
+    .services-grid .service-card:nth-child(1) { animation-delay: 0.12s; }
+    .services-grid .service-card:nth-child(2) { animation-delay: 0.16s; }
+    .services-grid .service-card:nth-child(3) { animation-delay: 0.20s; }
+    .services-grid .service-card:nth-child(4) { animation-delay: 0.24s; }
+    .services-grid .service-card:nth-child(5) { animation-delay: 0.28s; }
+    .services-grid .service-card:nth-child(6) { animation-delay: 0.32s; }
+
+    /* Top Strip Color Accent */
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--svc-color-1, #3b82f6), var(--svc-color-2, #6366f1));
+    }
+
+    /* Hover Auras by Service */
     .service-card:hover {
-      border-color: rgba(255,255,255,0.2);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      transform: translateY(-4px);
+      border-color: var(--svc-color-1, rgba(255, 255, 255, 0.2));
+      box-shadow: 0 16px 36px -6px var(--svc-glow, rgba(59, 130, 246, 0.25)), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
     }
+
     .service-card-head {
-      padding: 16px 20px;
+      padding: 18px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
     .service-card-title {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       font-weight: 600;
       font-size: 15px;
       color: #fff;
     }
     .service-card-icon {
       font-size: 18px;
-      width: 32px;
-      height: 32px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 6px;
+      width: 36px;
+      height: 36px;
+      background: var(--svc-icon-bg, rgba(255, 255, 255, 0.08));
+      border: 1px solid var(--svc-icon-border, rgba(255, 255, 255, 0.15));
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 2px 10px var(--svc-glow, rgba(0, 0, 0, 0.3));
     }
+
     .service-card-body {
       padding: 18px 20px;
       flex: 1;
     }
     .service-desc {
       font-size: 13px;
-      color: rgba(255,255,255,0.55);
-      line-height: 1.5;
-      margin-bottom: 14px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 16px;
       min-height: 40px;
     }
     .service-telemetry {
@@ -292,124 +521,301 @@
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
-      font-size: 12px;
     }
+
     .service-card-actions {
-      border-top: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
-      padding: 10px 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.15);
+      padding: 12px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    /* Ant Design Switch Custom */
-    .ant-switch {
+    /* Spring-Loaded Toggle Switch */
+    .spring-switch {
+      width: 48px;
+      height: 24px;
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
       position: relative;
-      display: inline-block;
-      box-sizing: border-box;
-      min-width: 44px;
-      height: 22px;
-      line-height: 22px;
-      vertical-align: middle;
-      background-color: rgba(255, 255, 255, 0.25);
-      border: 0;
-      border-radius: 100px;
       cursor: pointer;
-      transition: all 0.2s;
-      user-select: none;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       outline: none;
     }
-    .ant-switch.ant-switch-checked {
-      background-color: #1677ff;
+    .spring-switch.active {
+      background-color: var(--svc-color-1, #3b82f6);
+      box-shadow: 0 0 16px var(--svc-color-1, rgba(59, 130, 246, 0.5));
+      border-color: transparent;
     }
-    .ant-switch-handle {
-      position: absolute;
-      top: 2px;
-      left: 2px;
+    .spring-switch-handle {
       width: 18px;
       height: 18px;
-      transition: all 0.2s ease-in-out;
-    }
-    .ant-switch-handle::before {
+      background: white;
+      border-radius: 50%;
       position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      background-color: #fff;
-      border-radius: 9px;
-      box-shadow: 0 2px 4px 0 rgba(0, 35, 11, 0.2);
-      transition: all 0.2s ease-in-out;
-      content: '';
+      top: 2px;
+      left: 3px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .ant-switch.ant-switch-checked .ant-switch-handle {
-      left: calc(100% - 20px);
+    .spring-switch.active .spring-switch-handle {
+      transform: translateX(23px);
     }
 
-    /* Table Toolbar */
+    /* Pulsing Running Dot */
+    .pulse-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+    .pulse-indicator.running {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+    }
+    .pulse-indicator.idle {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-dim);
+    }
+    .pulse-indicator.running .dot {
+      width: 7px;
+      height: 7px;
+      background: #10b981;
+      border-radius: 50%;
+      position: relative;
+    }
+    .pulse-indicator.running .dot::after {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      border-radius: 50%;
+      border: 2px solid #10b981;
+      animation: radarPulse 1.8s infinite cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    /* Service-specific custom theme variables */
+    .svc-job-daemon {
+      --svc-color-1: #10b981;
+      --svc-color-2: #06b6d4;
+      --svc-glow: rgba(16, 185, 129, 0.25);
+      --svc-icon-bg: rgba(16, 185, 129, 0.15);
+      --svc-icon-border: rgba(16, 185, 129, 0.35);
+    }
+    .svc-browser-autoapply {
+      --svc-color-1: #f97316;
+      --svc-color-2: #fbbf24;
+      --svc-glow: rgba(249, 115, 22, 0.25);
+      --svc-icon-bg: rgba(249, 115, 22, 0.15);
+      --svc-icon-border: rgba(249, 115, 22, 0.35);
+    }
+    .svc-telegram-bot {
+      --svc-color-1: #3b82f6;
+      --svc-color-2: #6366f1;
+      --svc-glow: rgba(59, 130, 246, 0.25);
+      --svc-icon-bg: rgba(59, 130, 246, 0.15);
+      --svc-icon-border: rgba(59, 130, 246, 0.35);
+    }
+    .svc-project-scaffolder {
+      --svc-color-1: #06b6d4;
+      --svc-color-2: #38bdf8;
+      --svc-glow: rgba(6, 182, 212, 0.25);
+      --svc-icon-bg: rgba(6, 182, 212, 0.15);
+      --svc-icon-border: rgba(6, 182, 212, 0.35);
+    }
+    .svc-recruiter-outreach {
+      --svc-color-1: #ec4899;
+      --svc-color-2: #f43f5e;
+      --svc-glow: rgba(236, 72, 153, 0.25);
+      --svc-icon-bg: rgba(236, 72, 153, 0.15);
+      --svc-icon-border: rgba(236, 72, 153, 0.35);
+    }
+    .svc-sheets-sync {
+      --svc-color-1: #8b5cf6;
+      --svc-color-2: #c084fc;
+      --svc-glow: rgba(139, 92, 246, 0.25);
+      --svc-icon-bg: rgba(139, 92, 246, 0.15);
+      --svc-icon-border: rgba(139, 92, 246, 0.35);
+    }
+
+    /* ==========================================================================
+       CANDIDATE PIPELINE CRM TABLE (LUXURY GLASS TABLE)
+       ========================================================================== */
+    .table-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5);
+    }
     .table-toolbar {
-      background: #1f1f1f;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px 8px 0 0;
-      padding: 16px 20px;
+      padding: 18px 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
       flex-wrap: wrap;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
     }
-    .table-container {
-      background: #1f1f1f;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-top: none;
-      border-radius: 0 0 8px 8px;
-      overflow-x: auto;
+    .search-box-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 440px;
     }
-    .ant-table {
+    .search-box-wrap input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 9px 14px 9px 36px;
+      color: #fff;
+      font-size: 13.5px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .search-box-wrap input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+
+    .pipeline-table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
       font-size: 13px;
     }
-    .ant-table th {
-      background: rgba(255,255,255,0.02);
-      color: rgba(255,255,255,0.45);
+    .pipeline-table th {
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text-muted);
       font-weight: 600;
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-subtle);
       user-select: none;
       cursor: pointer;
+      transition: color 0.2s;
     }
-    .ant-table th:hover {
+    .pipeline-table th:hover {
       color: #fff;
     }
-    .ant-table td {
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+    .pipeline-table td {
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       color: #fff;
       vertical-align: middle;
+      transition: background 0.15s;
     }
-    .ant-table tbody tr {
-      transition: background 0.15s ease;
+    .pipeline-table tbody tr {
       cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .ant-table tbody tr:hover {
-      background: rgba(255,255,255,0.04);
+    .pipeline-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.04);
+      transform: translateX(2px);
     }
-    .ant-table tbody tr.selected-row {
-      background: rgba(22, 119, 255, 0.15);
+    .pipeline-table tbody tr.selected-row {
+      background: rgba(59, 130, 246, 0.15) !important;
+      border-left: 3px solid #3b82f6;
     }
 
-    /* Ant Design Drawer */
+    /* Company Logo Avatar */
+    .company-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .company-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.25));
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: #93c5fd;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    /* Glowing Fit Score Badges */
+    .fit-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+    }
+    .fit-badge.high {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
+    .fit-badge.mid {
+      background: rgba(14, 165, 233, 0.15);
+      border: 1px solid rgba(14, 165, 233, 0.35);
+      color: #38bdf8;
+      box-shadow: 0 0 12px rgba(14, 165, 233, 0.2);
+    }
+    .fit-badge.low {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+    }
+
+    /* Skill Tag */
+    .skill-tag {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      color: #e9d5ff;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 500;
+      display: inline-block;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ==========================================================================
+       ANT DESIGN SLIDE-OVER DRAWER (SMOOTH SPRING TRANSITION)
+       ========================================================================== */
     .ant-drawer-mask {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       z-index: 1000;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s;
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .ant-drawer-mask.open {
       opacity: 1;
@@ -417,12 +823,15 @@
     }
     .ant-drawer-content-wrapper {
       position: fixed;
-      top: 0; right: -480px; bottom: 0;
-      width: 480px;
-      background: #1f1f1f;
-      box-shadow: -6px 0 24px rgba(0,0,0,0.5);
+      top: 0; right: -520px; bottom: 0;
+      width: 520px;
+      background: rgba(13, 18, 32, 0.95);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
       z-index: 1001;
-      transition: right 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
     }
@@ -430,105 +839,170 @@
       right: 0;
     }
     .ant-drawer-header {
-      padding: 18px 24px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 20px 26px;
+      border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
     }
     .ant-drawer-title {
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       color: #fff;
       margin: 0;
     }
     .ant-drawer-body {
-      padding: 24px;
+      padding: 26px;
       flex: 1;
       overflow-y: auto;
     }
     .ant-drawer-footer {
-      padding: 16px 24px;
-      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 18px 26px;
+      border-top: 1px solid var(--border-subtle);
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
-      background: rgba(255,255,255,0.02);
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.2);
     }
 
-    /* Live Logs Terminal Container */
+    /* ==========================================================================
+       SUPERVISOR OBSERVABILITY TERMINAL
+       ========================================================================== */
     .terminal-card {
-      background: #141414;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px;
+      background: rgba(8, 11, 20, 0.95);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 200px);
+      height: calc(100vh - 210px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
     }
     .terminal-toolbar {
-      padding: 12px 18px;
-      background: #1f1f1f;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 14px;
       flex-wrap: wrap;
     }
     .terminal-body {
       flex: 1;
       overflow-y: auto;
-      padding: 16px;
+      padding: 18px 22px;
       font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-      font-size: 13px;
-      line-height: 1.6;
-      background: #0d0d0d;
-      color: #d4d4d4;
+      font-size: 12.5px;
+      line-height: 1.65;
+      background: #06080e;
+      color: #cbd5e1;
     }
     .terminal-line {
-      margin-bottom: 4px;
+      margin-bottom: 5px;
       word-break: break-all;
       display: flex;
-      gap: 10px;
+      gap: 12px;
+      animation: logLineIn 0.2s ease;
     }
-    .terminal-line.error { color: #ff4d4f; background: rgba(255, 77, 79, 0.1); padding: 2px 6px; border-radius: 4px; }
-    .terminal-line.warning { color: #faad14; }
-    .terminal-line.success { color: #52c41a; }
-    .terminal-time { color: rgba(255,255,255,0.35); flex-shrink: 0; }
-    .terminal-tag { font-weight: 600; flex-shrink: 0; }
+    @keyframes logLineIn {
+      from { opacity: 0; transform: translateX(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .terminal-line.error {
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.12);
+      padding: 3px 8px;
+      border-radius: 4px;
+      border-left: 2px solid #ef4444;
+    }
+    .terminal-line.warning { color: #fbbf24; }
+    .terminal-line.success { color: #34d399; }
+    .terminal-time { color: rgba(255, 255, 255, 0.3); flex-shrink: 0; }
+    .terminal-tag { font-weight: 600; flex-shrink: 0; color: #93c5fd; }
     .terminal-msg { flex: 1; }
 
-    /* Ant Design Notification Toast */
-    .ant-message-notice {
+    /* ==========================================================================
+       TOAST NOTIFICATIONS (SPRING POPPING)
+       ========================================================================== */
+    .toast-shelf {
       position: fixed;
       top: 24px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 2000;
+      z-index: 2500;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       pointer-events: none;
     }
-    .ant-message-notice-content {
-      padding: 10px 20px;
-      background: #1f1f1f;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 8px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    .toast-capsule {
+      padding: 12px 24px;
+      background: rgba(18, 24, 38, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.2);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       color: #fff;
-      font-size: 14px;
-      animation: antToastIn 0.25s ease;
+      font-size: 13.5px;
+      font-weight: 500;
+      animation: toastSpring 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: auto;
     }
-    @keyframes antToastIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes toastSpring {
+      0% { opacity: 0; transform: translateY(-20px) scale(0.9); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
+
+    /* Light Theme Overrides */
+    body.light-theme {
+      background-color: #f1f5f9;
+      background-image: 
+        radial-gradient(circle at 12% 12%, rgba(59, 130, 246, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 88% 18%, rgba(139, 92, 246, 0.06) 0%, transparent 45%);
+      color: #0f172a;
+    }
+    body.light-theme .app-sider {
+      background: #ffffff;
+      border-right-color: #e2e8f0;
+    }
+    body.light-theme .sider-logo-text { color: #0f172a; }
+    body.light-theme .menu-item { color: #64748b; }
+    body.light-theme .menu-item:hover { background: #f8fafc; color: #0f172a; }
+    body.light-theme .menu-item.active {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+      box-shadow: none;
+    }
+    body.light-theme .app-header {
+      background: #ffffff;
+      border-bottom-color: #e2e8f0;
+    }
+    body.light-theme .header-breadcrumb strong { color: #0f172a; }
+    body.light-theme .ant-page-header-title {
+      background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    body.light-theme .stat-card,
+    body.light-theme .service-card,
+    body.light-theme .table-card {
+      background: #ffffff;
+      border-color: #e2e8f0;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
+    }
+    body.light-theme .service-card-title { color: #0f172a; }
+    body.light-theme .pipeline-table th { background: #f8fafc; color: #64748b; border-bottom-color: #e2e8f0; }
+    body.light-theme .pipeline-table td { color: #0f172a; border-bottom-color: #f1f5f9; }
+    body.light-theme .pipeline-table tbody tr:hover { background: #f8fafc; }
+    body.light-theme .ant-drawer-content-wrapper { background: #ffffff; border-left-color: #e2e8f0; }
+    body.light-theme .ant-drawer-title { color: #0f172a; }
   </style>
 </head>
 <body>
@@ -564,8 +1038,8 @@
       </ul>
 
       <div class="sider-footer">
-        <div>Candidate CRM & Agent Plane</div>
-        <div style="margin-top: 4px; color: rgba(255,255,255,0.3);">Ant Design • 0 AI Tokens</div>
+        <div style="font-weight: 600; color: var(--text-muted);">Candidate CRM & Agent Plane</div>
+        <div style="margin-top: 4px;">Ant Design • 0 AI Tokens consumed</div>
       </div>
     </aside>
 
@@ -581,16 +1055,16 @@
         </div>
 
         <div class="header-right">
-          <span class="ant-badge ant-badge-status ant-badge-not-a-wrapper" style="display: flex; align-items: center; gap: 8px;">
-            <span class="ant-badge-status-dot ant-badge-status-processing" id="conn-dot"></span>
-            <span class="ant-badge-status-text" style="color: rgba(255,255,255,0.85); font-size: 13px;" id="conn-text">System Active (Port 8420)</span>
-          </span>
+          <div class="conn-pill">
+            <div class="conn-pulse-dot" id="conn-dot"></div>
+            <span id="conn-text">System Active (Port 8420)</span>
+          </div>
 
-          <button class="ant-btn ant-btn-default ant-btn-sm" onclick="openDiagnosticsModal()">
+          <button class="btn-glass" style="padding: 7px 14px; font-size: 13px;" onclick="openDiagnosticsModal()">
             ⚡ System Diagnostics
           </button>
 
-          <button class="ant-btn ant-btn-default ant-btn-sm" onclick="toggleAntTheme()" id="theme-btn" title="Toggle Light/Dark Theme">
+          <button class="btn-glass" style="padding: 7px 14px; font-size: 13px;" onclick="toggleTheme()" id="theme-btn" title="Toggle Theme">
             ☀️ Light Theme
           </button>
         </div>
@@ -607,54 +1081,54 @@
               <div class="ant-page-header-sub">Manage 6 independent background automation workers with real-time process supervisor tracking.</div>
             </div>
             <div style="display: flex; gap: 10px;">
-              <button class="ant-btn ant-btn-primary" onclick="runAction('scan-once')">
+              <button class="btn-glow" style="padding: 9px 18px; font-size: 13.5px;" onclick="runAction('scan-once')">
                 ▶ Run Discovery Scan
               </button>
-              <button class="ant-btn ant-btn-default" onclick="runAction('scaffold')">
+              <button class="btn-glass" style="padding: 9px 16px; font-size: 13.5px;" onclick="runAction('scaffold')">
                 📦 Scaffold POC Project
               </button>
-              <button class="ant-btn ant-btn-default" onclick="runAction('sync-sheets')">
+              <button class="btn-glass" style="padding: 9px 16px; font-size: 13.5px;" onclick="runAction('sync-sheets')">
                 📊 Sync Google Sheets
               </button>
             </div>
           </div>
 
-          <!-- 4 Ant Design Statistics Cards -->
+          <!-- 4 Statistics Cards (Animated Rolling Numbers) -->
           <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-title">
-                <span>TOTAL JOBS TRACKED</span>
-                <span class="ant-tag ant-tag-blue">All Portals</span>
+            <div class="stat-card stat-blue">
+              <div class="stat-head">
+                <span class="stat-title">TOTAL JOBS DISCOVERED</span>
+                <span class="stat-badge" style="background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3);">All Portals</span>
               </div>
               <div class="stat-value" id="stat-total-jobs">0</div>
-              <div class="stat-footer">LinkedIn, FreeHire, Arbeitnow, Remotive, RemoteOK</div>
+              <div class="stat-footer">🌐 LinkedIn, FreeHire, Arbeitnow, Remotive, RemoteOK</div>
             </div>
 
-            <div class="stat-card">
-              <div class="stat-title">
-                <span>STAGED FOR SUBMISSION</span>
-                <span class="ant-tag ant-tag-orange">Ready</span>
+            <div class="stat-card stat-amber">
+              <div class="stat-head">
+                <span class="stat-title">STAGED FOR SUBMISSION</span>
+                <span class="stat-badge" style="background: rgba(245, 158, 11, 0.15); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.3);">Ready</span>
               </div>
-              <div class="stat-value" style="color: #faad14;" id="stat-staged">0</div>
-              <div class="stat-footer">Prepared with tailored CV & cover letter</div>
+              <div class="stat-value" id="stat-staged">0</div>
+              <div class="stat-footer">📄 Tailored ModernCV & Cover Letter generated</div>
             </div>
 
-            <div class="stat-card">
-              <div class="stat-title">
-                <span>APPLIED & INTERVIEWS</span>
-                <span class="ant-tag ant-tag-green">Pipeline</span>
+            <div class="stat-card stat-emerald">
+              <div class="stat-head">
+                <span class="stat-title">APPLIED & INTERVIEWS</span>
+                <span class="stat-badge" style="background: rgba(16, 185, 129, 0.15); color: #a7f3d0; border: 1px solid rgba(16, 185, 129, 0.3);">Pipeline</span>
               </div>
-              <div class="stat-value" style="color: #52c41a;" id="stat-applied">0</div>
-              <div class="stat-footer">Active candidacies in progress</div>
+              <div class="stat-value" id="stat-applied">0</div>
+              <div class="stat-footer">🤝 Active candidacies in progress</div>
             </div>
 
-            <div class="stat-card">
-              <div class="stat-title">
-                <span>AVERAGE MATCH FIT</span>
-                <span class="ant-tag ant-tag-purple">ATS Fit</span>
+            <div class="stat-card stat-purple">
+              <div class="stat-head">
+                <span class="stat-title">AVERAGE MATCH FIT</span>
+                <span class="stat-badge" style="background: rgba(139, 92, 246, 0.15); color: #ddd6fe; border: 1px solid rgba(139, 92, 246, 0.3);">ATS Weighted</span>
               </div>
-              <div class="stat-value" style="color: #722ed1;" id="stat-avg-fit">0%</div>
-              <div class="stat-footer">Weighted against candidate skills profile</div>
+              <div class="stat-value" id="stat-avg-fit">0%</div>
+              <div class="stat-footer">🎯 Role-agnostic semantic compatibility</div>
             </div>
           </div>
 
@@ -672,46 +1146,48 @@
               <div class="ant-page-header-sub">Click any record to inspect detailed role requirements, missing skills, and pre-drafted recruiter outreach.</div>
             </div>
             <div style="display: flex; gap: 10px;">
-              <button class="ant-btn ant-btn-default" onclick="exportTrackerCSV()">
+              <button class="btn-glass" style="padding: 8px 16px;" onclick="exportTrackerCSV()">
                 📥 Download CSV
               </button>
             </div>
           </div>
 
-          <!-- Table Toolbar -->
-          <div class="table-toolbar">
-            <div style="display: flex; align-items: center; gap: 12px; flex: 1; max-width: 420px;">
-              <input type="text" class="ant-input" id="job-search-input" placeholder="Search by company, role title, or skill..." oninput="fetchJobs()">
+          <!-- Table Card -->
+          <div class="table-card">
+            <div class="table-toolbar">
+              <div class="search-box-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="job-search-input" placeholder="Search by company, role title, or skill..." oninput="fetchJobs()">
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 13px; color: var(--text-dim);">Filter Stage:</span>
+                <button class="btn-glow stage-btn" style="padding: 5px 12px; font-size: 12px;" onclick="setFilterStage('')">All</button>
+                <button class="btn-glass stage-btn" style="padding: 5px 12px; font-size: 12px;" onclick="setFilterStage('staged')">Staged</button>
+                <button class="btn-glass stage-btn" style="padding: 5px 12px; font-size: 12px;" onclick="setFilterStage('applied')">Applied</button>
+                <button class="btn-glass stage-btn" style="padding: 5px 12px; font-size: 12px;" onclick="setFilterStage('interview')">Interviews</button>
+                <button class="btn-glass stage-btn" style="padding: 5px 12px; font-size: 12px;" onclick="setFilterStage('offer')">Offers</button>
+              </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 13px; color: rgba(255,255,255,0.45);">Filter Stage:</span>
-              <button class="ant-btn ant-btn-sm ant-btn-primary stage-btn" onclick="setFilterStage('')">All</button>
-              <button class="ant-btn ant-btn-sm ant-btn-default stage-btn" onclick="setFilterStage('staged')">Staged</button>
-              <button class="ant-btn ant-btn-sm ant-btn-default stage-btn" onclick="setFilterStage('applied')">Applied</button>
-              <button class="ant-btn ant-btn-sm ant-btn-default stage-btn" onclick="setFilterStage('interview')">Interviews</button>
-              <button class="ant-btn ant-btn-sm ant-btn-default stage-btn" onclick="setFilterStage('offer')">Offers</button>
+            <div style="overflow-x: auto;">
+              <table class="pipeline-table">
+                <thead>
+                  <tr>
+                    <th onclick="sortJobs('company')">Company ↕</th>
+                    <th onclick="sortJobs('title')">Role Title ↕</th>
+                    <th onclick="sortJobs('fitScore')">Fit Score ↕</th>
+                    <th>Pipeline Stage</th>
+                    <th>Identified Skill Gap / Demo POC</th>
+                    <th>Location</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="jobs-tbody">
+                  <!-- Rendered dynamically via JS -->
+                </tbody>
+              </table>
             </div>
-          </div>
-
-          <!-- Ant Design Table -->
-          <div class="table-container">
-            <table class="ant-table">
-              <thead>
-                <tr>
-                  <th onclick="sortJobs('company')">Company ↕</th>
-                  <th onclick="sortJobs('title')">Role Title ↕</th>
-                  <th onclick="sortJobs('fitScore')">Fit Score ↕</th>
-                  <th>Pipeline Stage</th>
-                  <th>Identified Skill Gap / Demo POC</th>
-                  <th>Location</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="jobs-tbody">
-                <!-- Rendered dynamically via JS -->
-              </tbody>
-            </table>
           </div>
         </section>
 
@@ -724,21 +1200,21 @@
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
             <div class="stat-card">
-              <div class="stat-title">APPLICATION CONVERSION FUNNEL</div>
+              <div class="stat-title" style="margin-bottom: 16px;">APPLICATION CONVERSION FUNNEL</div>
               <canvas id="chart-funnel" style="width: 100%; height: 260px;"></canvas>
             </div>
             <div class="stat-card">
-              <div class="stat-title">TOP MISSING SKILLS DEMAND</div>
+              <div class="stat-title" style="margin-bottom: 16px;">TOP MISSING SKILLS DEMAND</div>
               <canvas id="chart-skills" style="width: 100%; height: 260px;"></canvas>
             </div>
             <div class="stat-card">
-              <div class="stat-title">CANDIDATE FIT SCORE DISTRIBUTION</div>
+              <div class="stat-title" style="margin-bottom: 16px;">CANDIDATE FIT SCORE DISTRIBUTION</div>
               <canvas id="chart-fit" style="width: 100%; height: 260px;"></canvas>
             </div>
             <div class="stat-card">
-              <div class="stat-title">TOP HIRING EMPLOYERS</div>
+              <div class="stat-title" style="margin-bottom: 16px;">TOP HIRING EMPLOYERS</div>
               <canvas id="chart-companies" style="width: 100%; height: 260px;"></canvas>
             </div>
           </div>
@@ -756,19 +1232,19 @@
           <div class="terminal-card">
             <div class="terminal-toolbar">
               <div style="display: flex; gap: 8px;">
-                <button class="ant-btn ant-btn-sm ant-btn-primary log-filter-btn" onclick="filterLogs('All')">All</button>
-                <button class="ant-btn ant-btn-sm ant-btn-default log-filter-btn" onclick="filterLogs('SUCCESS')">Success</button>
-                <button class="ant-btn ant-btn-sm ant-btn-default log-filter-btn" onclick="filterLogs('INFO')">Info</button>
-                <button class="ant-btn ant-btn-sm ant-btn-default log-filter-btn" onclick="filterLogs('WARNING')">Warning</button>
-                <button class="ant-btn ant-btn-sm ant-btn-default log-filter-btn" onclick="filterLogs('ERROR')">Error</button>
+                <button class="btn-glow log-filter-btn" style="padding: 5px 12px; font-size: 12px;" onclick="filterLogs('All')">All</button>
+                <button class="btn-glass log-filter-btn" style="padding: 5px 12px; font-size: 12px;" onclick="filterLogs('SUCCESS')">Success</button>
+                <button class="btn-glass log-filter-btn" style="padding: 5px 12px; font-size: 12px;" onclick="filterLogs('INFO')">Info</button>
+                <button class="btn-glass log-filter-btn" style="padding: 5px 12px; font-size: 12px;" onclick="filterLogs('WARNING')">Warning</button>
+                <button class="btn-glass log-filter-btn" style="padding: 5px 12px; font-size: 12px;" onclick="filterLogs('ERROR')">Error</button>
               </div>
 
               <div style="display: flex; gap: 10px; align-items: center;">
-                <input type="text" class="ant-input ant-input-sm" style="width: 200px;" id="log-search-box" placeholder="Filter logs..." oninput="renderLogs()">
-                <button class="ant-btn ant-btn-sm ant-btn-default" onclick="toggleLogPause()" id="btn-log-pause">⏸ Pause</button>
-                <button class="ant-btn ant-btn-sm ant-btn-default" onclick="copyLogs()">📋 Copy Logs</button>
-                <button class="ant-btn ant-btn-sm ant-btn-default" onclick="clearLiveLogs()">🗑 Clear</button>
-                <a class="ant-btn ant-btn-sm ant-btn-default" href="/api/logs/export" download>⬇ Export .txt</a>
+                <input type="text" class="btn-glass" style="width: 220px; padding: 6px 12px; font-size: 12px;" id="log-search-box" placeholder="Filter logs..." oninput="renderLogs()">
+                <button class="btn-glass" style="padding: 6px 12px; font-size: 12px;" onclick="toggleLogPause()" id="btn-log-pause">⏸ Pause</button>
+                <button class="btn-glass" style="padding: 6px 12px; font-size: 12px;" onclick="copyLogs()">📋 Copy Logs</button>
+                <button class="btn-glass" style="padding: 6px 12px; font-size: 12px;" onclick="clearLiveLogs()">🗑 Clear</button>
+                <a class="btn-glass" style="padding: 6px 12px; font-size: 12px; text-decoration: none;" href="/api/logs/export" download>⬇ Export .txt</a>
               </div>
             </div>
 
@@ -787,36 +1263,36 @@
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
             <div class="stat-card" style="grid-column: 1 / -1;">
               <h3 style="color: #fff; margin-top: 0; font-size: 16px;">🎯 Dynamic Career Search Profile</h3>
-              <p style="color: rgba(255,255,255,0.45); font-size: 13px; margin-bottom: 16px;">
+              <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 18px;">
                 The search daemon queries LinkedIn, FreeHire, Arbeitnow, Remotive, and RemoteOK dynamically using these exact keywords.
               </p>
 
               <div style="margin-bottom: 14px;">
-                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Target Job Titles (comma-separated)</label>
-                <input type="text" class="ant-input" id="setting-target-roles" placeholder="e.g. AI Automation Engineer, Senior Flutter Developer, Java Backend Engineer">
+                <label style="display: block; font-size: 13px; color: var(--text-main); margin-bottom: 6px;">Target Job Titles (comma-separated)</label>
+                <input type="text" class="btn-glass" style="width: 100%; padding: 10px 14px; color: #fff;" id="setting-target-roles" placeholder="e.g. AI Automation Engineer, Senior Flutter Developer, Java Backend Engineer, UI/UX Designer">
               </div>
 
               <div style="margin-bottom: 14px;">
-                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Core Technical Skills (comma-separated)</label>
-                <input type="text" class="ant-input" id="setting-skills" placeholder="e.g. Python, Flutter, Riverpod, LangGraph, FastAPI, Docker">
+                <label style="display: block; font-size: 13px; color: var(--text-main); margin-bottom: 6px;">Core Technical Skills (comma-separated)</label>
+                <input type="text" class="btn-glass" style="width: 100%; padding: 10px 14px; color: #fff;" id="setting-skills" placeholder="e.g. Python, Flutter, Riverpod, LangGraph, FastAPI, Docker">
               </div>
 
               <div>
-                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Preferred Locations / Work Mode (comma-separated)</label>
-                <input type="text" class="ant-input" id="setting-locations" placeholder="e.g. Remote, Worldwide, United States, Europe, India">
+                <label style="display: block; font-size: 13px; color: var(--text-main); margin-bottom: 6px;">Preferred Locations / Work Mode (comma-separated)</label>
+                <input type="text" class="btn-glass" style="width: 100%; padding: 10px 14px; color: #fff;" id="setting-locations" placeholder="e.g. Remote, Worldwide, United States, Europe, India">
               </div>
             </div>
 
             <div class="stat-card">
               <h3 style="color: #fff; margin-top: 0; font-size: 15px;">Current Employer Exclusion</h3>
               <div style="margin-bottom: 8px;">
-                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Company to Exclude</label>
-                <input type="text" class="ant-input" id="setting-company" placeholder="e.g. Floor Boss">
+                <label style="display: block; font-size: 13px; color: var(--text-main); margin-bottom: 6px;">Company to Exclude</label>
+                <input type="text" class="btn-glass" style="width: 100%; padding: 10px 14px; color: #fff;" id="setting-company" placeholder="e.g. Floor Boss">
               </div>
-              <div style="font-size: 12px; color: rgba(255,255,255,0.45);">
+              <div style="font-size: 12px; color: var(--text-dim);">
                 This company will be strictly filtered out of all job searches and cold outreach attempts.
               </div>
             </div>
@@ -824,41 +1300,41 @@
             <div class="stat-card">
               <h3 style="color: #fff; margin-top: 0; font-size: 15px;">Telegram Remote Control Bot</h3>
               <div style="margin-bottom: 10px;">
-                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Telegram Bot Token</label>
-                <input type="password" class="ant-input" id="setting-tg-token">
+                <label style="display: block; font-size: 13px; color: var(--text-main); margin-bottom: 6px;">Telegram Bot Token</label>
+                <input type="password" class="btn-glass" style="width: 100%; padding: 10px 14px; color: #fff;" id="setting-tg-token">
               </div>
               <div>
-                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Allowed User ID</label>
-                <input type="text" class="ant-input" id="setting-tg-id">
+                <label style="display: block; font-size: 13px; color: var(--text-main); margin-bottom: 6px;">Allowed User ID</label>
+                <input type="text" class="btn-glass" style="width: 100%; padding: 10px 14px; color: #fff;" id="setting-tg-id">
               </div>
             </div>
 
             <div class="stat-card">
               <h3 style="color: #fff; margin-top: 0; font-size: 15px;">Google Sheets Webhook Sync</h3>
               <div>
-                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Apps Script Webhook URL</label>
-                <input type="text" class="ant-input" id="setting-sheets">
+                <label style="display: block; font-size: 13px; color: var(--text-main); margin-bottom: 6px;">Apps Script Webhook URL</label>
+                <input type="text" class="btn-glass" style="width: 100%; padding: 10px 14px; color: #fff;" id="setting-sheets">
               </div>
             </div>
 
             <div class="stat-card">
               <h3 style="color: #fff; margin-top: 0; font-size: 15px;">Browser Automation & GitHub</h3>
               <div style="margin-bottom: 10px;">
-                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Browser Profile Directory</label>
-                <input type="text" class="ant-input" id="setting-browser-dir">
+                <label style="display: block; font-size: 13px; color: var(--text-main); margin-bottom: 6px;">Browser Profile Directory</label>
+                <input type="text" class="btn-glass" style="width: 100%; padding: 10px 14px; color: #fff;" id="setting-browser-dir">
               </div>
               <div>
-                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">GitHub Username</label>
-                <input type="text" class="ant-input" id="setting-github">
+                <label style="display: block; font-size: 13px; color: var(--text-main); margin-bottom: 6px;">GitHub Username</label>
+                <input type="text" class="btn-glass" style="width: 100%; padding: 10px 14px; color: #fff;" id="setting-github">
               </div>
             </div>
           </div>
 
           <div style="margin-top: 24px; display: flex; gap: 12px;">
-            <button class="ant-btn ant-btn-primary" onclick="saveSettings()">
+            <button class="btn-glow" style="padding: 10px 22px; font-size: 14px;" onclick="saveSettings()">
               💾 Save All Configuration
             </button>
-            <button class="ant-btn ant-btn-default" onclick="loadSettings()">
+            <button class="btn-glass" style="padding: 10px 20px; font-size: 14px;" onclick="loadSettings()">
               ↺ Reset Fields
             </button>
           </div>
@@ -868,15 +1344,15 @@
     </div>
   </div>
 
-  <!-- Ant Design Slide-Over Drawer -->
+  <!-- Slide-Over Inspector Drawer -->
   <div class="ant-drawer-mask" id="drawer-mask" onclick="closeDrawer()"></div>
   <div class="ant-drawer-content-wrapper" id="drawer-wrapper">
     <div class="ant-drawer-header">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 18px;">📄</span>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 20px;">📄</span>
         <h4 class="ant-drawer-title" id="drawer-company-title">Opportunity Details</h4>
       </div>
-      <button class="ant-btn ant-btn-text ant-btn-sm" onclick="closeDrawer()" style="color: rgba(255,255,255,0.45); font-size: 16px;">✕</button>
+      <button class="btn-glass" onclick="closeDrawer()" style="padding: 4px 10px; font-size: 14px;">✕</button>
     </div>
 
     <div class="ant-drawer-body" id="drawer-body-content">
@@ -884,28 +1360,28 @@
     </div>
 
     <div class="ant-drawer-footer" id="drawer-footer-actions">
-      <button class="ant-btn ant-btn-default" onclick="closeDrawer()">Close</button>
-      <button class="ant-btn ant-btn-primary" id="drawer-btn-apply">Auto-Fill Application</button>
+      <button class="btn-glass" style="padding: 8px 18px;" onclick="closeDrawer()">Close</button>
+      <button class="btn-glow" style="padding: 8px 20px;" id="drawer-btn-apply">Auto-Fill Application</button>
     </div>
   </div>
 
-  <!-- Ant Design System Diagnostics Modal -->
+  <!-- System Diagnostics Modal -->
   <div class="ant-drawer-mask" id="diag-mask" onclick="closeDiagnosticsModal()"></div>
-  <div class="ant-drawer-content-wrapper" id="diag-wrapper" style="width: 520px; right: -520px;">
+  <div class="ant-drawer-content-wrapper" id="diag-wrapper" style="width: 540px; right: -540px;">
     <div class="ant-drawer-header">
       <h4 class="ant-drawer-title">⚡ Host System & Worker Diagnostics</h4>
-      <button class="ant-btn ant-btn-text ant-btn-sm" onclick="closeDiagnosticsModal()" style="color: rgba(255,255,255,0.45); font-size: 16px;">✕</button>
+      <button class="btn-glass" onclick="closeDiagnosticsModal()" style="padding: 4px 10px; font-size: 14px;">✕</button>
     </div>
     <div class="ant-drawer-body" id="diag-body-content">
       <!-- Diagnostics rendered here -->
     </div>
     <div class="ant-drawer-footer">
-      <button class="ant-btn ant-btn-default" onclick="closeDiagnosticsModal()">Dismiss</button>
+      <button class="btn-glass" style="padding: 8px 18px;" onclick="closeDiagnosticsModal()">Dismiss</button>
     </div>
   </div>
 
   <!-- Toast Notification Container -->
-  <div class="ant-message-notice" id="toast-shelf"></div>
+  <div class="toast-shelf" id="toast-shelf"></div>
 
   <script>
     // State
@@ -913,18 +1389,65 @@
       currentPage: 'dashboard',
       services: [],
       logs: [],
-      theme: localStorage.getItem('antd_theme') || 'dark',
+      theme: localStorage.getItem('app_theme') || 'dark',
       logsPaused: false,
       logFilter: 'All',
       selectedJobIdx: null,
       jobs: [],
       jobsSort: { by: 'company', order: 'asc' },
       stageFilter: '',
-      ws: null
+      ws: null,
+      stats: { total_jobs: 0, staged: 0, applied: 0, avg_fit_score: 0 }
+    };
+
+    // Service Theme Registry for vibrant distinct color combinations
+    const SERVICE_THEMES = {
+      'job_daemon': {
+        class: 'svc-job-daemon',
+        c1: '#10b981', c2: '#06b6d4',
+        glow: 'rgba(16, 185, 129, 0.3)',
+        iconBg: 'rgba(16, 185, 129, 0.15)',
+        iconBorder: 'rgba(16, 185, 129, 0.4)'
+      },
+      'browser_autoapply': {
+        class: 'svc-browser-autoapply',
+        c1: '#f97316', c2: '#fbbf24',
+        glow: 'rgba(249, 115, 22, 0.3)',
+        iconBg: 'rgba(249, 115, 22, 0.15)',
+        iconBorder: 'rgba(249, 115, 22, 0.4)'
+      },
+      'telegram_bot': {
+        class: 'svc-telegram-bot',
+        c1: '#3b82f6', c2: '#6366f1',
+        glow: 'rgba(59, 130, 246, 0.3)',
+        iconBg: 'rgba(59, 130, 246, 0.15)',
+        iconBorder: 'rgba(59, 130, 246, 0.4)'
+      },
+      'project_scaffolder': {
+        class: 'svc-project-scaffolder',
+        c1: '#06b6d4', c2: '#38bdf8',
+        glow: 'rgba(6, 182, 212, 0.3)',
+        iconBg: 'rgba(6, 182, 212, 0.15)',
+        iconBorder: 'rgba(6, 182, 212, 0.4)'
+      },
+      'recruiter_outreach': {
+        class: 'svc-recruiter-outreach',
+        c1: '#ec4899', c2: '#f43f5e',
+        glow: 'rgba(236, 72, 153, 0.3)',
+        iconBg: 'rgba(236, 72, 153, 0.15)',
+        iconBorder: 'rgba(236, 72, 153, 0.4)'
+      },
+      'sheets_sync': {
+        class: 'svc-sheets-sync',
+        c1: '#8b5cf6', c2: '#c084fc',
+        glow: 'rgba(139, 92, 246, 0.3)',
+        iconBg: 'rgba(139, 92, 246, 0.15)',
+        iconBorder: 'rgba(139, 92, 246, 0.4)'
+      }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
-      applyAntTheme();
+      applyTheme();
       connectWebSocket();
       fetchServices();
       loadStats();
@@ -933,31 +1456,42 @@
     });
 
     // Theme Toggle
-    function toggleAntTheme() {
+    function toggleTheme() {
       state.theme = state.theme === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('antd_theme', state.theme);
-      applyAntTheme();
+      localStorage.setItem('app_theme', state.theme);
+      applyTheme();
     }
 
-    function applyAntTheme() {
-      const link = document.getElementById('antd-theme-link');
+    function applyTheme() {
       const btn = document.getElementById('theme-btn');
       if (state.theme === 'light') {
-        link.href = '/static/antd.min.css';
+        document.body.classList.add('light-theme');
         btn.textContent = '🌙 Dark Theme';
-        document.querySelector('.app-main').style.background = '#f5f5f5';
-        document.querySelector('.app-header').style.background = '#ffffff';
-        document.querySelector('.app-header').style.borderColor = '#e8e8e8';
-        document.getElementById('breadcrumb-title').style.color = '#000000';
       } else {
-        link.href = '/static/antd.dark.min.css';
+        document.body.classList.remove('light-theme');
         btn.textContent = '☀️ Light Theme';
-        document.querySelector('.app-main').style.background = '#141414';
-        document.querySelector('.app-header').style.background = '#1f1f1f';
-        document.querySelector('.app-header').style.borderColor = 'rgba(255,255,255,0.08)';
-        document.getElementById('breadcrumb-title').style.color = '#ffffff';
       }
       if (state.currentPage === 'analytics') renderCharts();
+    }
+
+    // Number Counting Animation
+    function animateValue(id, start, end, duration = 800, suffix = '') {
+      const obj = document.getElementById(id);
+      if (!obj) return;
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const easeOutQuad = 1 - (1 - progress) * (1 - progress);
+        const val = Math.floor(easeOutQuad * (end - start) + start);
+        obj.textContent = val + suffix;
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        } else {
+          obj.textContent = end + suffix;
+        }
+      };
+      window.requestAnimationFrame(step);
     }
 
     // Navigation
@@ -1008,7 +1542,7 @@
 
         state.ws.onopen = () => {
           backoff = 1000;
-          document.getElementById('conn-dot').className = 'ant-badge-status-dot ant-badge-status-processing';
+          document.getElementById('conn-dot').className = 'conn-pulse-dot';
           document.getElementById('conn-text').textContent = 'System Active (Port 8420)';
         };
 
@@ -1039,7 +1573,7 @@
         };
 
         state.ws.onclose = () => {
-          document.getElementById('conn-dot').className = 'ant-badge-status-dot ant-badge-status-error';
+          document.getElementById('conn-dot').className = 'conn-pulse-dot';
           document.getElementById('conn-text').textContent = 'Disconnected (Reconnecting...)';
           setTimeout(connect, backoff);
           backoff = Math.min(backoff * 2, 15000);
@@ -1066,15 +1600,19 @@
         const isRunning = svc.status === 'running';
         if (isRunning) runningCount++;
 
+        const theme = SERVICE_THEMES[svc.id] || {
+          class: '', c1: '#3b82f6', c2: '#6366f1', glow: 'rgba(59, 130, 246, 0.3)'
+        };
+
         const card = document.createElement('div');
-        card.className = 'service-card';
+        card.className = `service-card ${theme.class}`;
 
         const statusTag = isRunning
-          ? '<span class="ant-tag ant-tag-green"><span class="ant-badge-status-dot ant-badge-status-processing"></span> RUNNING</span>'
-          : '<span class="ant-tag ant-tag-default">IDLE</span>';
+          ? `<div class="pulse-indicator running"><span class="dot"></span> RUNNING</div>`
+          : `<div class="pulse-indicator idle">IDLE</div>`;
 
-        const pidBadge = svc.pid ? '<span class="ant-tag ant-tag-blue">PID: ' + svc.pid + '</span>' : '';
-        const memBadge = isRunning && svc.memory_mb ? '<span class="ant-tag ant-tag-cyan">' + svc.memory_mb + ' MB</span>' : '';
+        const pidBadge = svc.pid ? `<span class="stat-badge" style="background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3);">PID: ${svc.pid}</span>` : '';
+        const memBadge = isRunning && svc.memory_mb ? `<span class="stat-badge" style="background: rgba(6, 182, 212, 0.15); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.3);">${svc.memory_mb} MB</span>` : '';
 
         card.innerHTML = `
           <div class="service-card-head">
@@ -1082,8 +1620,8 @@
               <div class="service-card-icon">${svc.icon}</div>
               <span>${svc.name}</span>
             </div>
-            <button type="button" role="switch" class="ant-switch ${isRunning ? 'ant-switch-checked' : ''}" onclick="toggleService('${svc.id}')" id="switch-${svc.id}">
-              <div class="ant-switch-handle"></div>
+            <button type="button" class="spring-switch ${isRunning ? 'active' : ''}" onclick="toggleService('${svc.id}')" id="switch-${svc.id}">
+              <div class="spring-switch-handle"></div>
             </button>
           </div>
 
@@ -1097,11 +1635,11 @@
           </div>
 
           <div class="service-card-actions">
-            <span style="font-size: 12px; color: rgba(255,255,255,0.45); font-family: monospace;">
+            <span style="font-size: 12px; color: var(--text-dim); font-family: monospace;">
               ${isRunning ? '⏱️ ' + formatUptime(svc.uptime_seconds) : '💤 Standby'}
             </span>
             <div style="display: flex; gap: 8px;">
-              <button class="ant-btn ant-btn-sm ant-btn-default" onclick="triggerServiceOnce('${svc.id}')">
+              <button class="btn-glass" style="padding: 5px 12px; font-size: 12px;" onclick="triggerServiceOnce('${svc.id}')">
                 ⚡ Trigger Once
               </button>
             </div>
@@ -1117,11 +1655,11 @@
       const svc = state.services.find(s => s.id === id);
       if (!svc) return;
       const willStart = svc.status !== 'running';
-      showAntToast((willStart ? 'Starting ' : 'Stopping ') + svc.name + '...', 'info');
+      showToast((willStart ? 'Starting ' : 'Stopping ') + svc.name + '...', 'info');
 
       const res = await apiCall('/api/services/' + id + '/' + (willStart ? 'start' : 'stop'), 'POST');
       if (res && res.status) {
-        showAntToast(svc.name + ' is now ' + res.status, res.status === 'running' ? 'success' : 'info');
+        showToast(svc.name + ' is now ' + res.status, res.status === 'running' ? 'success' : 'info');
         fetchServices();
       }
     }
@@ -1131,15 +1669,15 @@
       else if (id === 'project_scaffolder') await runAction('scaffold');
       else if (id === 'sheets_sync') await runAction('sync-sheets');
       else {
-        showAntToast('Dispatching single pass for ' + id + '...', 'info');
+        showToast('Dispatching single pass for ' + id + '...', 'info');
         await apiCall('/api/services/' + id + '/start', 'POST');
       }
     }
 
     async function runAction(act) {
-      showAntToast('Executing ' + act + '...', 'info');
+      showToast('Executing ' + act + '...', 'info');
       const res = await apiCall('/api/actions/' + act, 'POST');
-      if (res) showAntToast('Action ' + act + ' dispatched successfully!', 'success');
+      if (res) showToast('Action ' + act + ' dispatched successfully!', 'success');
     }
 
     function updateUptimes() {
@@ -1162,11 +1700,15 @@
     async function loadStats() {
       const data = await apiCall('/api/stats');
       if (!data) return;
-      document.getElementById('stat-total-jobs').textContent = data.total_jobs || 0;
-      document.getElementById('stat-staged').textContent = data.staged || 0;
-      document.getElementById('stat-applied').textContent = data.applied || 0;
-      document.getElementById('stat-avg-fit').textContent = (data.avg_fit_score || 0) + '%';
+      
+      const prev = state.stats;
+      animateValue('stat-total-jobs', prev.total_jobs, data.total_jobs || 0);
+      animateValue('stat-staged', prev.staged, data.staged || 0);
+      animateValue('stat-applied', prev.applied, data.applied || 0);
+      animateValue('stat-avg-fit', prev.avg_fit_score, data.avg_fit_score || 0, 800, '%');
+      
       document.getElementById('sider-badge-jobs').textContent = data.total_jobs || 0;
+      state.stats = data;
     }
 
     // Pipeline & Job Tracker
@@ -1185,8 +1727,8 @@
       state.stageFilter = stage.toLowerCase();
       document.querySelectorAll('.stage-btn').forEach(b => {
         b.className = b.textContent.toLowerCase() === (stage || 'all')
-          ? 'ant-btn ant-btn-sm ant-btn-primary stage-btn'
-          : 'ant-btn ant-btn-sm ant-btn-default stage-btn';
+          ? 'btn-glow stage-btn'
+          : 'btn-glass stage-btn';
       });
       renderJobs();
     }
@@ -1205,21 +1747,28 @@
         if (state.selectedJobIdx === job.idx) tr.classList.add('selected-row');
 
         const score = parseInt(job.fitScore) || 75;
-        let scoreTag = 'ant-tag-orange';
-        if (score >= 90) scoreTag = 'ant-tag-green';
-        else if (score < 75) scoreTag = 'ant-tag-red';
+        let scoreClass = 'mid';
+        if (score >= 90) scoreClass = 'high';
+        else if (score < 75) scoreClass = 'low';
+
+        const initial = (job.company || 'C').charAt(0).toUpperCase();
 
         tr.onclick = () => openDrawer(job.idx);
 
         tr.innerHTML = `
-          <td><strong>${escapeHtml(job.company)}</strong></td>
+          <td>
+            <div class="company-cell">
+              <div class="company-avatar">${initial}</div>
+              <strong>${escapeHtml(job.company)}</strong>
+            </div>
+          </td>
           <td>
             <div style="font-weight: 600; color: #fff;">${escapeHtml(job.title)}</div>
-            <div style="font-size: 11px; color: rgba(255,255,255,0.45);">${job.timestamp ? job.timestamp.split('T')[0] : 'Recently'}</div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">${job.timestamp ? job.timestamp.split('T')[0] : 'Recently'}</div>
           </td>
-          <td><span class="ant-tag ${scoreTag}">${score}%</span></td>
+          <td><span class="fit-badge ${scoreClass}">${score}%</span></td>
           <td>
-            <select class="ant-input ant-input-sm" style="width: 140px; cursor: pointer;" onclick="event.stopPropagation()" onchange="updateJobStatus(${job.idx}, this.value)">
+            <select class="btn-glass" style="width: 140px; cursor: pointer; padding: 6px 10px; font-size: 12.5px; border-radius: 6px;" onclick="event.stopPropagation()" onchange="updateJobStatus(${job.idx}, this.value)">
               <option value="Staged - Ready to Submit" ${job.status.includes('Staged') ? 'selected' : ''}>Staged</option>
               <option value="Applied" ${job.status.includes('Applied') ? 'selected' : ''}>Applied</option>
               <option value="Interview" ${job.status.includes('Interview') ? 'selected' : ''}>Interview</option>
@@ -1228,15 +1777,15 @@
             </select>
           </td>
           <td>
-            <span class="ant-tag ant-tag-purple" style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; display: inline-block;">
+            <span class="skill-tag">
               ${escapeHtml(job.missingSkill || 'Fully Matched')}
             </span>
           </td>
-          <td><span style="font-size: 12px; color: rgba(255,255,255,0.55);">${escapeHtml(job.location || 'Remote')}</span></td>
+          <td><span style="font-size: 12.5px; color: var(--text-muted);">${escapeHtml(job.location || 'Remote')}</span></td>
           <td>
             <div style="display: flex; gap: 8px;" onclick="event.stopPropagation()">
-              <button class="ant-btn ant-btn-sm ant-btn-default" onclick="openDrawer(${job.idx})">Inspect</button>
-              ${job.url ? '<a href="' + job.url + '" target="_blank" class="ant-btn ant-btn-sm ant-btn-primary">Link ↗</a>' : ''}
+              <button class="btn-glass" style="padding: 5px 12px; font-size: 12px;" onclick="openDrawer(${job.idx})">Inspect</button>
+              ${job.url ? '<a href="' + job.url + '" target="_blank" class="btn-glow" style="padding: 5px 12px; font-size: 12px; text-decoration: none; display: inline-block;">Link ↗</a>' : ''}
             </div>
           </td>
         `;
@@ -1257,7 +1806,7 @@
     async function updateJobStatus(idx, newStatus) {
       const res = await apiCall('/api/jobs/' + idx + '/status', 'POST', { status: newStatus });
       if (res && res.status === 'success') {
-        showAntToast('Status updated to ' + newStatus, 'success');
+        showToast('Status updated to ' + newStatus, 'success');
         loadStats();
       }
     }
@@ -1271,11 +1820,11 @@
       document.getElementById('drawer-wrapper').classList.add('open');
 
       const body = document.getElementById('drawer-body-content');
-      body.innerHTML = '<div style="color: rgba(255,255,255,0.45); padding: 20px;">Loading role specifications...</div>';
+      body.innerHTML = '<div style="color: var(--text-muted); padding: 20px;">Loading role specifications...</div>';
 
       const data = await apiCall('/api/jobs/' + idx);
       if (!data || !data.job) {
-        body.innerHTML = '<div style="color: #ff4d4f;">Could not load job details.</div>';
+        body.innerHTML = '<div style="color: #f87171;">Could not load job details.</div>';
         return;
       }
 
@@ -1285,25 +1834,25 @@
       let outreachHtml = '';
       if (data.has_outreach && data.outreach_content) {
         outreachHtml = `
-          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <span style="font-weight: 600; font-size: 13px; color: #fff;">TAILORED OUTREACH PACKAGE</span>
-              <button class="ant-btn ant-btn-sm ant-btn-default" onclick="generateOutreach(${idx})">🔄 Regenerate</button>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 18px; margin-bottom: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span style="font-weight: 700; font-size: 13px; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.5px;">TAILORED OUTREACH PACKAGE</span>
+              <button class="btn-glass" style="padding: 4px 10px; font-size: 11px;" onclick="generateOutreach(${idx})">🔄 Regenerate</button>
             </div>
-            <pre style="background: #0d0d0d; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 12px; font-size: 12px; color: #d4d4d4; white-space: pre-wrap; word-break: break-word; max-height: 180px; overflow-y: auto;" id="drawer-outreach-text">${escapeHtml(data.outreach_content)}</pre>
-            <div style="margin-top: 10px;">
-              <button class="ant-btn ant-btn-sm ant-btn-primary" onclick="copyDrawerOutreach()">📋 Copy Pitch to Clipboard</button>
+            <pre style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px; font-size: 12px; color: #cbd5e1; white-space: pre-wrap; word-break: break-word; max-height: 180px; overflow-y: auto;" id="drawer-outreach-text">${escapeHtml(data.outreach_content)}</pre>
+            <div style="margin-top: 12px;">
+              <button class="btn-glow" style="padding: 8px 16px; font-size: 12.5px;" id="btn-copy-pitch" onclick="copyDrawerOutreach()">📋 Copy Pitch to Clipboard</button>
             </div>
           </div>
         `;
       } else {
         outreachHtml = `
-          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-            <div style="font-weight: 600; font-size: 13px; color: #fff; margin-bottom: 6px;">RECRUITER OUTREACH PITCH</div>
-            <p style="font-size: 12px; color: rgba(255,255,255,0.55); margin-bottom: 12px;">
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 18px; margin-bottom: 18px;">
+            <div style="font-weight: 700; font-size: 13px; color: #93c5fd; margin-bottom: 6px; text-transform: uppercase;">RECRUITER OUTREACH PITCH</div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 14px;">
               Auto-draft a 4-sentence cold email and informal LinkedIn connection request (≤300 chars) tailored to this specific role.
             </p>
-            <button class="ant-btn ant-btn-primary ant-btn-sm" onclick="generateOutreach(${idx})">
+            <button class="btn-glow" style="padding: 8px 18px; font-size: 12.5px;" onclick="generateOutreach(${idx})">
               ⚡ Generate Tailored Pitch
             </button>
           </div>
@@ -1311,30 +1860,30 @@
       }
 
       body.innerHTML = `
-        <div style="margin-bottom: 18px;">
-          <h2 style="font-size: 18px; font-weight: 700; color: #fff; margin: 0 0 6px 0;">${escapeHtml(job.title)}</h2>
-          <div style="font-size: 13px; color: rgba(255,255,255,0.55);">
-            🏢 <strong>${escapeHtml(job.company)}</strong> • 📍 ${escapeHtml(job.location || 'Remote')} • ⏱️ ${job.timestamp || 'Discovered'}
+        <div style="margin-bottom: 20px;">
+          <h2 style="font-size: 20px; font-weight: 700; color: #fff; margin: 0 0 6px 0;">${escapeHtml(job.title)}</h2>
+          <div style="font-size: 13.5px; color: var(--text-muted);">
+            🏢 <strong style="color: #fff;">${escapeHtml(job.company)}</strong> • 📍 ${escapeHtml(job.location || 'Remote')} • ⏱️ ${job.timestamp || 'Discovered'}
           </div>
         </div>
 
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-          <div style="font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.45); margin-bottom: 8px;">CANDIDATE FIT & DEMO POC</div>
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <span>ATS Match Score:</span>
-            <span class="ant-tag ${parseInt(job.fitScore)>=90?'ant-tag-green':'ant-tag-orange'}" style="font-size: 14px; font-weight: 700;">${job.fitScore}%</span>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 18px; margin-bottom: 18px;">
+          <div style="font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">CANDIDATE FIT & DEMO POC</div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span style="font-size: 13.5px; color: var(--text-muted);">ATS Compatibility Score:</span>
+            <span class="fit-badge ${parseInt(job.fitScore)>=90?'high':'mid'}" style="font-size: 14px;">${job.fitScore}%</span>
           </div>
           <div style="font-size: 13px; line-height: 1.6;">
-            <strong>Identified Skill Gap:</strong> <span style="color: #ff7875;">${escapeHtml(job.missingSkill || 'None')}</span><br>
-            <strong>Recommended POC Project:</strong> <span style="color: #69c0ff;">${escapeHtml(job.suggestedProject || 'Production Deployment Checklist')}</span>
+            <strong>Identified Skill Gap:</strong> <span style="color: #f87171;">${escapeHtml(job.missingSkill || 'None')}</span><br>
+            <strong>Recommended POC Project:</strong> <span style="color: #38bdf8;">${escapeHtml(job.suggestedProject || 'Production Deployment Checklist')}</span>
           </div>
         </div>
 
         ${outreachHtml}
 
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px;">
-          <div style="font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.45); margin-bottom: 8px;">EXTERNAL LISTING</div>
-          ${job.url ? '<a href="' + job.url + '" target="_blank" class="ant-btn ant-btn-default" style="width: 100%; text-align: center; margin-bottom: 8px;">🌐 Open Original Job Posting</a>' : ''}
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 18px;">
+          <div style="font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">EXTERNAL LISTING</div>
+          ${job.url ? '<a href="' + job.url + '" target="_blank" class="btn-glass" style="display: block; width: 100%; text-align: center; padding: 10px; text-decoration: none;">🌐 Open Original Job Posting</a>' : '<span style="color: var(--text-dim); font-size: 13px;">No external URL stored for this entry.</span>'}
         </div>
       `;
 
@@ -1349,10 +1898,10 @@
     }
 
     async function generateOutreach(idx) {
-      showAntToast('Drafting tailored recruiter pitch...', 'info');
+      showToast('Drafting tailored recruiter pitch...', 'info');
       const res = await apiCall('/api/jobs/' + idx + '/outreach', 'POST');
       if (res && res.draft) {
-        showAntToast('Pitch generated and saved!', 'success');
+        showToast('Pitch generated and saved!', 'success');
         openDrawer(idx);
       }
     }
@@ -1360,12 +1909,22 @@
     function copyDrawerOutreach() {
       const txt = document.getElementById('drawer-outreach-text').textContent;
       navigator.clipboard.writeText(txt);
-      showAntToast('Pitch copied to clipboard!', 'success');
+      const btn = document.getElementById('btn-copy-pitch');
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copied to Clipboard!';
+        btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.style.background = '';
+        }, 2000);
+      }
+      showToast('Pitch copied to clipboard!', 'success');
     }
 
     async function runAutofillForJob(url) {
-      if (!url) { showAntToast('No URL provided for this job', 'error'); return; }
-      showAntToast('Starting anti-detect browser autofill...', 'info');
+      if (!url) { showToast('No URL provided for this job', 'error'); return; }
+      showToast('Starting anti-detect browser autofill...', 'info');
       await apiCall('/api/services/browser_autoapply/start', 'POST');
       navigate('logs');
     }
@@ -1395,6 +1954,17 @@
         return true;
       });
 
+      if (filtered.length === 0) {
+        viewer.innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-dim); text-align: center; padding: 40px 20px;">
+            <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.25); display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 14px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);">📡</div>
+            <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px;">Live Process Supervisor Ready</div>
+            <div style="font-size: 12.5px; color: var(--text-muted); max-width: 360px;">Trigger any worker service or run a discovery scan to observe real-time stdout/stderr traces and process exit diagnostics.</div>
+          </div>
+        `;
+        return;
+      }
+
       filtered.forEach(log => {
         const row = document.createElement('div');
         row.className = 'terminal-line ' + (log.level || 'info').toLowerCase();
@@ -1415,8 +1985,8 @@
       state.logFilter = lvl;
       document.querySelectorAll('.log-filter-btn').forEach(b => {
         b.className = b.textContent.toUpperCase() === lvl.toUpperCase()
-          ? 'ant-btn ant-btn-sm ant-btn-primary log-filter-btn'
-          : 'ant-btn ant-btn-sm ant-btn-default log-filter-btn';
+          ? 'btn-glow log-filter-btn'
+          : 'btn-glass log-filter-btn';
       });
       renderLogs();
     }
@@ -1429,17 +1999,17 @@
     function copyLogs() {
       const text = state.logs.map(l => '[' + l.timestamp + '] [' + l.level + '] [' + l.service_name + '] ' + l.message).join(String.fromCharCode(10));
       navigator.clipboard.writeText(text);
-      showAntToast('Logs copied to clipboard!', 'success');
+      showToast('Logs copied to clipboard!', 'success');
     }
 
     async function clearLiveLogs() {
       await apiCall('/api/logs', 'DELETE');
       state.logs = [];
       renderLogs();
-      showAntToast('Logs cleared', 'info');
+      showToast('Logs cleared', 'info');
     }
 
-    // Analytics (Canvas 2D)
+    // Analytics (Canvas 2D with Vibrant Gradients)
     async function fetchAnalytics() {
       const data = await apiCall('/api/analytics') || {
         funnel: { discovered: 42, staged: 12, applied: 5, interview: 2, offer: 0 },
@@ -1455,12 +2025,12 @@
       if (!window._analyticsData || state.currentPage !== 'analytics') return;
       const data = window._analyticsData;
       const isDark = state.theme === 'dark';
-      const textColor = isDark ? 'rgba(255,255,255,0.65)' : '#475569';
+      const textColor = isDark ? '#94a3b8' : '#475569';
 
       function setupCanvas(id) {
         const c = document.getElementById(id);
         if (!c) return null;
-        c.width = c.parentElement.clientWidth - 40;
+        c.width = c.parentElement.clientWidth - 44;
         c.height = 240;
         return { c, ctx: c.getContext('2d') };
       }
@@ -1470,18 +2040,28 @@
       if (funnel) {
         const items = Object.entries(data.funnel).map(([label, val]) => ({ label, val }));
         const max = Math.max(...items.map(i => i.val)) || 1;
-        const barH = 26;
+        const barH = 24;
         items.forEach((item, i) => {
-          const y = 20 + i * (barH + 12);
-          const w = Math.max(10, (item.val / max) * (funnel.c.width - 150));
-          funnel.ctx.fillStyle = '#1677ff';
-          funnel.ctx.fillRect(100, y, w, barH);
+          const y = 20 + i * (barH + 14);
+          const w = Math.max(12, (item.val / max) * (funnel.c.width - 150));
+          
+          const grad = funnel.ctx.createLinearGradient(110, y, 110 + w, y);
+          grad.addColorStop(0, '#3b82f6');
+          grad.addColorStop(1, '#6366f1');
+          
+          funnel.ctx.fillStyle = grad;
+          funnel.ctx.beginPath();
+          funnel.ctx.roundRect(110, y, w, barH, 6);
+          funnel.ctx.fill();
+
           funnel.ctx.fillStyle = textColor;
-          funnel.ctx.font = '12px system-ui';
+          funnel.ctx.font = '600 12px system-ui';
           funnel.ctx.textAlign = 'right';
-          funnel.ctx.fillText(item.label, 90, y + 17);
+          funnel.ctx.fillText(item.label.toUpperCase(), 96, y + 16);
+          
           funnel.ctx.textAlign = 'left';
-          funnel.ctx.fillText(item.val, 100 + w + 10, y + 17);
+          funnel.ctx.fillStyle = '#fff';
+          funnel.ctx.fillText(item.val, 110 + w + 12, y + 16);
         });
       }
 
@@ -1491,100 +2071,91 @@
         const max = Math.max(...data.skill_gaps.map(s => s.count)) || 1;
         const barH = 18;
         data.skill_gaps.slice(0, 6).forEach((s, i) => {
-          const y = 16 + i * (barH + 12);
-          const w = Math.max(10, (s.count / max) * (skills.c.width - 160));
-          skills.ctx.fillStyle = '#fa8c16';
-          skills.ctx.fillRect(110, y, w, barH);
+          const y = 16 + i * (barH + 14);
+          const w = Math.max(12, (s.count / max) * (skills.c.width - 250));
+          
+          const grad = skills.ctx.createLinearGradient(190, y, 190 + w, y);
+          grad.addColorStop(0, '#f97316');
+          grad.addColorStop(1, '#fbbf24');
+          
+          skills.ctx.fillStyle = grad;
+          skills.ctx.beginPath();
+          skills.ctx.roundRect(190, y, w, barH, 5);
+          skills.ctx.fill();
+
           skills.ctx.fillStyle = textColor;
-          skills.ctx.font = '12px system-ui';
+          skills.ctx.font = '500 12px system-ui';
           skills.ctx.textAlign = 'right';
-          skills.ctx.fillText(s.skill, 100, y + 13);
+          const label = s.skill.length > 22 ? s.skill.slice(0, 20) + '..' : s.skill;
+          skills.ctx.fillText(label, 175, y + 14);
+
           skills.ctx.textAlign = 'left';
-          skills.ctx.fillText(s.count, 110 + w + 8, y + 13);
+          skills.ctx.fillStyle = '#fff';
+          skills.ctx.fillText(s.count, 190 + w + 10, y + 14);
         });
       }
 
       // Fit Distribution
       const fit = setupCanvas('chart-fit');
       if (fit) {
-        const keys = Object.keys(data.fit_distribution);
-        const vals = Object.values(data.fit_distribution);
-        const max = Math.max(...vals) || 1;
-        const barW = (fit.c.width - 60) / keys.length - 20;
+        const entries = Object.entries(data.fit_distribution || {});
+        const max = Math.max(...entries.map(e => e[1])) || 1;
+        const barW = 44;
+        const gap = (fit.c.width - (entries.length * barW)) / (entries.length + 1);
+        entries.forEach(([bin, count], i) => {
+          const x = gap + i * (barW + gap);
+          const h = Math.max(10, (count / max) * 150);
+          const y = 190 - h;
 
-        keys.forEach((k, i) => {
-          const h = (vals[i] / max) * 160;
-          const x = 30 + i * (barW + 20);
-          const y = fit.c.height - 30 - h;
-          fit.ctx.fillStyle = '#52c41a';
-          fit.ctx.fillRect(x, y, barW, h);
+          const grad = fit.ctx.createLinearGradient(x, y + h, x, y);
+          grad.addColorStop(0, '#10b981');
+          grad.addColorStop(1, '#34d399');
+
+          fit.ctx.fillStyle = grad;
+          fit.ctx.beginPath();
+          fit.ctx.roundRect(x, y, barW, h, 6);
+          fit.ctx.fill();
+
           fit.ctx.fillStyle = textColor;
-          fit.ctx.font = '12px system-ui';
+          fit.ctx.font = '500 11px system-ui';
           fit.ctx.textAlign = 'center';
-          fit.ctx.fillText(k, x + barW / 2, fit.c.height - 10);
-          fit.ctx.fillText(vals[i], x + barW / 2, y - 6);
+          fit.ctx.fillText(bin + '%', x + barW / 2, 212);
+          
+          fit.ctx.fillStyle = '#fff';
+          fit.ctx.font = '600 12px system-ui';
+          fit.ctx.fillText(count, x + barW / 2, y - 8);
         });
       }
 
-      // Companies
-      const comps = setupCanvas('chart-companies');
-      if (comps) {
-        const max = Math.max(...data.top_companies.map(c => c.count)) || 1;
+      // Top Companies
+      const comp = setupCanvas('chart-companies');
+      if (comp) {
+        const topComps = (data.top_companies || []).slice(0, 6);
+        const max = Math.max(...topComps.map(c => c.count)) || 1;
         const barH = 18;
-        data.top_companies.slice(0, 6).forEach((c, i) => {
-          const y = 16 + i * (barH + 12);
-          const w = Math.max(10, (c.count / max) * (comps.c.width - 150));
-          comps.ctx.fillStyle = '#13c2c2';
-          comps.ctx.fillRect(110, y, w, barH);
-          comps.ctx.fillStyle = textColor;
-          comps.ctx.font = '12px system-ui';
-          comps.ctx.textAlign = 'right';
-          comps.ctx.fillText(c.company, 100, y + 13);
-          comps.ctx.textAlign = 'left';
-          comps.ctx.fillText(c.count, 110 + w + 8, y + 13);
+        topComps.forEach((c, i) => {
+          const y = 16 + i * (barH + 14);
+          const w = Math.max(12, (c.count / max) * (comp.c.width - 240));
+
+          const grad = comp.ctx.createLinearGradient(180, y, 180 + w, y);
+          grad.addColorStop(0, '#8b5cf6');
+          grad.addColorStop(1, '#c084fc');
+
+          comp.ctx.fillStyle = grad;
+          comp.ctx.beginPath();
+          comp.ctx.roundRect(180, y, w, barH, 5);
+          comp.ctx.fill();
+
+          comp.ctx.fillStyle = textColor;
+          comp.ctx.font = '500 12px system-ui';
+          comp.ctx.textAlign = 'right';
+          const label = c.company.length > 20 ? c.company.slice(0, 18) + '..' : c.company;
+          comp.ctx.fillText(label, 165, y + 14);
+
+          comp.ctx.textAlign = 'left';
+          comp.ctx.fillStyle = '#fff';
+          comp.ctx.fillText(c.count, 180 + w + 10, y + 14);
         });
-      }
-    }
-
-    // Settings
-    async function loadSettings() {
-      const data = await apiCall('/api/settings') || {};
-      document.getElementById('setting-tg-token').value = data.TELEGRAM_BOT_TOKEN || '';
-      document.getElementById('setting-tg-id').value = data.TELEGRAM_ALLOWED_USER_ID || '';
-      document.getElementById('setting-sheets').value = data.GOOGLE_SHEET_WEBHOOK_URL || '';
-      document.getElementById('setting-browser-dir').value = data.BROWSER_PROFILE_DIR || '';
-      document.getElementById('setting-github').value = data.GITHUB_USERNAME || '';
-
-      if (data.candidate_profile) {
-        const cp = data.candidate_profile;
-        document.getElementById('setting-company').value = cp.current_company || '';
-        document.getElementById('setting-target-roles').value = (cp.target_roles || []).join(', ');
-        document.getElementById('setting-skills').value = (cp.skills || []).join(', ');
-        document.getElementById('setting-locations').value = (cp.target_locations || []).join(', ');
-      }
-    }
-
-    async function saveSettings() {
-      const parseList = val => val.split(',').map(s => s.trim()).filter(Boolean);
-      const payload = {
-        env_vars: {
-          TELEGRAM_BOT_TOKEN: document.getElementById('setting-tg-token').value,
-          TELEGRAM_ALLOWED_USER_ID: document.getElementById('setting-tg-id').value,
-          GOOGLE_SHEET_WEBHOOK_URL: document.getElementById('setting-sheets').value,
-          BROWSER_PROFILE_DIR: document.getElementById('setting-browser-dir').value,
-          GITHUB_USERNAME: document.getElementById('setting-github').value
-        },
-        candidate_profile: {
-          current_company: document.getElementById('setting-company').value,
-          target_roles: parseList(document.getElementById('setting-target-roles').value),
-          skills: parseList(document.getElementById('setting-skills').value),
-          target_locations: parseList(document.getElementById('setting-locations').value)
-        }
-      };
-
-      const res = await apiCall('/api/settings', 'POST', payload);
-      if (res && res.status === 'success') {
-        showAntToast('Configuration updated and saved!', 'success');
       }
     }
 
@@ -1593,37 +2164,37 @@
       document.getElementById('diag-mask').classList.add('open');
       document.getElementById('diag-wrapper').classList.add('open');
 
-      const box = document.getElementById('diag-body-content');
-      box.innerHTML = '<div style="color: rgba(255,255,255,0.45);">Fetching live process metrics...</div>';
+      const body = document.getElementById('diag-body-content');
+      body.innerHTML = '<div style="color: var(--text-muted); padding: 20px;">Querying host supervisor metrics...</div>';
 
-      const diag = await apiCall('/api/system/diagnostics');
-      if (!diag) {
-        box.innerHTML = '<div style="color: #ff4d4f;">Failed to read diagnostics.</div>';
+      const data = await apiCall('/api/system/diagnostics');
+      if (!data) {
+        body.innerHTML = '<div style="color: #f87171;">Failed to fetch system diagnostics.</div>';
         return;
       }
 
-      box.innerHTML = `
-        <div style="margin-bottom: 20px;">
-          <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.45); margin-bottom: 8px;">HOST RUNTIME</div>
-          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 14px; font-size: 13px; line-height: 1.7;">
-            Python: <strong>${diag.system.python_version}</strong><br>
-            System Uptime: <strong>${formatUptime(diag.system.uptime_seconds)}</strong><br>
-            CPU Cores: <strong>${diag.system.cpu_count}</strong> (Load: ${diag.system.cpu_percent}%)<br>
-            Memory: <strong>${diag.system.memory_used_gb} GB / ${diag.system.memory_total_gb} GB</strong> (${diag.system.memory_percent}%)<br>
-            Disk Free: <strong>${diag.system.disk_free_gb} GB</strong>
+      const host = data.host_metrics || {};
+      body.innerHTML = `
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 18px; margin-bottom: 18px;">
+          <h4 style="margin: 0 0 12px 0; color: #fff; font-size: 14px;">💻 HOST SYSTEM TELEMETRY</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
+            <div><span style="color: var(--text-dim);">CPU Utilization:</span> <strong style="color: #fff;">${host.cpu_percent || 0}%</strong></div>
+            <div><span style="color: var(--text-dim);">Memory Utilization:</span> <strong style="color: #fff;">${host.memory_percent || 0}%</strong></div>
+            <div><span style="color: var(--text-dim);">Total Memory:</span> <strong style="color: #fff;">${host.total_memory_gb || 0} GB</strong></div>
+            <div><span style="color: var(--text-dim);">Free Memory:</span> <strong style="color: #fff;">${host.free_memory_gb || 0} GB</strong></div>
+            <div><span style="color: var(--text-dim);">Disk Free:</span> <strong style="color: #fff;">${host.disk_free_gb || 0} GB</strong></div>
+            <div><span style="color: var(--text-dim);">System Load (1m):</span> <strong style="color: #fff;">${host.load_avg_1m || 0}</strong></div>
           </div>
         </div>
 
-        <div>
-          <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.45); margin-bottom: 8px;">SERVICES SUPERVISOR TABLE</div>
-          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 14px; font-size: 12px;">
-            ${diag.services.map(s => `
-              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
-                <span>${s.name}</span>
-                <span>
-                  <span class="ant-tag ${s.status === 'running' ? 'ant-tag-green' : 'ant-tag-default'}">${s.status.toUpperCase()}</span>
-                  <span class="ant-tag ant-tag-blue">PID ${s.pid || 'None'}</span>
-                  <span class="ant-tag ant-tag-cyan">${s.memory_mb || 0} MB</span>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 18px;">
+          <h4 style="margin: 0 0 12px 0; color: #fff; font-size: 14px;">⚙️ WORKER PROCESS TRACING</h4>
+          <div style="font-size: 13px; line-height: 1.8;">
+            ${(data.services || []).map(s => `
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.04); padding: 4px 0;">
+                <span>${s.icon} <strong>${s.name}</strong></span>
+                <span class="stat-badge" style="background: ${s.status === 'running' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.06)'}; color: ${s.status === 'running' ? '#34d399' : '#94a3b8'};">
+                  ${s.status.toUpperCase()} ${s.pid ? '(PID ' + s.pid + ')' : ''}
                 </span>
               </div>
             `).join('')}
@@ -1637,26 +2208,71 @@
       document.getElementById('diag-wrapper').classList.remove('open');
     }
 
-    // Ant Design Toast
-    function showAntToast(msg, type = 'info') {
-      const shelf = document.getElementById('toast-shelf');
-      const box = document.createElement('div');
-      box.className = 'ant-message-notice-content';
+    // Settings
+    async function loadSettings() {
+      const data = await apiCall('/api/settings');
+      if (!data) return;
 
-      const icons = {
-        'success': '<span style="color: #52c41a;">✔</span>',
-        'error': '<span style="color: #ff4d4f;">✖</span>',
-        'info': '<span style="color: #1677ff;">ℹ</span>'
-      };
-
-      box.innerHTML = (icons[type] || icons.info) + ' <span>' + escapeHtml(msg) + '</span>';
-      shelf.appendChild(box);
-      setTimeout(() => box.remove(), 4000);
+      if (data.target_roles) document.getElementById('setting-target-roles').value = data.target_roles;
+      if (data.core_skills) document.getElementById('setting-skills').value = data.core_skills;
+      if (data.preferred_locations) document.getElementById('setting-locations').value = data.preferred_locations;
+      if (data.current_company) document.getElementById('setting-company').value = data.current_company;
+      if (data.telegram_bot_token) document.getElementById('setting-tg-token').value = data.telegram_bot_token;
+      if (data.telegram_allowed_user_id) document.getElementById('setting-tg-id').value = data.telegram_allowed_user_id;
+      if (data.google_sheet_webhook_url) document.getElementById('setting-sheets').value = data.google_sheet_webhook_url;
+      if (data.browser_profile_dir) document.getElementById('setting-browser-dir').value = data.browser_profile_dir;
+      if (data.github_username) document.getElementById('setting-github').value = data.github_username;
     }
 
+    async function saveSettings() {
+      const payload = {
+        target_roles: document.getElementById('setting-target-roles').value,
+        core_skills: document.getElementById('setting-skills').value,
+        preferred_locations: document.getElementById('setting-locations').value,
+        current_company: document.getElementById('setting-company').value,
+        telegram_bot_token: document.getElementById('setting-tg-token').value,
+        telegram_allowed_user_id: document.getElementById('setting-tg-id').value,
+        google_sheet_webhook_url: document.getElementById('setting-sheets').value,
+        browser_profile_dir: document.getElementById('setting-browser-dir').value,
+        github_username: document.getElementById('setting-github').value
+      };
+
+      showToast('Saving updated settings...', 'info');
+      const res = await apiCall('/api/settings', 'POST', payload);
+      if (res && res.status === 'ok') {
+        showToast('All settings and career profile successfully saved!', 'success');
+      } else {
+        showToast('Failed to save settings', 'error');
+      }
+    }
+
+    // Toast Shelf
+    function showToast(msg, type = 'info') {
+      const shelf = document.getElementById('toast-shelf');
+      const toast = document.createElement('div');
+      toast.className = 'toast-capsule';
+
+      const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
+      toast.innerHTML = `<span>${icon}</span> <span>${escapeHtml(msg)}</span>`;
+      shelf.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s, transform 0.3s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // HTML Escaper
     function escapeHtml(str) {
       if (!str) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
   </script>
 </body>
