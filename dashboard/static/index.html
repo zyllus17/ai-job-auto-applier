@@ -1256,8 +1256,7 @@
     }
 
     function copyLogs() {
-      const text = state.logs.map(l => `[${l.timestamp}] [${l.level}] [${l.service_name}] ${l.message}`).join('
-');
+      const text = state.logs.map(l => `[${l.timestamp}] [${l.level}] [${l.service_name}] ${l.message}`).join('\n');
       navigator.clipboard.writeText(text);
       showToast('Logs copied to clipboard!', 'success');
     }
