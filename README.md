@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/dashboard_preview.jpg" alt="AI Job Auto-Applier Web Dashboard" width="100%" style="border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);" />
+  <img src="assets/antd_dashboard.png" alt="AI Job Auto-Applier Ant Design Web Dashboard" width="100%" style="border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);" />
 </p>
 
 ---

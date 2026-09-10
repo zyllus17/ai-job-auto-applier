@@ -4,780 +4,916 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Job Auto-Applier | Candidate CRM & Operations Cockpit</title>
+  
+  <!-- Ant Design Official CSS (served locally from /static) -->
+  <link id="antd-theme-link" rel="stylesheet" href="/static/antd.dark.min.css">
+  
   <style>
+    /* Custom Ant Design Pro Polish */
     :root {
-      --bg-base: #080c14;
-      --bg-primary: #0d1322;
-      --bg-secondary: #131c31;
-      --bg-card: rgba(19, 28, 49, 0.75);
-      --bg-card-hover: rgba(26, 38, 66, 0.85);
-      --bg-drawer: #0e1526;
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --border: rgba(255, 255, 255, 0.08);
-      --border-light: rgba(255, 255, 255, 0.14);
-      --border-focus: #6366f1;
-      --green: #10b981;
-      --green-glow: rgba(16, 185, 129, 0.25);
-      --orange: #f97316;
-      --blue: #3b82f6;
-      --cyan: #06b6d4;
-      --pink: #ec4899;
-      --purple: #a855f7;
-      --red: #ef4444;
-      --amber: #f59e0b;
-      --sidebar-width: 230px;
-      --topbar-height: 56px;
-      --drawer-width: 440px;
+      --primary-color: #1677ff;
+      --success-color: #52c41a;
+      --warning-color: #faad14;
+      --error-color: #ff4d4f;
     }
 
-    [data-theme='light'] {
-      --bg-base: #f1f5f9;
-      --bg-primary: #ffffff;
-      --bg-secondary: #f8fafc;
-      --bg-card: rgba(255, 255, 255, 0.9);
-      --bg-card-hover: rgba(248, 250, 252, 1);
-      --bg-drawer: #ffffff;
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #94a3b8;
-      --border: rgba(0, 0, 0, 0.08);
-      --border-light: rgba(0, 0, 0, 0.14);
-      --border-focus: #4f46e5;
-      --green-glow: rgba(16, 185, 129, 0.15);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg-base);
-      color: var(--text-primary);
-      display: flex;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       height: 100vh;
       overflow: hidden;
-      -webkit-font-smoothing: antialiased;
     }
 
-    /* Top Bar */
-    .topbar {
-      position: fixed; top: 0; left: 0; right: 0;
-      height: var(--topbar-height);
-      background: var(--bg-primary);
-      border-bottom: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0 20px;
+    .app-layout {
+      height: 100vh;
+      display: flex;
+      flex-direction: row;
+    }
+
+    /* Ant Design Sider */
+    .app-sider {
+      width: 240px;
+      flex-shrink: 0;
+      background: #001529;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(255,255,255,0.08);
       z-index: 100;
     }
-    .topbar-left { display: flex; align-items: center; gap: 14px; }
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.05rem; letter-spacing: -0.02em; }
-    .brand-badge {
-      font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-      padding: 2px 7px; border-radius: 6px;
-      background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3);
+    .sider-logo {
+      height: 64px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
-    .topbar-right { display: flex; align-items: center; gap: 16px; }
-
-    .cmd-k-hint {
-      display: flex; align-items: center; gap: 6px;
-      background: var(--bg-secondary); border: 1px solid var(--border);
-      border-radius: 8px; padding: 4px 10px; font-size: 0.8rem; color: var(--text-secondary);
-      cursor: pointer; transition: border-color 0.2s;
+    .sider-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: #1677ff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
     }
-    .cmd-k-hint:hover { border-color: var(--border-light); color: var(--text-primary); }
-    kbd {
-      background: var(--bg-base); border: 1px solid var(--border); border-radius: 4px;
-      padding: 1px 5px; font-size: 0.7rem; font-family: monospace;
-    }
-
-    .telemetry-chip {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--bg-secondary); border: 1px solid var(--border);
-      border-radius: 16px; padding: 4px 12px; font-size: 0.75rem; color: var(--text-secondary);
-    }
-    .health-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
-    .health-dot.running { box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite; }
-    .health-dot.offline { background: var(--red); box-shadow: 0 0 8px var(--red); }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-    .icon-btn {
-      background: none; border: 1px solid var(--border); border-radius: 8px;
-      padding: 6px 10px; cursor: pointer; color: var(--text-primary); font-size: 0.95rem;
-      transition: all 0.2s;
-    }
-    .icon-btn:hover { background: var(--bg-secondary); border-color: var(--border-light); }
-
-    /* Sidebar */
-    .sidebar {
-      position: fixed; top: var(--topbar-height); left: 0; bottom: 0;
-      width: var(--sidebar-width);
-      background: var(--bg-primary);
-      border-right: 1px solid var(--border);
-      padding: 20px 0;
-      display: flex; flex-direction: column; justify-content: space-between;
-      z-index: 90;
-    }
-    .nav-group { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; }
-    .nav-label {
-      font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--text-muted); padding: 8px 12px 4px;
-    }
-    .nav-link {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 12px; border-radius: 8px;
-      color: var(--text-secondary); text-decoration: none; font-size: 0.88rem; font-weight: 500;
-      transition: all 0.15s ease; cursor: pointer;
-    }
-    .nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
-    .nav-link.active {
-      color: var(--text-primary);
-      background: rgba(99, 102, 241, 0.12);
-      border-left: 3px solid #6366f1;
-    }
-    .nav-badge {
-      margin-left: auto; font-size: 0.7rem; font-weight: 600;
-      padding: 1px 6px; border-radius: 10px; background: rgba(255,255,255,0.08); color: var(--text-secondary);
+    .sider-logo-text {
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
     }
 
-    .sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--text-muted); }
-
-    /* Main Content */
-    .content {
-      margin-top: var(--topbar-height);
-      margin-left: var(--sidebar-width);
+    .sider-menu {
       flex: 1;
-      height: calc(100vh - var(--topbar-height));
+      padding: 12px 8px;
+      list-style: none;
+      margin: 0;
+      overflow-y: auto;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: rgba(255,255,255,0.65);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+      transition: all 0.2s ease;
+    }
+    .menu-item:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.08);
+    }
+    .menu-item.active {
+      color: #fff;
+      background: #1677ff;
+      box-shadow: 0 2px 8px rgba(22, 119, 255, 0.35);
+    }
+    .menu-badge {
+      margin-left: auto;
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+
+    .sider-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+    }
+
+    /* Main Content Area */
+    .app-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #141414;
+    }
+
+    /* Ant Design Header */
+    .app-header {
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: #1f1f1f;
+      flex-shrink: 0;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-breadcrumb {
+      font-size: 14px;
+      color: rgba(255,255,255,0.45);
+    }
+    .header-breadcrumb strong {
+      color: #fff;
+      margin-left: 6px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* Scrollable Page Content */
+    .app-content {
+      flex: 1;
       overflow-y: auto;
       padding: 24px;
-      position: relative;
     }
-    section { display: none; }
-    section.active { display: block; animation: fadeIn 0.25s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Cockpit Actions Toolbar */
-    .toolbar {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 22px; flex-wrap: wrap; gap: 12px;
+    .page-section {
+      display: none;
     }
-    .toolbar-title h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; }
-    .toolbar-title p { font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px; }
-    .toolbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-
-    .btn {
-      padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
-      background: var(--bg-card); color: var(--text-primary); cursor: pointer;
-      display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 500;
-      transition: all 0.2s;
+    .page-section.active {
+      display: block;
+      animation: antFadeIn 0.2s ease;
     }
-    .btn:hover { background: var(--bg-card-hover); border-color: var(--border-light); transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
-    .btn-primary { background: #4f46e5; border-color: #6366f1; color: white; }
-    .btn-primary:hover { background: #4338ca; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35); }
-    .btn-sm { padding: 5px 10px; font-size: 0.78rem; border-radius: 6px; }
+    @keyframes antFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-    /* KPI Summary Strip */
-    .kpi-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    /* Page Header */
+    .ant-page-header {
+      padding: 0 0 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .ant-page-header-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+      margin: 0;
+    }
+    .ant-page-header-sub {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 4px;
+    }
+
+    /* Top Statistics Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
       margin-bottom: 24px;
     }
-    .kpi-card {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 16px 18px; position: relative; overflow: hidden;
-      backdrop-filter: blur(12px);
+    .stat-card {
+      background: #1f1f1f;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 18px 20px;
+      transition: all 0.2s;
     }
-    .kpi-label { font-size: 0.78rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-    .kpi-value { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; margin: 6px 0 2px; }
-    .kpi-sub { font-size: 0.75rem; color: var(--text-secondary); }
+    .stat-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .stat-title {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .stat-footer {
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 6px;
+    }
 
-    /* Service Cards (Linear Cockpit Grid) */
+    /* Services Grid */
     .services-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
       margin-bottom: 24px;
     }
     .service-card {
-      backdrop-filter: blur(14px);
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px;
+      background: #1f1f1f;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
       position: relative;
       overflow: hidden;
-      transition: all 0.25s ease;
-      display: flex; flex-direction: column; justify-content: space-between;
     }
     .service-card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--border-light);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      border-color: rgba(255,255,255,0.2);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
     }
-    .service-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-      background: var(--card-color, var(--blue));
+    .service-card-head {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
-    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-    .service-info { display: flex; align-items: center; gap: 10px; }
-    .service-icon {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    .service-card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      color: #fff;
     }
-    .service-title { font-weight: 600; font-size: 0.95rem; }
-    .service-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; line-height: 1.3; }
+    .service-card-icon {
+      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .service-card-body {
+      padding: 18px 20px;
+      flex: 1;
+    }
+    .service-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.5;
+      margin-bottom: 14px;
+      min-height: 40px;
+    }
+    .service-telemetry {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+    }
+    .service-card-actions {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-    /* Toggle Switch */
-    .toggle {
-      width: 44px; height: 24px; border-radius: 12px;
-      background: #1e293b; border: 1px solid var(--border);
-      cursor: pointer; transition: all 0.25s ease; position: relative; flex-shrink: 0;
-    }
-    .toggle.active {
-      background: var(--card-color, var(--green));
-      border-color: var(--card-color, var(--green));
-      box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
-    }
-    .toggle::after {
-      content: ''; width: 18px; height: 18px; border-radius: 50%; background: white;
-      position: absolute; top: 2px; left: 2px; transition: transform 0.25s ease;
-    }
-    .toggle.active::after { transform: translateX(20px); }
-
-    .card-telemetry {
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-      margin: 10px 0; font-size: 0.75rem; color: var(--text-secondary);
-    }
-    .pill {
-      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-      border-radius: 6px; padding: 2px 7px; font-family: monospace; font-size: 0.72rem;
-    }
-    .status-pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 0.74rem; font-weight: 600; text-transform: capitalize;
-    }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; }
-    .status-dot.running { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
-    .status-dot.idle { background: var(--text-muted); }
-    .status-dot.error { background: var(--red); box-shadow: 0 0 8px var(--red); }
-
-    .card-footer {
-      display: flex; align-items: center; justify-content: space-between;
-      border-top: 1px solid var(--border); padding-top: 12px; margin-top: 10px;
-    }
-    .uptime-tag { font-size: 0.72rem; color: var(--text-muted); font-family: monospace; }
-
-    /* Job Tracker Table (Attio CRM Style) */
-    .tracker-header {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
-    }
-    .search-input-wrap {
-      position: relative; flex: 1; max-width: 400px;
-    }
-    .search-input-wrap input {
-      width: 100%; padding: 8px 14px 8px 36px; border-radius: 8px;
-      border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary);
-      font-size: 0.85rem; outline: none; transition: border-color 0.2s;
-    }
-    .search-input-wrap input:focus { border-color: var(--border-focus); }
-    .search-icon { position: absolute; left: 12px; top: 9px; color: var(--text-muted); font-size: 0.85rem; }
-
-    .filter-pills { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-    .filter-pill {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
-      padding: 5px 10px; font-size: 0.75rem; color: var(--text-secondary); cursor: pointer;
+    /* Ant Design Switch Custom */
+    .ant-switch {
+      position: relative;
+      display: inline-block;
+      box-sizing: border-box;
+      min-width: 44px;
+      height: 22px;
+      line-height: 22px;
+      vertical-align: middle;
+      background-color: rgba(255, 255, 255, 0.25);
+      border: 0;
+      border-radius: 100px;
+      cursor: pointer;
       transition: all 0.2s;
+      user-select: none;
+      outline: none;
     }
-    .filter-pill:hover { border-color: var(--border-light); color: var(--text-primary); }
-    .filter-pill.active { background: rgba(99, 102, 241, 0.15); border-color: #6366f1; color: #818cf8; }
+    .ant-switch.ant-switch-checked {
+      background-color: #1677ff;
+    }
+    .ant-switch-handle {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      transition: all 0.2s ease-in-out;
+    }
+    .ant-switch-handle::before {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-color: #fff;
+      border-radius: 9px;
+      box-shadow: 0 2px 4px 0 rgba(0, 35, 11, 0.2);
+      transition: all 0.2s ease-in-out;
+      content: '';
+    }
+    .ant-switch.ant-switch-checked .ant-switch-handle {
+      left: calc(100% - 20px);
+    }
 
-    .crm-table-wrap {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
-      overflow: hidden; backdrop-filter: blur(12px);
+    /* Table Toolbar */
+    .table-toolbar {
+      background: #1f1f1f;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px 8px 0 0;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
     }
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
-    thead th {
-      padding: 12px 16px; background: rgba(255,255,255,0.02);
-      border-bottom: 1px solid var(--border); color: var(--text-muted);
-      font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;
-      cursor: pointer; user-select: none;
+    .table-container {
+      background: #1f1f1f;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      overflow-x: auto;
     }
-    thead th:hover { color: var(--text-primary); }
-    tbody tr {
-      border-bottom: 1px solid var(--border);
+    .ant-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+    .ant-table th {
+      background: rgba(255,255,255,0.02);
+      color: rgba(255,255,255,0.45);
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      user-select: none;
+      cursor: pointer;
+    }
+    .ant-table th:hover {
+      color: #fff;
+    }
+    .ant-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      color: #fff;
+      vertical-align: middle;
+    }
+    .ant-table tbody tr {
       transition: background 0.15s ease;
       cursor: pointer;
     }
-    tbody tr:hover { background: rgba(255,255,255,0.03); }
-    tbody tr.selected { background: rgba(99, 102, 241, 0.12); }
-    tbody td { padding: 12px 16px; vertical-align: middle; }
-
-    .job-title-col { font-weight: 600; color: var(--text-primary); display: flex; flex-direction: column; gap: 2px; }
-    .job-sub { font-size: 0.75rem; color: var(--text-muted); font-weight: normal; }
-
-    .fit-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 3px 8px; border-radius: 6px; font-family: monospace; font-size: 0.75rem; font-weight: 700;
+    .ant-table tbody tr:hover {
+      background: rgba(255,255,255,0.04);
     }
-    .fit-badge.high { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .fit-badge.mid { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .fit-badge.low { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-
-    .status-select {
-      background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 6px;
-      color: var(--text-primary); padding: 4px 8px; font-size: 0.75rem; cursor: pointer; outline: none;
+    .ant-table tbody tr.selected-row {
+      background: rgba(22, 119, 255, 0.15);
     }
 
-    /* Side-Over Drawer (Attio Style Inspector) */
-    .drawer {
-      position: fixed; top: var(--topbar-height); right: -100%; bottom: 0;
-      width: var(--drawer-width);
-      background: var(--bg-drawer);
-      border-left: 1px solid var(--border);
-      box-shadow: -8px 0 32px rgba(0,0,0,0.5);
-      z-index: 95;
-      display: flex; flex-direction: column;
-      transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Ant Design Drawer */
+    .ant-drawer-mask {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
     }
-    .drawer.open { right: 0; }
-    .drawer-header {
-      padding: 18px 20px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
+    .ant-drawer-mask.open {
+      opacity: 1;
+      pointer-events: auto;
     }
-    .drawer-header h3 { font-size: 1.05rem; font-weight: 700; }
-    .drawer-body {
-      padding: 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 18px;
+    .ant-drawer-content-wrapper {
+      position: fixed;
+      top: 0; right: -480px; bottom: 0;
+      width: 480px;
+      background: #1f1f1f;
+      box-shadow: -6px 0 24px rgba(0,0,0,0.5);
+      z-index: 1001;
+      transition: right 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      display: flex;
+      flex-direction: column;
     }
-    .drawer-section {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px;
+    .ant-drawer-content-wrapper.open {
+      right: 0;
     }
-    .drawer-section-title {
-      font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
-      color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;
+    .ant-drawer-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    .copy-box {
-      background: var(--bg-base); border: 1px solid var(--border); border-radius: 6px;
-      padding: 10px; font-family: monospace; font-size: 0.78rem; line-height: 1.4;
-      max-height: 140px; overflow-y: auto; white-space: pre-wrap; word-break: break-word; color: #cbd5e1;
+    .ant-drawer-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin: 0;
+    }
+    .ant-drawer-body {
+      padding: 24px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .ant-drawer-footer {
+      padding: 16px 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: rgba(255,255,255,0.02);
     }
 
-    /* Live Logs Terminal */
-    .logs-container {
-      background: #060910; border: 1px solid var(--border); border-radius: 12px;
-      overflow: hidden; display: flex; flex-direction: column; height: calc(100vh - 220px);
+    /* Live Logs Terminal Container */
+    .terminal-card {
+      background: #141414;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 200px);
     }
-    .logs-toolbar {
-      padding: 10px 16px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    .terminal-toolbar {
+      padding: 12px 18px;
+      background: #1f1f1f;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
     }
-    .logs-terminal {
-      flex: 1; overflow-y: auto; padding: 14px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.8rem; line-height: 1.5; color: #cbd5e1;
+    .terminal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      background: #0d0d0d;
+      color: #d4d4d4;
     }
-    .log-line { margin-bottom: 3px; word-break: break-all; display: flex; gap: 8px; }
-    .log-time { color: var(--text-muted); flex-shrink: 0; }
-    .log-svc { font-weight: 600; flex-shrink: 0; }
-    .log-msg { flex: 1; }
-    .log-line.error { color: #f87171; background: rgba(239, 68, 68, 0.08); padding: 2px 4px; border-radius: 4px; }
-    .log-line.warning { color: #fbbf24; }
-    .log-line.success { color: #34d399; }
+    .terminal-line {
+      margin-bottom: 4px;
+      word-break: break-all;
+      display: flex;
+      gap: 10px;
+    }
+    .terminal-line.error { color: #ff4d4f; background: rgba(255, 77, 79, 0.1); padding: 2px 6px; border-radius: 4px; }
+    .terminal-line.warning { color: #faad14; }
+    .terminal-line.success { color: #52c41a; }
+    .terminal-time { color: rgba(255,255,255,0.35); flex-shrink: 0; }
+    .terminal-tag { font-weight: 600; flex-shrink: 0; }
+    .terminal-msg { flex: 1; }
 
-    /* Analytics Canvas Grid */
-    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .chart-card {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 18px; backdrop-filter: blur(12px);
+    /* Ant Design Notification Toast */
+    .ant-message-notice {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
     }
-    .chart-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; }
-    canvas { width: 100%; height: 260px; display: block; }
-
-    /* Settings Cards */
-    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .settings-card {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+    .ant-message-notice-content {
+      padding: 10px 20px;
+      background: #1f1f1f;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+      font-size: 14px;
+      animation: antToastIn 0.25s ease;
+      pointer-events: auto;
     }
-    .settings-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; }
-    .form-control {
-      width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
-      background: var(--bg-base); color: var(--text-primary); font-size: 0.85rem; outline: none;
+    @keyframes antToastIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .form-control:focus { border-color: var(--border-focus); }
-
-    /* Command Palette Modal */
-    .modal-overlay {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 1000;
-      align-items: flex-start; justify-content: center; padding-top: 100px;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal-palette {
-      background: var(--bg-secondary); border: 1px solid var(--border-light);
-      border-radius: 14px; width: 100%; max-width: 540px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-      overflow: hidden; animation: popIn 0.2s ease;
-    }
-    @keyframes popIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-    .palette-input {
-      width: 100%; padding: 14px 18px; background: transparent; border: none;
-      border-bottom: 1px solid var(--border); color: var(--text-primary); font-size: 1rem; outline: none;
-    }
-    .palette-results { max-height: 320px; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
-    .palette-item {
-      padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;
-      color: var(--text-secondary); cursor: pointer; font-size: 0.88rem;
-    }
-    .palette-item:hover, .palette-item.selected { background: rgba(99, 102, 241, 0.15); color: var(--text-primary); }
-
-    /* Toasts */
-    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
-    .toast {
-      padding: 10px 16px; border-radius: 10px; background: var(--bg-secondary);
-      border: 1px solid var(--border-light); color: var(--text-primary); font-size: 0.82rem;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 8px;
-      animation: slideIn 0.25s ease;
-    }
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   </style>
 </head>
 <body>
 
-  <!-- Top Bar -->
-  <header class="topbar">
-    <div class="topbar-left">
-      <div class="brand">
-        <span>🚀 Candidate CRM</span>
-        <span class="brand-badge">Ops Cockpit</span>
-      </div>
-      <div class="cmd-k-hint" onclick="openCommandPalette()">
-        <span>Search actions & jobs</span>
-        <kbd>⌘K</kbd>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <div class="telemetry-chip">
-        <span class="health-dot running" id="health-dot"></span>
-        <span id="health-text">Connected (Port 8420)</span>
-      </div>
-      <button class="icon-btn" onclick="openDiagnosticsModal()" title="System Health & Diagnostics">⚡ Diagnostics</button>
-      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle Theme">☀️</button>
-    </div>
-  </header>
+  <div class="app-layout">
 
-  <!-- Sidebar -->
-  <nav class="sidebar">
-    <div class="nav-group">
-      <div class="nav-label">Workspace</div>
-      <a class="nav-link active" onclick="navigate('dashboard')" id="nav-dashboard">
-        <span>🏠 Operations</span>
-        <span class="nav-badge" id="badge-running-count">0/6</span>
-      </a>
-      <a class="nav-link" onclick="navigate('tracker')" id="nav-tracker">
-        <span>📋 Pipeline (CRM)</span>
-        <span class="nav-badge" id="badge-jobs-count">0</span>
-      </a>
-      <a class="nav-link" onclick="navigate('analytics')" id="nav-analytics">
-        <span>📊 Analytics</span>
-      </a>
-      <a class="nav-link" onclick="navigate('logs')" id="nav-logs">
-        <span>📜 Live Logs</span>
-        <span class="nav-badge" id="badge-log-count">0</span>
-      </a>
-    </div>
-
-    <div class="nav-group">
-      <div class="nav-label">Configuration</div>
-      <a class="nav-link" onclick="navigate('settings')" id="nav-settings">
-        <span>⚙️ Career & Settings</span>
-      </a>
-    </div>
-
-    <div class="sidebar-footer">
-      <div>AI Job Auto-Applier v3.0</div>
-      <div style="color: var(--text-muted); margin-top: 2px;">0 AI Tokens • 100% Local</div>
-    </div>
-  </nav>
-
-  <!-- Main Content -->
-  <main class="content">
-
-    <!-- PAGE 1: DASHBOARD / COCKPIT -->
-    <section id="page-dashboard" class="active">
-      <div class="toolbar">
-        <div class="toolbar-title">
-          <h1>Autonomous Agent Control Plane</h1>
-          <p>Continuous daemons executing multi-portal scraping, anti-detect auto-applying, and recruiter outreach.</p>
-        </div>
-        <div class="toolbar-actions">
-          <button class="btn btn-primary" onclick="runAction('scan-once')">▶️ Run Discovery Scan</button>
-          <button class="btn" onclick="runAction('scaffold')">📦 Scaffold POC Project</button>
-          <button class="btn" onclick="runAction('sync-sheets')">📊 Sync Google Sheets</button>
-        </div>
+    <!-- Ant Design Sider -->
+    <aside class="app-sider">
+      <div class="sider-logo">
+        <div class="sider-logo-icon">🚀</div>
+        <div class="sider-logo-text">AI Job Auto-Applier</div>
       </div>
 
-      <!-- KPI Summary Strip -->
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">Discovered Opportunities</div>
-          <div class="kpi-value" id="kpi-jobs">0</div>
-          <div class="kpi-sub">Across 5 portals & APIs</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Staged For Review</div>
-          <div class="kpi-value" style="color: #60a5fa;" id="kpi-staged">0</div>
-          <div class="kpi-sub">Ready for auto-apply</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Applications & Interviews</div>
-          <div class="kpi-value" style="color: #34d399;" id="kpi-applied">0</div>
-          <div class="kpi-sub">Active in candidate pipeline</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Avg Candidate Match</div>
-          <div class="kpi-value" style="color: #fbbf24;" id="kpi-fit">0%</div>
-          <div class="kpi-sub">Weighted profile fit score</div>
-        </div>
-      </div>
+      <ul class="sider-menu">
+        <li class="menu-item active" onclick="navigate('dashboard')" id="menu-dashboard">
+          <span>⚡ Operations Cockpit</span>
+          <span class="menu-badge" id="sider-badge-running">0/6</span>
+        </li>
+        <li class="menu-item" onclick="navigate('tracker')" id="menu-tracker">
+          <span>📋 Candidate Pipeline</span>
+          <span class="menu-badge" id="sider-badge-jobs">0</span>
+        </li>
+        <li class="menu-item" onclick="navigate('analytics')" id="menu-analytics">
+          <span>📊 Funnel Analytics</span>
+        </li>
+        <li class="menu-item" onclick="navigate('logs')" id="menu-logs">
+          <span>📜 Live Observability</span>
+          <span class="menu-badge" id="sider-badge-logs">0</span>
+        </li>
+        <li class="menu-item" onclick="navigate('settings')" id="menu-settings">
+          <span>⚙️ Career & Settings</span>
+        </li>
+      </ul>
 
-      <!-- 6 Service Cards -->
-      <div class="services-grid" id="services-grid">
-        <!-- Rendered via JavaScript -->
+      <div class="sider-footer">
+        <div>Candidate CRM & Agent Plane</div>
+        <div style="margin-top: 4px; color: rgba(255,255,255,0.3);">Ant Design • 0 AI Tokens</div>
       </div>
-    </section>
+    </aside>
 
-    <!-- PAGE 2: PIPELINE & JOB TRACKER (ATTIO STYLE) -->
-    <section id="page-tracker">
-      <div class="toolbar">
-        <div class="toolbar-title">
-          <h1>Candidate Opportunity Pipeline</h1>
-          <p>Click any row to inspect role details, review matched skills, and view pre-drafted cold outreach pitches.</p>
-        </div>
-        <div class="toolbar-actions">
-          <button class="btn btn-sm" onclick="exportTrackerCSV()">📥 Export CSV</button>
-        </div>
-      </div>
+    <!-- Main Container -->
+    <div class="app-main">
 
-      <div class="tracker-header">
-        <div class="search-input-wrap">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="job-search" placeholder="Search by company, role title, or skill..." oninput="fetchJobs()">
-        </div>
-        <div class="filter-pills">
-          <div class="filter-pill active" onclick="setFilterStage('')">All</div>
-          <div class="filter-pill" onclick="setFilterStage('staged')">Staged</div>
-          <div class="filter-pill" onclick="setFilterStage('applied')">Applied</div>
-          <div class="filter-pill" onclick="setFilterStage('interview')">Interviews</div>
-          <div class="filter-pill" onclick="setFilterStage('offer')">Offers</div>
-        </div>
-      </div>
-
-      <div class="crm-table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th onclick="sortJobs('company')">Company ↕</th>
-              <th onclick="sortJobs('title')">Role Title ↕</th>
-              <th onclick="sortJobs('fitScore')">Fit Score ↕</th>
-              <th>Pipeline Stage</th>
-              <th>Key Skill Gap / Suggested POC</th>
-              <th>Location</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="jobs-tbody">
-            <!-- Rendered via JS -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- PAGE 3: ANALYTICS -->
-    <section id="page-analytics">
-      <div class="toolbar">
-        <div class="toolbar-title">
-          <h1>Funnel & Skill Gap Intelligence</h1>
-          <p>Conversion metrics, missing skills demand, and company leaderboards.</p>
-        </div>
-      </div>
-      <div class="charts-grid">
-        <div class="chart-card">
-          <h3>Application Conversion Funnel</h3>
-          <canvas id="chart-funnel"></canvas>
-        </div>
-        <div class="chart-card">
-          <h3>Top Missing Skills Heatmap</h3>
-          <canvas id="chart-skills"></canvas>
-        </div>
-        <div class="chart-card">
-          <h3>Candidate Fit Score Distribution</h3>
-          <canvas id="chart-fit"></canvas>
-        </div>
-        <div class="chart-card">
-          <h3>Top Hiring Companies</h3>
-          <canvas id="chart-companies"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <!-- PAGE 4: LIVE LOGS -->
-    <section id="page-logs">
-      <div class="toolbar">
-        <div class="toolbar-title">
-          <h1>Live Observability & Stream Traces</h1>
-          <p>Real-time stdout/stderr capture, process supervisor events, and exit code diagnostics.</p>
-        </div>
-      </div>
-      <div class="logs-container">
-        <div class="logs-toolbar">
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <button class="btn btn-sm" onclick="filterLogs('All')">All</button>
-            <button class="btn btn-sm" onclick="filterLogs('SUCCESS')">Success</button>
-            <button class="btn btn-sm" onclick="filterLogs('INFO')">Info</button>
-            <button class="btn btn-sm" onclick="filterLogs('WARNING')">Warning</button>
-            <button class="btn btn-sm" onclick="filterLogs('ERROR')">Errors</button>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" class="form-control" style="width: 180px; padding: 4px 8px; font-size: 0.78rem;" id="log-search-input" placeholder="Grep in logs..." oninput="renderLogs()">
-            <button class="btn btn-sm" onclick="toggleLogPause()" id="btn-log-pause">⏸️ Pause</button>
-            <button class="btn btn-sm" onclick="copyLogs()">📋 Copy</button>
-            <button class="btn btn-sm" onclick="clearLiveLogs()">🗑️ Clear</button>
-            <a class="btn btn-sm" href="/api/logs/export" download>⬇️ Export</a>
-          </div>
-        </div>
-        <div class="logs-terminal" id="log-viewer">
-          <!-- Rendered via JS -->
-        </div>
-      </div>
-    </section>
-
-    <!-- PAGE 5: SETTINGS -->
-    <section id="page-settings">
-      <div class="toolbar">
-        <div class="toolbar-title">
-          <h1>Career Profile & System Configuration</h1>
-          <p>Role-agnostic query settings (Designers, Java, Mobile, AI) and daemon credentials.</p>
-        </div>
-      </div>
-
-      <div class="settings-grid">
-        <div class="settings-card" style="grid-column: 1 / -1;">
-          <h3>🎯 Dynamic Career Profile (Role-Agnostic)</h3>
-          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-            The autonomous engine searches LinkedIn, FreeHire, Arbeitnow, Remotive, and RemoteOK for these exact roles. Works for any domain!
-          </p>
-          <div class="form-group">
-            <label>Target Roles (comma-separated)</label>
-            <input type="text" class="form-control" id="setting-target-roles" placeholder="e.g. AI Automation Engineer, Senior Flutter Developer, Java Backend Engineer">
-          </div>
-          <div class="form-group">
-            <label>Core Technical Skills (comma-separated)</label>
-            <input type="text" class="form-control" id="setting-skills" placeholder="e.g. Python, Flutter, Riverpod, LangGraph, FastAPI, Docker">
-          </div>
-          <div class="form-group">
-            <label>Target Locations & Modes (comma-separated)</label>
-            <input type="text" class="form-control" id="setting-locations" placeholder="e.g. Remote, Worldwide, United States, Europe, India">
+      <!-- Ant Design Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <div class="header-breadcrumb">
+            Workspace / <strong id="breadcrumb-title">Operations Cockpit</strong>
           </div>
         </div>
 
-        <div class="settings-card">
-          <h3>Current Employer Exclusion</h3>
-          <div class="form-group">
-            <label>Company Name to Exclude</label>
-            <input type="text" class="form-control" id="setting-company" placeholder="e.g. Floor Boss">
-          </div>
-          <p style="font-size: 0.75rem; color: var(--text-muted);">
-            Guarantees your current employer will never appear in discovery scans or recruiter outreach.
-          </p>
+        <div class="header-right">
+          <span class="ant-badge ant-badge-status ant-badge-not-a-wrapper" style="display: flex; align-items: center; gap: 8px;">
+            <span class="ant-badge-status-dot ant-badge-status-processing" id="conn-dot"></span>
+            <span class="ant-badge-status-text" style="color: rgba(255,255,255,0.85); font-size: 13px;" id="conn-text">System Active (Port 8420)</span>
+          </span>
+
+          <button class="ant-btn ant-btn-default ant-btn-sm" onclick="openDiagnosticsModal()">
+            ⚡ System Diagnostics
+          </button>
+
+          <button class="ant-btn ant-btn-default ant-btn-sm" onclick="toggleAntTheme()" id="theme-btn" title="Toggle Light/Dark Theme">
+            ☀️ Light Theme
+          </button>
         </div>
+      </header>
 
-        <div class="settings-card">
-          <h3>Telegram Bot Remote Control</h3>
-          <div class="form-group">
-            <label>Bot Token (from @BotFather)</label>
-            <input type="password" class="form-control" id="setting-tg-token">
+      <!-- Scrollable Main Content -->
+      <main class="app-content">
+
+        <!-- PAGE 1: DASHBOARD / COCKPIT -->
+        <section id="page-dashboard" class="page-section active">
+          <div class="ant-page-header">
+            <div>
+              <h1 class="ant-page-header-title">Worker Daemons & Pipeline Overview</h1>
+              <div class="ant-page-header-sub">Manage 6 independent background automation workers with real-time process supervisor tracking.</div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="ant-btn ant-btn-primary" onclick="runAction('scan-once')">
+                ▶ Run Discovery Scan
+              </button>
+              <button class="ant-btn ant-btn-default" onclick="runAction('scaffold')">
+                📦 Scaffold POC Project
+              </button>
+              <button class="ant-btn ant-btn-default" onclick="runAction('sync-sheets')">
+                📊 Sync Google Sheets
+              </button>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Allowed Telegram User ID</label>
-            <input type="text" class="form-control" id="setting-tg-id">
+
+          <!-- 4 Ant Design Statistics Cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-title">
+                <span>TOTAL JOBS TRACKED</span>
+                <span class="ant-tag ant-tag-blue">All Portals</span>
+              </div>
+              <div class="stat-value" id="stat-total-jobs">0</div>
+              <div class="stat-footer">LinkedIn, FreeHire, Arbeitnow, Remotive, RemoteOK</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-title">
+                <span>STAGED FOR SUBMISSION</span>
+                <span class="ant-tag ant-tag-orange">Ready</span>
+              </div>
+              <div class="stat-value" style="color: #faad14;" id="stat-staged">0</div>
+              <div class="stat-footer">Prepared with tailored CV & cover letter</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-title">
+                <span>APPLIED & INTERVIEWS</span>
+                <span class="ant-tag ant-tag-green">Pipeline</span>
+              </div>
+              <div class="stat-value" style="color: #52c41a;" id="stat-applied">0</div>
+              <div class="stat-footer">Active candidacies in progress</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-title">
+                <span>AVERAGE MATCH FIT</span>
+                <span class="ant-tag ant-tag-purple">ATS Fit</span>
+              </div>
+              <div class="stat-value" style="color: #722ed1;" id="stat-avg-fit">0%</div>
+              <div class="stat-footer">Weighted against candidate skills profile</div>
+            </div>
           </div>
-        </div>
 
-        <div class="settings-card">
-          <h3>Google Sheets Sync</h3>
-          <div class="form-group">
-            <label>Apps Script Webhook URL</label>
-            <input type="text" class="form-control" id="setting-sheets">
+          <!-- 6 Worker Service Cards Grid -->
+          <div class="services-grid" id="services-grid">
+            <!-- Rendered dynamically via JavaScript -->
           </div>
-        </div>
+        </section>
 
-        <div class="settings-card">
-          <h3>Browser & GitHub</h3>
-          <div class="form-group">
-            <label>Browser Profile Directory</label>
-            <input type="text" class="form-control" id="setting-browser-dir">
+        <!-- PAGE 2: CANDIDATE PIPELINE (CRM) -->
+        <section id="page-tracker" class="page-section">
+          <div class="ant-page-header">
+            <div>
+              <h1 class="ant-page-header-title">Candidate Opportunities Pipeline</h1>
+              <div class="ant-page-header-sub">Click any record to inspect detailed role requirements, missing skills, and pre-drafted recruiter outreach.</div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="ant-btn ant-btn-default" onclick="exportTrackerCSV()">
+                📥 Download CSV
+              </button>
+            </div>
           </div>
-          <div class="form-group">
-            <label>GitHub Username</label>
-            <input type="text" class="form-control" id="setting-github">
+
+          <!-- Table Toolbar -->
+          <div class="table-toolbar">
+            <div style="display: flex; align-items: center; gap: 12px; flex: 1; max-width: 420px;">
+              <input type="text" class="ant-input" id="job-search-input" placeholder="Search by company, role title, or skill..." oninput="fetchJobs()">
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 13px; color: rgba(255,255,255,0.45);">Filter Stage:</span>
+              <button class="ant-btn ant-btn-sm ant-btn-primary stage-btn" onclick="setFilterStage('')">All</button>
+              <button class="ant-btn ant-btn-sm ant-btn-default stage-btn" onclick="setFilterStage('staged')">Staged</button>
+              <button class="ant-btn ant-btn-sm ant-btn-default stage-btn" onclick="setFilterStage('applied')">Applied</button>
+              <button class="ant-btn ant-btn-sm ant-btn-default stage-btn" onclick="setFilterStage('interview')">Interviews</button>
+              <button class="ant-btn ant-btn-sm ant-btn-default stage-btn" onclick="setFilterStage('offer')">Offers</button>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div style="margin-top: 20px; display: flex; gap: 12px;">
-        <button class="btn btn-primary" onclick="saveSettings()">💾 Save All Settings</button>
-        <button class="btn" onclick="loadSettings()">↺ Reset</button>
-      </div>
-    </section>
+          <!-- Ant Design Table -->
+          <div class="table-container">
+            <table class="ant-table">
+              <thead>
+                <tr>
+                  <th onclick="sortJobs('company')">Company ↕</th>
+                  <th onclick="sortJobs('title')">Role Title ↕</th>
+                  <th onclick="sortJobs('fitScore')">Fit Score ↕</th>
+                  <th>Pipeline Stage</th>
+                  <th>Identified Skill Gap / Demo POC</th>
+                  <th>Location</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="jobs-tbody">
+                <!-- Rendered dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-  </main>
+        <!-- PAGE 3: ANALYTICS -->
+        <section id="page-analytics" class="page-section">
+          <div class="ant-page-header">
+            <div>
+              <h1 class="ant-page-header-title">Candidate Pipeline Intelligence</h1>
+              <div class="ant-page-header-sub">Conversion funnels, skill gap demand distribution, and company hiring leaderboards.</div>
+            </div>
+          </div>
 
-  <!-- Side-Over Drawer (Attio Style Inspector) -->
-  <aside class="drawer" id="job-drawer">
-    <div class="drawer-header">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 1.1rem;">📄</span>
-        <h3 id="drawer-title">Job Details</h3>
-      </div>
-      <button class="icon-btn" onclick="closeDrawer()">✕</button>
-    </div>
-    <div class="drawer-body" id="drawer-body">
-      <!-- Populated via JS -->
-    </div>
-  </aside>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="stat-card">
+              <div class="stat-title">APPLICATION CONVERSION FUNNEL</div>
+              <canvas id="chart-funnel" style="width: 100%; height: 260px;"></canvas>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">TOP MISSING SKILLS DEMAND</div>
+              <canvas id="chart-skills" style="width: 100%; height: 260px;"></canvas>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">CANDIDATE FIT SCORE DISTRIBUTION</div>
+              <canvas id="chart-fit" style="width: 100%; height: 260px;"></canvas>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">TOP HIRING EMPLOYERS</div>
+              <canvas id="chart-companies" style="width: 100%; height: 260px;"></canvas>
+            </div>
+          </div>
+        </section>
 
-  <!-- Command Palette Modal -->
-  <div class="modal-overlay" id="palette-modal" onclick="closeCommandPalette(event)">
-    <div class="modal-palette" onclick="event.stopPropagation()">
-      <input type="text" class="palette-input" id="palette-input" placeholder="Type a command, page, or search jobs..." oninput="handlePaletteSearch()">
-      <div class="palette-results" id="palette-results">
-        <!-- Rendered via JS -->
-      </div>
+        <!-- PAGE 4: LIVE LOGS -->
+        <section id="page-logs" class="page-section">
+          <div class="ant-page-header">
+            <div>
+              <h1 class="ant-page-header-title">Supervisor Live Observability</h1>
+              <div class="ant-page-header-sub">Structured stdout/stderr trace capture, worker startup diagnostics, and process exit codes.</div>
+            </div>
+          </div>
+
+          <div class="terminal-card">
+            <div class="terminal-toolbar">
+              <div style="display: flex; gap: 8px;">
+                <button class="ant-btn ant-btn-sm ant-btn-primary log-filter-btn" onclick="filterLogs('All')">All</button>
+                <button class="ant-btn ant-btn-sm ant-btn-default log-filter-btn" onclick="filterLogs('SUCCESS')">Success</button>
+                <button class="ant-btn ant-btn-sm ant-btn-default log-filter-btn" onclick="filterLogs('INFO')">Info</button>
+                <button class="ant-btn ant-btn-sm ant-btn-default log-filter-btn" onclick="filterLogs('WARNING')">Warning</button>
+                <button class="ant-btn ant-btn-sm ant-btn-default log-filter-btn" onclick="filterLogs('ERROR')">Error</button>
+              </div>
+
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" class="ant-input ant-input-sm" style="width: 200px;" id="log-search-box" placeholder="Filter logs..." oninput="renderLogs()">
+                <button class="ant-btn ant-btn-sm ant-btn-default" onclick="toggleLogPause()" id="btn-log-pause">⏸ Pause</button>
+                <button class="ant-btn ant-btn-sm ant-btn-default" onclick="copyLogs()">📋 Copy Logs</button>
+                <button class="ant-btn ant-btn-sm ant-btn-default" onclick="clearLiveLogs()">🗑 Clear</button>
+                <a class="ant-btn ant-btn-sm ant-btn-default" href="/api/logs/export" download>⬇ Export .txt</a>
+              </div>
+            </div>
+
+            <div class="terminal-body" id="terminal-body">
+              <!-- Logs rendered here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- PAGE 5: CAREER & SETTINGS -->
+        <section id="page-settings" class="page-section">
+          <div class="ant-page-header">
+            <div>
+              <h1 class="ant-page-header-title">Career Profile & Daemon Configuration</h1>
+              <div class="ant-page-header-sub">Dynamic role queries for any developer/designer domain and service credentials.</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="stat-card" style="grid-column: 1 / -1;">
+              <h3 style="color: #fff; margin-top: 0; font-size: 16px;">🎯 Dynamic Career Search Profile</h3>
+              <p style="color: rgba(255,255,255,0.45); font-size: 13px; margin-bottom: 16px;">
+                The search daemon queries LinkedIn, FreeHire, Arbeitnow, Remotive, and RemoteOK dynamically using these exact keywords.
+              </p>
+
+              <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Target Job Titles (comma-separated)</label>
+                <input type="text" class="ant-input" id="setting-target-roles" placeholder="e.g. AI Automation Engineer, Senior Flutter Developer, Java Backend Engineer">
+              </div>
+
+              <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Core Technical Skills (comma-separated)</label>
+                <input type="text" class="ant-input" id="setting-skills" placeholder="e.g. Python, Flutter, Riverpod, LangGraph, FastAPI, Docker">
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Preferred Locations / Work Mode (comma-separated)</label>
+                <input type="text" class="ant-input" id="setting-locations" placeholder="e.g. Remote, Worldwide, United States, Europe, India">
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <h3 style="color: #fff; margin-top: 0; font-size: 15px;">Current Employer Exclusion</h3>
+              <div style="margin-bottom: 8px;">
+                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Company to Exclude</label>
+                <input type="text" class="ant-input" id="setting-company" placeholder="e.g. Floor Boss">
+              </div>
+              <div style="font-size: 12px; color: rgba(255,255,255,0.45);">
+                This company will be strictly filtered out of all job searches and cold outreach attempts.
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <h3 style="color: #fff; margin-top: 0; font-size: 15px;">Telegram Remote Control Bot</h3>
+              <div style="margin-bottom: 10px;">
+                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Telegram Bot Token</label>
+                <input type="password" class="ant-input" id="setting-tg-token">
+              </div>
+              <div>
+                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Allowed User ID</label>
+                <input type="text" class="ant-input" id="setting-tg-id">
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <h3 style="color: #fff; margin-top: 0; font-size: 15px;">Google Sheets Webhook Sync</h3>
+              <div>
+                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Apps Script Webhook URL</label>
+                <input type="text" class="ant-input" id="setting-sheets">
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <h3 style="color: #fff; margin-top: 0; font-size: 15px;">Browser Automation & GitHub</h3>
+              <div style="margin-bottom: 10px;">
+                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">Browser Profile Directory</label>
+                <input type="text" class="ant-input" id="setting-browser-dir">
+              </div>
+              <div>
+                <label style="display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px;">GitHub Username</label>
+                <input type="text" class="ant-input" id="setting-github">
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 24px; display: flex; gap: 12px;">
+            <button class="ant-btn ant-btn-primary" onclick="saveSettings()">
+              💾 Save All Configuration
+            </button>
+            <button class="ant-btn ant-btn-default" onclick="loadSettings()">
+              ↺ Reset Fields
+            </button>
+          </div>
+        </section>
+
+      </main>
     </div>
   </div>
 
-  <!-- Diagnostics Modal -->
-  <div class="modal-overlay" id="diagnostics-modal" onclick="closeDiagnosticsModal(event)">
-    <div class="modal-palette" style="max-width: 600px;" onclick="event.stopPropagation()">
-      <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-size: 1rem; font-weight: 700;">⚡ System & Worker Diagnostics</h3>
-        <button class="icon-btn" onclick="closeDiagnosticsModal()">✕</button>
+  <!-- Ant Design Slide-Over Drawer -->
+  <div class="ant-drawer-mask" id="drawer-mask" onclick="closeDrawer()"></div>
+  <div class="ant-drawer-content-wrapper" id="drawer-wrapper">
+    <div class="ant-drawer-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 18px;">📄</span>
+        <h4 class="ant-drawer-title" id="drawer-company-title">Opportunity Details</h4>
       </div>
-      <div style="padding: 20px; max-height: 400px; overflow-y: auto;" id="diagnostics-content">
-        <!-- Populated via JS -->
-      </div>
+      <button class="ant-btn ant-btn-text ant-btn-sm" onclick="closeDrawer()" style="color: rgba(255,255,255,0.45); font-size: 16px;">✕</button>
+    </div>
+
+    <div class="ant-drawer-body" id="drawer-body-content">
+      <!-- Injected via JS -->
+    </div>
+
+    <div class="ant-drawer-footer" id="drawer-footer-actions">
+      <button class="ant-btn ant-btn-default" onclick="closeDrawer()">Close</button>
+      <button class="ant-btn ant-btn-primary" id="drawer-btn-apply">Auto-Fill Application</button>
+    </div>
+  </div>
+
+  <!-- Ant Design System Diagnostics Modal -->
+  <div class="ant-drawer-mask" id="diag-mask" onclick="closeDiagnosticsModal()"></div>
+  <div class="ant-drawer-content-wrapper" id="diag-wrapper" style="width: 520px; right: -520px;">
+    <div class="ant-drawer-header">
+      <h4 class="ant-drawer-title">⚡ Host System & Worker Diagnostics</h4>
+      <button class="ant-btn ant-btn-text ant-btn-sm" onclick="closeDiagnosticsModal()" style="color: rgba(255,255,255,0.45); font-size: 16px;">✕</button>
+    </div>
+    <div class="ant-drawer-body" id="diag-body-content">
+      <!-- Diagnostics rendered here -->
+    </div>
+    <div class="ant-drawer-footer">
+      <button class="ant-btn ant-btn-default" onclick="closeDiagnosticsModal()">Dismiss</button>
     </div>
   </div>
 
   <!-- Toast Notification Container -->
-  <div class="toast-container" id="toasts"></div>
+  <div class="ant-message-notice" id="toast-shelf"></div>
 
   <script>
-    // State management
+    // State
     const state = {
       currentPage: 'dashboard',
       services: [],
       logs: [],
-      theme: localStorage.getItem('theme') || 'dark',
+      theme: localStorage.getItem('antd_theme') || 'dark',
       logsPaused: false,
       logFilter: 'All',
       selectedJobIdx: null,
@@ -788,41 +924,79 @@
     };
 
     document.addEventListener('DOMContentLoaded', () => {
-      applyTheme();
+      applyAntTheme();
       connectWebSocket();
       fetchServices();
       loadStats();
       loadSettings();
-      setupKeyboardShortcuts();
       setInterval(updateUptimes, 1000);
     });
 
-    // Theme Management
-    function toggleTheme() {
+    // Theme Toggle
+    function toggleAntTheme() {
       state.theme = state.theme === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', state.theme);
-      applyTheme();
+      localStorage.setItem('antd_theme', state.theme);
+      applyAntTheme();
     }
-    function applyTheme() {
-      document.body.setAttribute('data-theme', state.theme);
-      document.getElementById('theme-btn').textContent = state.theme === 'dark' ? '☀️' : '🌙';
+
+    function applyAntTheme() {
+      const link = document.getElementById('antd-theme-link');
+      const btn = document.getElementById('theme-btn');
+      if (state.theme === 'light') {
+        link.href = '/static/antd.min.css';
+        btn.textContent = '🌙 Dark Theme';
+        document.querySelector('.app-main').style.background = '#f5f5f5';
+        document.querySelector('.app-header').style.background = '#ffffff';
+        document.querySelector('.app-header').style.borderColor = '#e8e8e8';
+        document.getElementById('breadcrumb-title').style.color = '#000000';
+      } else {
+        link.href = '/static/antd.dark.min.css';
+        btn.textContent = '☀️ Light Theme';
+        document.querySelector('.app-main').style.background = '#141414';
+        document.querySelector('.app-header').style.background = '#1f1f1f';
+        document.querySelector('.app-header').style.borderColor = 'rgba(255,255,255,0.08)';
+        document.getElementById('breadcrumb-title').style.color = '#ffffff';
+      }
       if (state.currentPage === 'analytics') renderCharts();
     }
 
     // Navigation
     function navigate(page) {
-      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-      
-      const targetSec = document.getElementById(`page-${page}`);
-      const targetNav = document.getElementById(`nav-${page}`);
-      if (targetSec) targetSec.classList.add('active');
-      if (targetNav) targetNav.classList.add('active');
+      document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+
+      const sec = document.getElementById('page-' + page);
+      const menuItem = document.getElementById('menu-' + page);
+      if (sec) sec.classList.add('active');
+      if (menuItem) menuItem.classList.add('active');
       state.currentPage = page;
+
+      const titles = {
+        'dashboard': 'Operations Cockpit',
+        'tracker': 'Candidate Pipeline CRM',
+        'analytics': 'Pipeline Analytics',
+        'logs': 'Live Observability',
+        'settings': 'Career & Daemon Settings'
+      };
+      document.getElementById('breadcrumb-title').textContent = titles[page] || page;
 
       if (page === 'tracker') fetchJobs();
       if (page === 'analytics') fetchAnalytics();
       if (page === 'dashboard') { fetchServices(); loadStats(); }
+    }
+
+    // API Helper
+    async function apiCall(endpoint, method = 'GET', body = null) {
+      try {
+        const opts = { method, headers: { 'Content-Type': 'application/json' } };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(endpoint, opts);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } catch (e) {
+        console.warn('API error on ' + endpoint, e);
+        return null;
+      }
     }
 
     // WebSocket Connection
@@ -830,12 +1004,12 @@
       let backoff = 1000;
       function connect() {
         const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        state.ws = new WebSocket(`${protocol}//${location.hostname}:8420/ws`);
+        state.ws = new WebSocket(protocol + '//' + location.hostname + ':8420/ws');
 
         state.ws.onopen = () => {
           backoff = 1000;
-          document.getElementById('health-dot').className = 'health-dot running';
-          document.getElementById('health-text').textContent = 'Connected (Port 8420)';
+          document.getElementById('conn-dot').className = 'ant-badge-status-dot ant-badge-status-processing';
+          document.getElementById('conn-text').textContent = 'System Active (Port 8420)';
         };
 
         state.ws.onmessage = (e) => {
@@ -859,12 +1033,14 @@
               state.logs = [];
               renderLogs();
             }
-          } catch(err) { console.error('WS parsing error:', err); }
+          } catch (err) {
+            console.error('WS JSON parse error:', err);
+          }
         };
 
         state.ws.onclose = () => {
-          document.getElementById('health-dot').className = 'health-dot offline';
-          document.getElementById('health-text').textContent = 'Disconnected (Reconnecting...)';
+          document.getElementById('conn-dot').className = 'ant-badge-status-dot ant-badge-status-error';
+          document.getElementById('conn-text').textContent = 'Disconnected (Reconnecting...)';
           setTimeout(connect, backoff);
           backoff = Math.min(backoff * 2, 15000);
         };
@@ -872,20 +1048,7 @@
       if (location.protocol !== 'file:') connect();
     }
 
-    async function apiCall(endpoint, method = 'GET', body = null) {
-      try {
-        const opts = { method, headers: { 'Content-Type': 'application/json' } };
-        if (body) opts.body = JSON.stringify(body);
-        const res = await fetch(endpoint, opts);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return await res.json();
-      } catch (e) {
-        console.warn(`API Error on ${endpoint}:`, e);
-        return null;
-      }
-    }
-
-    // Services
+    // Services Management
     async function fetchServices() {
       const data = await apiCall('/api/services');
       if (data) {
@@ -905,54 +1068,60 @@
 
         const card = document.createElement('div');
         card.className = 'service-card';
-        card.style.setProperty('--card-color', svc.color);
 
-        const memStr = svc.memory_mb ? `${svc.memory_mb} MB` : '0 MB';
-        const cpuStr = svc.cpu_percent ? `${svc.cpu_percent}%` : '0%';
-        const pidStr = svc.pid ? `PID: ${svc.pid}` : 'Standby';
+        const statusTag = isRunning
+          ? '<span class="ant-tag ant-tag-green"><span class="ant-badge-status-dot ant-badge-status-processing"></span> RUNNING</span>'
+          : '<span class="ant-tag ant-tag-default">IDLE</span>';
+
+        const pidBadge = svc.pid ? '<span class="ant-tag ant-tag-blue">PID: ' + svc.pid + '</span>' : '';
+        const memBadge = isRunning && svc.memory_mb ? '<span class="ant-tag ant-tag-cyan">' + svc.memory_mb + ' MB</span>' : '';
 
         card.innerHTML = `
-          <div class="card-top">
-            <div class="service-info">
-              <div class="service-icon">${svc.icon}</div>
-              <div>
-                <div class="service-title">${svc.name}</div>
-                <div class="service-desc">${svc.description}</div>
-              </div>
+          <div class="service-card-head">
+            <div class="service-card-title">
+              <div class="service-card-icon">${svc.icon}</div>
+              <span>${svc.name}</span>
             </div>
-            <div class="toggle ${isRunning ? 'active' : ''}" onclick="toggleService('${svc.id}')" title="Toggle Service"></div>
-          </div>
-          
-          <div class="card-telemetry">
-            <div class="status-pill">
-              <span class="status-dot ${svc.status}"></span>
-              <span>${svc.status}</span>
-            </div>
-            <span class="pill">${pidStr}</span>
-            ${isRunning ? `<span class="pill">${memStr}</span><span class="pill">CPU ${cpuStr}</span>` : ''}
+            <button type="button" role="switch" class="ant-switch ${isRunning ? 'ant-switch-checked' : ''}" onclick="toggleService('${svc.id}')" id="switch-${svc.id}">
+              <div class="ant-switch-handle"></div>
+            </button>
           </div>
 
-          <div class="card-footer">
-            <div class="uptime-tag">${isRunning ? `⏱️ ${formatUptime(svc.uptime_seconds)}` : '💤 Idle'}</div>
-            <button class="btn btn-sm" onclick="triggerServiceOnce('${svc.id}')">⚡ Trigger Once</button>
+          <div class="service-card-body">
+            <div class="service-desc">${svc.description}</div>
+            <div class="service-telemetry">
+              ${statusTag}
+              ${pidBadge}
+              ${memBadge}
+            </div>
+          </div>
+
+          <div class="service-card-actions">
+            <span style="font-size: 12px; color: rgba(255,255,255,0.45); font-family: monospace;">
+              ${isRunning ? '⏱️ ' + formatUptime(svc.uptime_seconds) : '💤 Standby'}
+            </span>
+            <div style="display: flex; gap: 8px;">
+              <button class="ant-btn ant-btn-sm ant-btn-default" onclick="triggerServiceOnce('${svc.id}')">
+                ⚡ Trigger Once
+              </button>
+            </div>
           </div>
         `;
         grid.appendChild(card);
       });
 
-      document.getElementById('badge-running-count').textContent = `${runningCount}/${state.services.length}`;
+      document.getElementById('sider-badge-running').textContent = runningCount + '/' + state.services.length;
     }
 
     async function toggleService(id) {
       const svc = state.services.find(s => s.id === id);
       if (!svc) return;
       const willStart = svc.status !== 'running';
-      showToast(`${willStart ? 'Starting' : 'Stopping'} ${svc.name}...`, 'info');
-      
-      const endpoint = `/api/services/${id}/${willStart ? 'start' : 'stop'}`;
-      const res = await apiCall(endpoint, 'POST');
+      showAntToast((willStart ? 'Starting ' : 'Stopping ') + svc.name + '...', 'info');
+
+      const res = await apiCall('/api/services/' + id + '/' + (willStart ? 'start' : 'stop'), 'POST');
       if (res && res.status) {
-        showToast(`${svc.name} is now ${res.status}`, res.status === 'running' ? 'success' : 'info');
+        showAntToast(svc.name + ' is now ' + res.status, res.status === 'running' ? 'success' : 'info');
         fetchServices();
       }
     }
@@ -962,9 +1131,15 @@
       else if (id === 'project_scaffolder') await runAction('scaffold');
       else if (id === 'sheets_sync') await runAction('sync-sheets');
       else {
-        showToast(`Running single pass for ${id}...`, 'info');
-        await apiCall(`/api/services/${id}/start`, 'POST');
+        showAntToast('Dispatching single pass for ' + id + '...', 'info');
+        await apiCall('/api/services/' + id + '/start', 'POST');
       }
+    }
+
+    async function runAction(act) {
+      showAntToast('Executing ' + act + '...', 'info');
+      const res = await apiCall('/api/actions/' + act, 'POST');
+      if (res) showAntToast('Action ' + act + ' dispatched successfully!', 'success');
     }
 
     function updateUptimes() {
@@ -973,43 +1148,33 @@
           svc.uptime_seconds = (svc.uptime_seconds || 0) + 1;
         }
       });
-      document.querySelectorAll('.uptime-tag').forEach((el, i) => {
-        const s = state.services[i];
-        if (s && s.status === 'running') el.textContent = `⏱️ ${formatUptime(s.uptime_seconds)}`;
-      });
     }
 
     function formatUptime(sec) {
       if (!sec) return '0s';
       const m = Math.floor(sec / 60);
       const s = sec % 60;
-      if (m > 60) return `${Math.floor(m/60)}h ${m%60}m`;
-      return `${m}m ${s}s`;
+      if (m > 60) return Math.floor(m / 60) + 'h ' + (m % 60) + 'm';
+      return m + 'm ' + s + 's';
     }
 
-    async function runAction(act) {
-      showToast(`Triggering ${act}...`, 'info');
-      const res = await apiCall(`/api/actions/${act}`, 'POST');
-      if (res) showToast(`Action ${act} dispatched successfully!`, 'success');
-    }
-
-    // Stats & KPIs
+    // Stats
     async function loadStats() {
       const data = await apiCall('/api/stats');
       if (!data) return;
-      document.getElementById('kpi-jobs').textContent = data.total_jobs || 0;
-      document.getElementById('kpi-staged').textContent = data.staged || 0;
-      document.getElementById('kpi-applied').textContent = data.applied || 0;
-      document.getElementById('kpi-fit').textContent = `${data.avg_fit_score || 0}%`;
-      document.getElementById('badge-jobs-count').textContent = data.total_jobs || 0;
+      document.getElementById('stat-total-jobs').textContent = data.total_jobs || 0;
+      document.getElementById('stat-staged').textContent = data.staged || 0;
+      document.getElementById('stat-applied').textContent = data.applied || 0;
+      document.getElementById('stat-avg-fit').textContent = (data.avg_fit_score || 0) + '%';
+      document.getElementById('sider-badge-jobs').textContent = data.total_jobs || 0;
     }
 
     // Pipeline & Job Tracker
     async function fetchJobs() {
-      const q = document.getElementById('job-search').value;
+      const q = document.getElementById('job-search-input').value;
       const sb = state.jobsSort.by;
       const so = state.jobsSort.order;
-      const data = await apiCall(`/api/jobs?search=${encodeURIComponent(q)}&sort_by=${sb}&sort_order=${so}&per_page=100`);
+      const data = await apiCall('/api/jobs?search=' + encodeURIComponent(q) + '&sort_by=' + sb + '&sort_order=' + so + '&per_page=100');
       if (data && data.data) {
         state.jobs = data.data;
         renderJobs();
@@ -1018,8 +1183,10 @@
 
     function setFilterStage(stage) {
       state.stageFilter = stage.toLowerCase();
-      document.querySelectorAll('.filter-pill').forEach(p => {
-        p.classList.toggle('active', p.textContent.toLowerCase() === (stage || 'all'));
+      document.querySelectorAll('.stage-btn').forEach(b => {
+        b.className = b.textContent.toLowerCase() === (stage || 'all')
+          ? 'ant-btn ant-btn-sm ant-btn-primary stage-btn'
+          : 'ant-btn ant-btn-sm ant-btn-default stage-btn';
       });
       renderJobs();
     }
@@ -1027,7 +1194,7 @@
     function renderJobs() {
       const tbody = document.getElementById('jobs-tbody');
       tbody.innerHTML = '';
-      
+
       const filtered = state.jobs.filter(j => {
         if (!state.stageFilter) return true;
         return (j.status || '').toLowerCase().includes(state.stageFilter);
@@ -1035,28 +1202,24 @@
 
       filtered.forEach(job => {
         const tr = document.createElement('tr');
-        if (state.selectedJobIdx === job.idx) tr.classList.add('selected');
-        
+        if (state.selectedJobIdx === job.idx) tr.classList.add('selected-row');
+
         const score = parseInt(job.fitScore) || 75;
-        let scoreClass = 'mid';
-        if (score >= 90) scoreClass = 'high';
-        else if (score < 75) scoreClass = 'low';
+        let scoreTag = 'ant-tag-orange';
+        if (score >= 90) scoreTag = 'ant-tag-green';
+        else if (score < 75) scoreTag = 'ant-tag-red';
 
         tr.onclick = () => openDrawer(job.idx);
 
         tr.innerHTML = `
           <td><strong>${escapeHtml(job.company)}</strong></td>
           <td>
-            <div class="job-title-col">
-              <span>${escapeHtml(job.title)}</span>
-              <span class="job-sub">${job.timestamp ? job.timestamp.split('T')[0] : 'Recently discovered'}</span>
-            </div>
+            <div style="font-weight: 600; color: #fff;">${escapeHtml(job.title)}</div>
+            <div style="font-size: 11px; color: rgba(255,255,255,0.45);">${job.timestamp ? job.timestamp.split('T')[0] : 'Recently'}</div>
           </td>
+          <td><span class="ant-tag ${scoreTag}">${score}%</span></td>
           <td>
-            <span class="fit-badge ${scoreClass}">${score}%</span>
-          </td>
-          <td>
-            <select class="status-select" onclick="event.stopPropagation()" onchange="updateJobStatus(${job.idx}, this.value)">
+            <select class="ant-input ant-input-sm" style="width: 140px; cursor: pointer;" onclick="event.stopPropagation()" onchange="updateJobStatus(${job.idx}, this.value)">
               <option value="Staged - Ready to Submit" ${job.status.includes('Staged') ? 'selected' : ''}>Staged</option>
               <option value="Applied" ${job.status.includes('Applied') ? 'selected' : ''}>Applied</option>
               <option value="Interview" ${job.status.includes('Interview') ? 'selected' : ''}>Interview</option>
@@ -1065,15 +1228,15 @@
             </select>
           </td>
           <td>
-            <span style="color: var(--text-secondary); font-size: 0.8rem;">
-              ${escapeHtml(job.missingSkill || 'Fully Aligned')}
+            <span class="ant-tag ant-tag-purple" style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; display: inline-block;">
+              ${escapeHtml(job.missingSkill || 'Fully Matched')}
             </span>
           </td>
-          <td><span style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(job.location || 'Remote')}</span></td>
+          <td><span style="font-size: 12px; color: rgba(255,255,255,0.55);">${escapeHtml(job.location || 'Remote')}</span></td>
           <td>
-            <div style="display: flex; gap: 6px;" onclick="event.stopPropagation()">
-              <button class="btn btn-sm" onclick="openDrawer(${job.idx})">Inspect</button>
-              ${job.url ? `<a href="${job.url}" target="_blank" class="btn btn-sm btn-primary">Link ↗</a>` : ''}
+            <div style="display: flex; gap: 8px;" onclick="event.stopPropagation()">
+              <button class="ant-btn ant-btn-sm ant-btn-default" onclick="openDrawer(${job.idx})">Inspect</button>
+              ${job.url ? '<a href="' + job.url + '" target="_blank" class="ant-btn ant-btn-sm ant-btn-primary">Link ↗</a>' : ''}
             </div>
           </td>
         `;
@@ -1092,101 +1255,104 @@
     }
 
     async function updateJobStatus(idx, newStatus) {
-      const res = await apiCall(`/api/jobs/${idx}/status`, 'POST', { status: newStatus });
+      const res = await apiCall('/api/jobs/' + idx + '/status', 'POST', { status: newStatus });
       if (res && res.status === 'success') {
-        showToast(`Status updated to ${newStatus}`, 'success');
+        showAntToast('Status updated to ' + newStatus, 'success');
         loadStats();
       }
     }
 
-    // Side-Over Drawer (Attio Style Inspector)
+    // Drawer Inspector
     async function openDrawer(idx) {
       state.selectedJobIdx = idx;
       renderJobs();
-      
-      const drawer = document.getElementById('job-drawer');
-      const body = document.getElementById('drawer-body');
-      drawer.classList.add('open');
-      body.innerHTML = '<div style="color: var(--text-muted); padding: 20px;">Loading job details...</div>';
 
-      const data = await apiCall(`/api/jobs/${idx}`);
+      document.getElementById('drawer-mask').classList.add('open');
+      document.getElementById('drawer-wrapper').classList.add('open');
+
+      const body = document.getElementById('drawer-body-content');
+      body.innerHTML = '<div style="color: rgba(255,255,255,0.45); padding: 20px;">Loading role specifications...</div>';
+
+      const data = await apiCall('/api/jobs/' + idx);
       if (!data || !data.job) {
-        body.innerHTML = '<div style="color: var(--red);">Could not load details.</div>';
+        body.innerHTML = '<div style="color: #ff4d4f;">Could not load job details.</div>';
         return;
       }
 
       const job = data.job;
-      document.getElementById('drawer-title').textContent = `${job.company}`;
+      document.getElementById('drawer-company-title').textContent = job.company + ' — ' + job.title;
 
       let outreachHtml = '';
       if (data.has_outreach && data.outreach_content) {
         outreachHtml = `
-          <div class="drawer-section">
-            <div class="drawer-section-title">
-              <span>Tailored Outreach Package</span>
-              <button class="btn btn-sm" onclick="generateOutreach(${idx})">Regenerate</button>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <span style="font-weight: 600; font-size: 13px; color: #fff;">TAILORED OUTREACH PACKAGE</span>
+              <button class="ant-btn ant-btn-sm ant-btn-default" onclick="generateOutreach(${idx})">🔄 Regenerate</button>
             </div>
-            <div class="copy-box" id="drawer-outreach-text">${escapeHtml(data.outreach_content)}</div>
-            <div style="margin-top: 8px; display: flex; gap: 8px;">
-              <button class="btn btn-sm" onclick="copyDrawerOutreach()">📋 Copy Pitch</button>
+            <pre style="background: #0d0d0d; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 12px; font-size: 12px; color: #d4d4d4; white-space: pre-wrap; word-break: break-word; max-height: 180px; overflow-y: auto;" id="drawer-outreach-text">${escapeHtml(data.outreach_content)}</pre>
+            <div style="margin-top: 10px;">
+              <button class="ant-btn ant-btn-sm ant-btn-primary" onclick="copyDrawerOutreach()">📋 Copy Pitch to Clipboard</button>
             </div>
           </div>
         `;
       } else {
         outreachHtml = `
-          <div class="drawer-section">
-            <div class="drawer-section-title">
-              <span>Recruiter Outreach Draft</span>
-            </div>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
-              Generate a personalized 4-sentence cold email and informal LinkedIn connection request for this role.
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+            <div style="font-weight: 600; font-size: 13px; color: #fff; margin-bottom: 6px;">RECRUITER OUTREACH PITCH</div>
+            <p style="font-size: 12px; color: rgba(255,255,255,0.55); margin-bottom: 12px;">
+              Auto-draft a 4-sentence cold email and informal LinkedIn connection request (≤300 chars) tailored to this specific role.
             </p>
-            <button class="btn btn-primary btn-sm" onclick="generateOutreach(${idx})">⚡ Generate Cold Outreach Pitch</button>
+            <button class="ant-btn ant-btn-primary ant-btn-sm" onclick="generateOutreach(${idx})">
+              ⚡ Generate Tailored Pitch
+            </button>
           </div>
         `;
       }
 
       body.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <h2 style="font-size: 1.2rem; font-weight: 700;">${escapeHtml(job.title)}</h2>
-          <div style="font-size: 0.85rem; color: var(--text-muted);">🏢 ${escapeHtml(job.company)} • 📍 ${escapeHtml(job.location || 'Remote')}</div>
+        <div style="margin-bottom: 18px;">
+          <h2 style="font-size: 18px; font-weight: 700; color: #fff; margin: 0 0 6px 0;">${escapeHtml(job.title)}</h2>
+          <div style="font-size: 13px; color: rgba(255,255,255,0.55);">
+            🏢 <strong>${escapeHtml(job.company)}</strong> • 📍 ${escapeHtml(job.location || 'Remote')} • ⏱️ ${job.timestamp || 'Discovered'}
+          </div>
         </div>
 
-        <div class="drawer-section">
-          <div class="drawer-section-title">Opportunity Fit & Gaps</div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="font-size: 0.85rem;">ATS Fit Score:</span>
-            <span class="fit-badge ${parseInt(job.fitScore)>=90?'high':'mid'}">${job.fitScore}%</span>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+          <div style="font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.45); margin-bottom: 8px;">CANDIDATE FIT & DEMO POC</div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <span>ATS Match Score:</span>
+            <span class="ant-tag ${parseInt(job.fitScore)>=90?'ant-tag-green':'ant-tag-orange'}" style="font-size: 14px; font-weight: 700;">${job.fitScore}%</span>
           </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
-            <strong>Identified Skill Gap:</strong> ${escapeHtml(job.missingSkill || 'None')}<br>
-            <strong>Recommended POC Project:</strong> ${escapeHtml(job.suggestedProject || 'Production Deployment Checklist')}
+          <div style="font-size: 13px; line-height: 1.6;">
+            <strong>Identified Skill Gap:</strong> <span style="color: #ff7875;">${escapeHtml(job.missingSkill || 'None')}</span><br>
+            <strong>Recommended POC Project:</strong> <span style="color: #69c0ff;">${escapeHtml(job.suggestedProject || 'Production Deployment Checklist')}</span>
           </div>
         </div>
 
         ${outreachHtml}
 
-        <div class="drawer-section">
-          <div class="drawer-section-title">Actions & Auto-Apply</div>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            ${job.url ? `<a href="${job.url}" target="_blank" class="btn btn-primary" style="justify-content: center;">🌐 View Official Posting</a>` : ''}
-            <button class="btn" style="justify-content: center;" onclick="runAutofillForJob('${job.url}')">🤖 Auto-Fill Application Form</button>
-          </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px;">
+          <div style="font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.45); margin-bottom: 8px;">EXTERNAL LISTING</div>
+          ${job.url ? '<a href="' + job.url + '" target="_blank" class="ant-btn ant-btn-default" style="width: 100%; text-align: center; margin-bottom: 8px;">🌐 Open Original Job Posting</a>' : ''}
         </div>
       `;
+
+      document.getElementById('drawer-btn-apply').onclick = () => runAutofillForJob(job.url);
     }
 
     function closeDrawer() {
-      document.getElementById('job-drawer').classList.remove('open');
+      document.getElementById('drawer-mask').classList.remove('open');
+      document.getElementById('drawer-wrapper').classList.remove('open');
       state.selectedJobIdx = null;
       renderJobs();
     }
 
     async function generateOutreach(idx) {
-      showToast('Generating personalized outreach...', 'info');
-      const res = await apiCall(`/api/jobs/${idx}/outreach`, 'POST');
+      showAntToast('Drafting tailored recruiter pitch...', 'info');
+      const res = await apiCall('/api/jobs/' + idx + '/outreach', 'POST');
       if (res && res.draft) {
-        showToast('Outreach generated successfully!', 'success');
+        showAntToast('Pitch generated and saved!', 'success');
         openDrawer(idx);
       }
     }
@@ -1194,12 +1360,12 @@
     function copyDrawerOutreach() {
       const txt = document.getElementById('drawer-outreach-text').textContent;
       navigator.clipboard.writeText(txt);
-      showToast('Outreach pitch copied to clipboard!', 'success');
+      showAntToast('Pitch copied to clipboard!', 'success');
     }
 
     async function runAutofillForJob(url) {
-      if (!url) { showToast('No URL available for this role', 'error'); return; }
-      showToast('Launching anti-detect browser autofill...', 'info');
+      if (!url) { showAntToast('No URL provided for this job', 'error'); return; }
+      showAntToast('Starting anti-detect browser autofill...', 'info');
       await apiCall('/api/services/browser_autoapply/start', 'POST');
       navigate('logs');
     }
@@ -1212,16 +1378,16 @@
     function addLog(log) {
       state.logs.push(log);
       if (state.logs.length > 1000) state.logs.shift();
-      document.getElementById('badge-log-count').textContent = state.logs.length;
+      document.getElementById('sider-badge-logs').textContent = state.logs.length;
       if (!state.logsPaused && state.currentPage === 'logs') {
         renderLogs();
       }
     }
 
     function renderLogs() {
-      const viewer = document.getElementById('log-viewer');
+      const viewer = document.getElementById('terminal-body');
       viewer.innerHTML = '';
-      const query = (document.getElementById('log-search-input')?.value || '').toLowerCase();
+      const query = (document.getElementById('log-search-box')?.value || '').toLowerCase();
 
       const filtered = state.logs.filter(l => {
         if (state.logFilter !== 'All' && l.level !== state.logFilter) return false;
@@ -1231,13 +1397,13 @@
 
       filtered.forEach(log => {
         const row = document.createElement('div');
-        row.className = `log-line ${(log.level || 'info').toLowerCase()}`;
-        const timeStr = log.timestamp ? log.timestamp.split('T')[1]?.slice(0,8) || log.timestamp : '';
-        
+        row.className = 'terminal-line ' + (log.level || 'info').toLowerCase();
+        const timeStr = log.timestamp ? log.timestamp.split('T')[1]?.slice(0, 8) || log.timestamp : '';
+
         row.innerHTML = `
-          <span class="log-time">[${timeStr}]</span>
-          <span class="log-svc">[${escapeHtml(log.service_name)}]</span>
-          <span class="log-msg">${escapeHtml(log.message)}</span>
+          <span class="terminal-time">[${timeStr}]</span>
+          <span class="terminal-tag">[${escapeHtml(log.service_name)}]</span>
+          <span class="terminal-msg">${escapeHtml(log.message)}</span>
         `;
         viewer.appendChild(row);
       });
@@ -1247,34 +1413,39 @@
 
     function filterLogs(lvl) {
       state.logFilter = lvl;
+      document.querySelectorAll('.log-filter-btn').forEach(b => {
+        b.className = b.textContent.toUpperCase() === lvl.toUpperCase()
+          ? 'ant-btn ant-btn-sm ant-btn-primary log-filter-btn'
+          : 'ant-btn ant-btn-sm ant-btn-default log-filter-btn';
+      });
       renderLogs();
     }
 
     function toggleLogPause() {
       state.logsPaused = !state.logsPaused;
-      document.getElementById('btn-log-pause').textContent = state.logsPaused ? '▶️ Resume' : '⏸️ Pause';
+      document.getElementById('btn-log-pause').textContent = state.logsPaused ? '▶ Resume' : '⏸ Pause';
     }
 
     function copyLogs() {
-      const text = state.logs.map(l => `[${l.timestamp}] [${l.level}] [${l.service_name}] ${l.message}`).join('\n');
+      const text = state.logs.map(l => '[' + l.timestamp + '] [' + l.level + '] [' + l.service_name + '] ' + l.message).join(String.fromCharCode(10));
       navigator.clipboard.writeText(text);
-      showToast('Logs copied to clipboard!', 'success');
+      showAntToast('Logs copied to clipboard!', 'success');
     }
 
     async function clearLiveLogs() {
       await apiCall('/api/logs', 'DELETE');
       state.logs = [];
       renderLogs();
-      showToast('Logs cleared', 'info');
+      showAntToast('Logs cleared', 'info');
     }
 
-    // Analytics (Canvas 2D Engine)
+    // Analytics (Canvas 2D)
     async function fetchAnalytics() {
       const data = await apiCall('/api/analytics') || {
         funnel: { discovered: 42, staged: 12, applied: 5, interview: 2, offer: 0 },
-        skill_gaps: [ {skill: 'LangGraph', count: 18}, {skill: 'Docker', count: 12}, {skill: 'Riverpod', count: 8} ],
+        skill_gaps: [{ skill: 'LangGraph', count: 18 }, { skill: 'Docker', count: 12 }, { skill: 'Riverpod', count: 8 }],
         fit_distribution: { "60-70": 4, "70-80": 14, "80-90": 20, "90-100": 4 },
-        top_companies: [ {company: 'Floor Boss', count: 1}, {company: 'Google', count: 4} ]
+        top_companies: [{ company: 'Floor Boss', count: 1 }, { company: 'Google', count: 4 }]
       };
       window._analyticsData = data;
       renderCharts();
@@ -1284,62 +1455,56 @@
       if (!window._analyticsData || state.currentPage !== 'analytics') return;
       const data = window._analyticsData;
       const isDark = state.theme === 'dark';
-      const textColor = isDark ? '#94a3b8' : '#475569';
+      const textColor = isDark ? 'rgba(255,255,255,0.65)' : '#475569';
 
       function setupCanvas(id) {
         const c = document.getElementById(id);
         if (!c) return null;
-        c.width = c.parentElement.clientWidth - 36;
+        c.width = c.parentElement.clientWidth - 40;
         c.height = 240;
         return { c, ctx: c.getContext('2d') };
       }
 
-      // Funnel Chart
+      // Funnel
       const funnel = setupCanvas('chart-funnel');
       if (funnel) {
         const items = Object.entries(data.funnel).map(([label, val]) => ({ label, val }));
         const max = Math.max(...items.map(i => i.val)) || 1;
-        const barH = 28;
+        const barH = 26;
         items.forEach((item, i) => {
           const y = 20 + i * (barH + 12);
           const w = Math.max(10, (item.val / max) * (funnel.c.width - 150));
-          funnel.ctx.fillStyle = '#6366f1';
-          funnel.ctx.beginPath();
-          funnel.ctx.roundRect(100, y, w, barH, 4);
-          funnel.ctx.fill();
-
+          funnel.ctx.fillStyle = '#1677ff';
+          funnel.ctx.fillRect(100, y, w, barH);
           funnel.ctx.fillStyle = textColor;
           funnel.ctx.font = '12px system-ui';
           funnel.ctx.textAlign = 'right';
-          funnel.ctx.fillText(item.label, 90, y + 18);
+          funnel.ctx.fillText(item.label, 90, y + 17);
           funnel.ctx.textAlign = 'left';
-          funnel.ctx.fillText(item.val, 100 + w + 10, y + 18);
+          funnel.ctx.fillText(item.val, 100 + w + 10, y + 17);
         });
       }
 
-      // Skills Heatmap
+      // Skills
       const skills = setupCanvas('chart-skills');
       if (skills) {
         const max = Math.max(...data.skill_gaps.map(s => s.count)) || 1;
-        const barH = 16;
+        const barH = 18;
         data.skill_gaps.slice(0, 6).forEach((s, i) => {
           const y = 16 + i * (barH + 12);
           const w = Math.max(10, (s.count / max) * (skills.c.width - 160));
-          skills.ctx.fillStyle = '#f97316';
-          skills.ctx.beginPath();
-          skills.ctx.roundRect(110, y, w, barH, 4);
-          skills.ctx.fill();
-
+          skills.ctx.fillStyle = '#fa8c16';
+          skills.ctx.fillRect(110, y, w, barH);
           skills.ctx.fillStyle = textColor;
-          skills.ctx.font = '11px system-ui';
+          skills.ctx.font = '12px system-ui';
           skills.ctx.textAlign = 'right';
-          skills.ctx.fillText(s.skill, 100, y + 12);
+          skills.ctx.fillText(s.skill, 100, y + 13);
           skills.ctx.textAlign = 'left';
-          skills.ctx.fillText(s.count, 110 + w + 8, y + 12);
+          skills.ctx.fillText(s.count, 110 + w + 8, y + 13);
         });
       }
 
-      // Fit Distribution Histogram
+      // Fit Distribution
       const fit = setupCanvas('chart-fit');
       if (fit) {
         const keys = Object.keys(data.fit_distribution);
@@ -1351,20 +1516,17 @@
           const h = (vals[i] / max) * 160;
           const x = 30 + i * (barW + 20);
           const y = fit.c.height - 30 - h;
-          fit.ctx.fillStyle = '#10b981';
-          fit.ctx.beginPath();
-          fit.ctx.roundRect(x, y, barW, h, 4);
-          fit.ctx.fill();
-
+          fit.ctx.fillStyle = '#52c41a';
+          fit.ctx.fillRect(x, y, barW, h);
           fit.ctx.fillStyle = textColor;
-          fit.ctx.font = '11px system-ui';
+          fit.ctx.font = '12px system-ui';
           fit.ctx.textAlign = 'center';
-          fit.ctx.fillText(k, x + barW/2, fit.c.height - 10);
-          fit.ctx.fillText(vals[i], x + barW/2, y - 6);
+          fit.ctx.fillText(k, x + barW / 2, fit.c.height - 10);
+          fit.ctx.fillText(vals[i], x + barW / 2, y - 6);
         });
       }
 
-      // Top Companies
+      // Companies
       const comps = setupCanvas('chart-companies');
       if (comps) {
         const max = Math.max(...data.top_companies.map(c => c.count)) || 1;
@@ -1372,13 +1534,10 @@
         data.top_companies.slice(0, 6).forEach((c, i) => {
           const y = 16 + i * (barH + 12);
           const w = Math.max(10, (c.count / max) * (comps.c.width - 150));
-          comps.ctx.fillStyle = '#06b6d4';
-          comps.ctx.beginPath();
-          comps.ctx.roundRect(110, y, w, barH, 4);
-          comps.ctx.fill();
-
+          comps.ctx.fillStyle = '#13c2c2';
+          comps.ctx.fillRect(110, y, w, barH);
           comps.ctx.fillStyle = textColor;
-          comps.ctx.font = '11px system-ui';
+          comps.ctx.font = '12px system-ui';
           comps.ctx.textAlign = 'right';
           comps.ctx.fillText(c.company, 100, y + 13);
           comps.ctx.textAlign = 'left';
@@ -1425,63 +1584,28 @@
 
       const res = await apiCall('/api/settings', 'POST', payload);
       if (res && res.status === 'success') {
-        showToast('Settings saved successfully! Daemons will use updated queries.', 'success');
+        showAntToast('Configuration updated and saved!', 'success');
       }
-    }
-
-    // Command Palette
-    function openCommandPalette() {
-      document.getElementById('palette-modal').classList.add('active');
-      document.getElementById('palette-input').focus();
-      handlePaletteSearch();
-    }
-    function closeCommandPalette(e) {
-      document.getElementById('palette-modal').classList.remove('active');
-    }
-    function handlePaletteSearch() {
-      const q = document.getElementById('palette-input').value.toLowerCase();
-      const res = document.getElementById('palette-results');
-      res.innerHTML = '';
-
-      const items = [
-        { label: 'Go to Operations Cockpit', action: () => navigate('dashboard') },
-        { label: 'Go to Pipeline CRM', action: () => navigate('tracker') },
-        { label: 'Go to Live Observability Logs', action: () => navigate('logs') },
-        { label: 'Go to Analytics & Funnel', action: () => navigate('analytics') },
-        { label: 'Go to Career Settings', action: () => navigate('settings') },
-        { label: 'Trigger Discovery Scan (Once)', action: () => runAction('scan-once') },
-        { label: 'Scaffold POC Mini-Project', action: () => runAction('scaffold') },
-        { label: 'Sync to Google Sheets', action: () => runAction('sync-sheets') }
-      ];
-
-      items.filter(i => !q || i.label.toLowerCase().includes(q)).forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'palette-item';
-        div.textContent = item.label;
-        div.onclick = () => {
-          closeCommandPalette();
-          item.action();
-        };
-        res.appendChild(div);
-      });
     }
 
     // Diagnostics Modal
     async function openDiagnosticsModal() {
-      document.getElementById('diagnostics-modal').classList.add('active');
-      const box = document.getElementById('diagnostics-content');
-      box.innerHTML = '<div style="color: var(--text-muted);">Fetching system metrics...</div>';
-      
+      document.getElementById('diag-mask').classList.add('open');
+      document.getElementById('diag-wrapper').classList.add('open');
+
+      const box = document.getElementById('diag-body-content');
+      box.innerHTML = '<div style="color: rgba(255,255,255,0.45);">Fetching live process metrics...</div>';
+
       const diag = await apiCall('/api/system/diagnostics');
       if (!diag) {
-        box.innerHTML = '<div style="color: var(--red);">Error fetching diagnostics.</div>';
+        box.innerHTML = '<div style="color: #ff4d4f;">Failed to read diagnostics.</div>';
         return;
       }
 
       box.innerHTML = `
-        <div style="margin-bottom: 16px;">
-          <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Host System</h4>
-          <div style="font-size: 0.82rem; margin-top: 6px; line-height: 1.6;">
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.45); margin-bottom: 8px;">HOST RUNTIME</div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 14px; font-size: 13px; line-height: 1.7;">
             Python: <strong>${diag.system.python_version}</strong><br>
             System Uptime: <strong>${formatUptime(diag.system.uptime_seconds)}</strong><br>
             CPU Cores: <strong>${diag.system.cpu_count}</strong> (Load: ${diag.system.cpu_percent}%)<br>
@@ -1489,61 +1613,45 @@
             Disk Free: <strong>${diag.system.disk_free_gb} GB</strong>
           </div>
         </div>
+
         <div>
-          <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Worker Services</h4>
-          <div style="font-size: 0.8rem; margin-top: 6px;">
+          <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.45); margin-bottom: 8px;">SERVICES SUPERVISOR TABLE</div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 14px; font-size: 12px;">
             ${diag.services.map(s => `
-              <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);">
-                <span>${s.name} (${s.status})</span>
-                <span class="pill">PID ${s.pid || 'None'} | ${s.memory_mb || 0} MB</span>
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <span>${s.name}</span>
+                <span>
+                  <span class="ant-tag ${s.status === 'running' ? 'ant-tag-green' : 'ant-tag-default'}">${s.status.toUpperCase()}</span>
+                  <span class="ant-tag ant-tag-blue">PID ${s.pid || 'None'}</span>
+                  <span class="ant-tag ant-tag-cyan">${s.memory_mb || 0} MB</span>
+                </span>
               </div>
             `).join('')}
           </div>
         </div>
       `;
     }
+
     function closeDiagnosticsModal() {
-      document.getElementById('diagnostics-modal').classList.remove('active');
+      document.getElementById('diag-mask').classList.remove('open');
+      document.getElementById('diag-wrapper').classList.remove('open');
     }
 
-    // Keyboard Shortcuts
-    function setupKeyboardShortcuts() {
-      document.addEventListener('keydown', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-          if (e.key === 'Escape') {
-            closeCommandPalette();
-            closeDrawer();
-            closeDiagnosticsModal();
-          }
-          return;
-        }
+    // Ant Design Toast
+    function showAntToast(msg, type = 'info') {
+      const shelf = document.getElementById('toast-shelf');
+      const box = document.createElement('div');
+      box.className = 'ant-message-notice-content';
 
-        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-          e.preventDefault();
-          openCommandPalette();
-        } else if (e.key === 'Escape') {
-          closeCommandPalette();
-          closeDrawer();
-          closeDiagnosticsModal();
-        } else if (e.key >= '1' && e.key <= '6') {
-          const idx = parseInt(e.key) - 1;
-          if (state.services[idx]) toggleService(state.services[idx].id);
-        } else if (e.key.toLowerCase() === 'd') navigate('dashboard');
-        else if (e.key.toLowerCase() === 'j') navigate('tracker');
-        else if (e.key.toLowerCase() === 'a') navigate('analytics');
-        else if (e.key.toLowerCase() === 'l') navigate('logs');
-        else if (e.key.toLowerCase() === 's') navigate('settings');
-      });
-    }
+      const icons = {
+        'success': '<span style="color: #52c41a;">✔</span>',
+        'error': '<span style="color: #ff4d4f;">✖</span>',
+        'info': '<span style="color: #1677ff;">ℹ</span>'
+      };
 
-    function showToast(msg, type = 'info') {
-      const c = document.getElementById('toasts');
-      const t = document.createElement('div');
-      t.className = 'toast';
-      const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
-      t.innerHTML = `<span>${icon}</span> <span>${escapeHtml(msg)}</span>`;
-      c.appendChild(t);
-      setTimeout(() => t.remove(), 4000);
+      box.innerHTML = (icons[type] || icons.info) + ' <span>' + escapeHtml(msg) + '</span>';
+      shelf.appendChild(box);
+      setTimeout(() => box.remove(), 4000);
     }
 
     function escapeHtml(str) {
