@@ -150,11 +150,22 @@ def main():
         print("[OK] Test mode: All 12 commands registered, dependencies loaded, bot syntax verified.")
         sys.exit(0)
 
-    if not TOKEN:
-        print("Error: TELEGRAM_BOT_TOKEN not set in environment or .env file.")
-        print("Create a bot via @BotFather on Telegram and set TELEGRAM_BOT_TOKEN in .env")
-        sys.exit(1)
+    global TOKEN, ALLOWED_USER_ID
+    while not TOKEN or "your_bot_token" in TOKEN or len(TOKEN) < 10:
+        print("📱 [TELEGRAM] Notice: TELEGRAM_BOT_TOKEN not configured in .env yet.")
+        print("   To connect: Create a bot via @BotFather on Telegram, then add your token in the Settings tab.")
+        print("   Standing by (checking .env every 15s)...")
+        time.sleep(15)
+        load_dotenv(override=True)
+        TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+        ALLOWED_USER_ID = os.getenv("TELEGRAM_ALLOWED_USER_ID")
+        if ALLOWED_USER_ID:
+            try:
+                ALLOWED_USER_ID = int(ALLOWED_USER_ID)
+            except ValueError:
+                ALLOWED_USER_ID = None
 
+    print("🤖 Telegram Bot initialized with token. Connecting to Telegram API...")
     application = Application.builder().token(TOKEN).build()
     
     commands = [

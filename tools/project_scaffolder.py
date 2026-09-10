@@ -291,6 +291,26 @@ python app.py
         return "langgraph"
 
 
+def run_scaffolder_daemon(interval_hours=2):
+    import time
+    print("📦 Project Scaffolder Daemon started.")
+    print("   Monitoring skill gaps and preparing 1 visual demo project per day for LinkedIn impressions...")
+    scaffolder = ProjectScaffolder()
+    
+    while True:
+        if scaffolder.can_build_today():
+            skill = scaffolder.get_top_skill_gap()
+            print(f"\n🚀 [SCAFFOLDER] Daily project needed. Scaffolding project for skill: '{skill}'...")
+            res = scaffolder.scaffold(skill, dry_run=False, force=False)
+            if "github_url" in res:
+                print(f"✅ Created: {res.get('local_path')}")
+                print(f"🔗 Repo: {res.get('github_url')}")
+                print(f"📢 Hook: {res.get('linkedin_hook')}")
+        else:
+            print("📦 [SCAFFOLDER] Today's demo project is already generated and pushed.")
+            print("   Standing by for tomorrow's cycle (checking every 2 hours)...")
+        time.sleep(interval_hours * 3600)
+
 if __name__ == "__main__":
     import argparse
     import os
@@ -298,10 +318,14 @@ if __name__ == "__main__":
     parser.add_argument("--skill", default=None, help="Skill slug to scaffold (defaults to auto-detected top gap)")
     parser.add_argument("--dry-run", action="store_true", help="Generate files locally without committing or pushing")
     parser.add_argument("--force", action="store_true", help="Bypass the 1-project-per-day limit")
+    parser.add_argument("--daemon", action="store_true", help="Run continuously in background daemon mode")
     args = parser.parse_args()
     
-    scaffolder = ProjectScaffolder()
-    skill = args.skill or scaffolder.get_top_skill_gap()
-    print(f"Scaffolding project for skill: {skill}")
-    res = scaffolder.scaffold(skill, dry_run=args.dry_run, force=args.force)
-    print(json.dumps(res, indent=2))
+    if args.daemon:
+        run_scaffolder_daemon()
+    else:
+        scaffolder = ProjectScaffolder()
+        skill = args.skill or scaffolder.get_top_skill_gap()
+        print(f"Scaffolding project for skill: {skill}")
+        res = scaffolder.scaffold(skill, dry_run=args.dry_run, force=args.force)
+        print(json.dumps(res, indent=2))

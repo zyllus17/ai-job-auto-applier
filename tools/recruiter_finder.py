@@ -91,21 +91,68 @@ def find_company_domain(company_name: str) -> str:
     clean_name = urllib.parse.quote_plus(company_name.lower().replace(' ', '').replace(',', '').replace('.', ''))
     return f"{clean_name}.com"
 
+def run_recruiter_daemon(roles=None):
+    import time
+    import csv
+    if roles is None:
+        roles = ["Engineering Manager", "Technical Recruiter", "Talent Acquisition"]
+    print("🤝 Recruiter Outreach Daemon started.")
+    print("   Scanning active companies from job tracker for key decision-makers...")
+    
+    tracker_path = Path(__file__).parent.parent / "job_search_tracker.csv"
+    processed_companies = set()
+    
+    while True:
+        companies_to_scan = []
+        if tracker_path.exists():
+            try:
+                with open(tracker_path, 'r', encoding='utf-8') as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        comp = row.get('company', '').strip()
+                        if comp and comp.lower() not in ('test company inc.', 'none', '') and comp not in processed_companies:
+                            companies_to_scan.append(comp)
+            except Exception as e:
+                print(f"[RECRUITER ERROR] {e}")
+                
+        if companies_to_scan:
+            batch = companies_to_scan[:3]
+            for comp in batch:
+                processed_companies.add(comp)
+                domain = find_company_domain(comp)
+                print(f"\n🔍 [OUTREACH] Finding decision-makers at: {comp} ({domain})")
+                findings = google_xray_search(comp, roles)
+                if findings:
+                    for f in findings:
+                        print(f"   👤 {f['name']} | {f['title']}")
+                        print(f"      🔗 {f['linkedin_url']}")
+                else:
+                    print(f"   ℹ️ No direct profiles found via X-Ray for {comp}")
+                time.sleep(3)
+            print("\n⏳ Outreach batch complete. Standing by for next cycle (checking every 60s)...")
+            time.sleep(60)
+        else:
+            print("⏳ All current companies processed. Standing by for new job discoveries (checking every 30s)...")
+            time.sleep(30)
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Find recruiters or hiring managers for a company via Google X-Ray")
-    parser.add_argument("--company", required=True, help="Target company name")
+    parser.add_argument("--company", default=None, help="Target company name (if omitted, runs continuous outreach daemon across discovered jobs)")
     parser.add_argument("--roles", nargs="+", default=["Engineering Manager", "Technical Recruiter", "Talent Acquisition"], help="Target role keywords")
     args = parser.parse_args()
     
-    findings = google_xray_search(args.company, args.roles)
-    domain = find_company_domain(args.company)
-    print(f"\n🔍 Recruiter Search Results for '{args.company}' (Domain: {domain}):")
-    for f in findings:
-        print(f"- Name: {f['name']}")
-        print(f"  Role: {f['title']}")
-        print(f"  LinkedIn: {f['linkedin_url']}")
-        first = f['name'].split()[0]
-        last = f['name'].split()[-1] if len(f['name'].split()) > 1 else 'doe'
-        emails = generate_email_permutations(first, last, domain)[:3]
-        print(f"  Guessed Emails: {', '.join(emails)}\n")
+    if args.company:
+        findings = google_xray_search(args.company, args.roles)
+        domain = find_company_domain(args.company)
+        print(f"\n🔍 Recruiter Search Results for '{args.company}' (Domain: {domain}):")
+        for f in findings:
+            print(f"- Name: {f['name']}")
+            print(f"  Role: {f['title']}")
+            print(f"  LinkedIn: {f['linkedin_url']}")
+            first = f['name'].split()[0]
+            last = f['name'].split()[-1] if len(f['name'].split()) > 1 else 'doe'
+            emails = generate_email_permutations(first, last, domain)[:3]
+            print(f"  Guessed Emails: {', '.join(emails)}\n")
+    else:
+        run_recruiter_daemon(args.roles)

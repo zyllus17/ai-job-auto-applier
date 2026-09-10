@@ -54,7 +54,7 @@ SERVICE_REGISTRY = {
     'project_scaffolder': {
         'name': 'Project Scaffolder',
         'description': 'Daily skill-gap demo project builder',
-        'command': [sys.executable, str(TOOLS_DIR / 'project_scaffolder.py')],
+        'command': [sys.executable, str(TOOLS_DIR / 'project_scaffolder.py'), '--daemon'],
         'icon': '📦',
         'color': '#06b6d4',  # cyan
     },
@@ -93,10 +93,13 @@ class ProcessManager:
         cmd = svc['command']
         
         try:
+            sub_env = dict(os.environ)
+            sub_env["PYTHONUNBUFFERED"] = "1"
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.STDOUT
+                stderr=asyncio.subprocess.STDOUT,
+                env=sub_env
             )
             
             self.processes[service_id] = {

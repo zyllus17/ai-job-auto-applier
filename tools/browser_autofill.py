@@ -311,9 +311,44 @@ class AutoApplier:
             except Exception as e:
                 logger.error(f"Could not submit form: {e}")
 
+async def run_autofill_daemon(mode='semi-auto', browser_type='camoufox', profile_dir='~/.job-autoapply-profile', dry_run=False):
+    logger.info("🤖 Browser Auto-Apply Daemon started.")
+    logger.info(f"   Mode: {mode} | Browser engine: {browser_type} | Profile: {profile_dir}")
+    tracker_path = Path(__file__).parent.parent / "job_search_tracker.csv"
+    applier = AutoApplier(mode=mode, browser_type=browser_type, profile_dir=profile_dir)
+    
+    while True:
+        staged_job = None
+        if tracker_path.exists():
+            try:
+                import csv
+                with open(tracker_path, 'r', encoding='utf-8') as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        st = row.get('status', '')
+                        url = row.get('url', '')
+                        if 'staged' in st.lower() and url and url.startswith('http') and not url.endswith('/jobs/test'):
+                            staged_job = row
+                            break
+            except Exception as e:
+                logger.error(f"Error reading tracker: {e}")
+                
+        if staged_job:
+            logger.info(f"🎯 Found staged application: {staged_job.get('company')} - {staged_job.get('title')}")
+            logger.info(f"   URL: {staged_job.get('url')}")
+            try:
+                await applier.apply(staged_job.get('url'), 'cv/main_example.pdf', dry_run=dry_run)
+            except Exception as e:
+                logger.error(f"Error during application: {e}")
+            logger.info("Application completed. Waiting 60s before processing next opportunity...")
+            await asyncio.sleep(60)
+        else:
+            logger.info("Standing by: No staged applications pending submission. Checking every 30s...")
+            await asyncio.sleep(30)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Auto-fill job application forms')
-    parser.add_argument('url', help='Application URL')
+    parser.add_argument('url', nargs='?', default=None, help='Application URL (if omitted, runs as continuous auto-apply daemon)')
     parser.add_argument('--resume', default='cv/main_example.pdf', help='Path to resume PDF')
     parser.add_argument('--cover-letter', help='Path to cover letter PDF')
     parser.add_argument('--mode', choices=['semi-auto', 'full-auto'], default='semi-auto')
@@ -322,5 +357,8 @@ if __name__ == '__main__':
     parser.add_argument('--profile-dir', default='~/.job-autoapply-profile', help='Persistent browser profile dir')
     args = parser.parse_args()
 
-    applier = AutoApplier(mode=args.mode, browser_type=args.browser, profile_dir=args.profile_dir)
-    asyncio.run(applier.apply(args.url, args.resume, args.cover_letter, args.dry_run))
+    if args.url:
+        applier = AutoApplier(mode=args.mode, browser_type=args.browser, profile_dir=args.profile_dir)
+        asyncio.run(applier.apply(args.url, args.resume, args.cover_letter, args.dry_run))
+    else:
+        asyncio.run(run_autofill_daemon(mode=args.mode, browser_type=args.browser, profile_dir=args.profile_dir, dry_run=args.dry_run))
