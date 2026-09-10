@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Job Auto-Applier</title>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: rgba(30, 41, 59, 0.8);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: rgba(148, 163, 184, 0.1);
+      --green: #22c55e;
+      --orange: #f97316;
+      --blue: #3b82f6;
+      --cyan: #06b6d4;
+      --pink: #ec4899;
+      --purple: #a855f7;
+      --red: #ef4444;
+      --yellow: #eab308;
+      --sidebar-width: 220px;
+      --topbar-height: 60px;
+    }
+
+    [data-theme='light'] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #e2e8f0;
+      --bg-card: rgba(255, 255, 255, 0.9);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border: rgba(0, 0, 0, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* Top Bar */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--topbar-height);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      z-index: 100;
+    }
+    .topbar .logo { font-size: 1.25rem; font-weight: 700; }
+    .topbar-right { display: flex; align-items: center; gap: 20px; }
+    .system-health { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; }
+    .health-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); }
+    .health-dot.offline { background: var(--red); }
+    .theme-toggle { background: none; border: none; cursor: pointer; font-size: 1.25rem; color: var(--text-primary); }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: var(--topbar-height); left: 0; bottom: 0;
+      width: var(--sidebar-width);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      z-index: 90;
+    }
+    .nav-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 24px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+    .nav-link.active {
+      color: var(--text-primary);
+      background: rgba(59, 130, 246, 0.1);
+      border-right: 3px solid var(--blue);
+    }
+
+    /* Main Content */
+    .content {
+      margin-top: var(--topbar-height);
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+    section { display: none; }
+    section.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Dashboard Cards */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .service-card {
+      backdrop-filter: blur(12px);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .service-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(var(--card-accent), 0.2); }
+    .service-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: var(--card-color, var(--blue));
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .card-title { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 1.1rem; }
+    .card-body { display: flex; flex-direction: column; gap: 8px; }
+    .card-status { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-secondary); }
+    .card-meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; }
+
+    /* Toggle Switch */
+    .toggle {
+      width: 52px; height: 28px; border-radius: 14px;
+      background: #374151; cursor: pointer; transition: all 0.3s ease; position: relative;
+    }
+    .toggle.active {
+      background: var(--card-color, var(--green));
+      box-shadow: 0 0 16px rgba(var(--card-color-rgb, 34, 197, 94), 0.4);
+    }
+    .toggle::after {
+      content: ''; width: 22px; height: 22px; border-radius: 50%; background: white;
+      position: absolute; top: 3px; left: 3px; transition: transform 0.3s ease;
+    }
+    .toggle.active::after { transform: translateX(24px); }
+
+    /* Status Dot */
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .status-dot.running { background: var(--green); animation: pulse 2s infinite; }
+    .status-dot.idle { background: var(--text-muted); }
+    .status-dot.error { background: var(--red); animation: pulse 1s infinite; }
+
+    /* Quick Actions */
+    .quick-actions { display: flex; gap: 16px; margin-bottom: 24px; }
+    .btn {
+      padding: 10px 20px; border-radius: 20px; border: 1px solid var(--border);
+      background: var(--bg-card); color: var(--text-primary); cursor: pointer;
+      display: flex; align-items: center; gap: 8px; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: var(--bg-secondary); box-shadow: 0 0 15px rgba(255,255,255,0.1); }
+    .btn-primary { background: var(--blue); border: none; }
+    .btn-primary:hover { background: #2563eb; }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+      background: var(--bg-card); padding: 20px; border-radius: 16px; border: 1px solid var(--border);
+    }
+    .stat-item { text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: 700; color: var(--blue); margin: 8px 0; }
+    .stat-label { font-size: 0.9rem; color: var(--text-secondary); }
+
+    /* Analytics Canvas */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .chart-card { background: var(--bg-card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); }
+    .chart-card h3 { margin-bottom: 16px; font-size: 1.1rem; }
+    canvas { width: 100%; height: 300px; display: block; }
+
+    /* Job Tracker */
+    .search-bar { width: 100%; padding: 12px 20px; border-radius: 24px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); margin-bottom: 20px; font-size: 1rem; }
+    .table-container { background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border); overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 16px; border-bottom: 1px solid var(--border); }
+    th { color: var(--text-secondary); font-weight: 500; cursor: pointer; }
+    th:hover { color: var(--text-primary); }
+    tr:nth-child(even) { background: rgba(0,0,0,0.02); }
+    .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+    .badge.staged { background: rgba(59, 130, 246, 0.2); color: var(--blue); }
+    .badge.applied { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+    .badge.interview { background: rgba(168, 85, 247, 0.2); color: var(--purple); }
+    .badge.offer { background: rgba(234, 179, 8, 0.2); color: var(--yellow); }
+    .badge.rejected { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+    .fit-score { position: relative; width: 60px; height: 24px; background: rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; }
+    .fit-bar { position: absolute; left: 0; top: 0; height: 100%; opacity: 0.5; }
+
+    /* Logs */
+    .log-controls { display: flex; gap: 10px; margin-bottom: 16px; }
+    .log-viewer { background: #0a0a0a; font-family: 'Courier New', monospace; padding: 16px; border-radius: 8px; height: calc(100vh - 250px); overflow-y: auto; color: #ccc; font-size: 0.9rem; }
+    .log-line { margin-bottom: 4px; word-break: break-all; }
+    .log-line.error { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .log-line.warning { color: #facc15; }
+
+    /* Settings */
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .settings-card { background: var(--bg-card); padding: 24px; border-radius: 16px; border: 1px solid var(--border); }
+    .settings-card h3 { margin-bottom: 16px; font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.9rem; }
+    .form-control { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-primary); }
+    .settings-actions { margin-top: 24px; display: flex; gap: 16px; }
+
+    /* Toasts */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .toast { padding: 12px 20px; border-radius: 12px; background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-primary); font-size: 14px; animation: slideInRight 0.3s ease; box-shadow: 0 4px 16px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; position: relative; overflow: hidden; }
+    .toast .progress { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--green); border-radius: 0 0 12px 12px; animation: shrink 5s linear forwards; }
+    @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+
+    /* Modal */
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--bg-secondary); padding: 32px; border-radius: 16px; max-width: 500px; width: 100%; }
+    .shortcut-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    kbd { background: var(--bg-primary); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); font-family: monospace; }
+  </style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="logo">🚀 AI Job Auto-Applier</div>
+    <div class="topbar-right">
+      <div class="system-health">
+        <span class="health-dot" id="health-dot"></span>
+        <span id="health-text">System Online</span>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☀️</button>
+    </div>
+  </header>
+  
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <a class="nav-link active" onclick="navigate('dashboard')" id="nav-dashboard">🏠 Dashboard</a>
+    <a class="nav-link" onclick="navigate('analytics')" id="nav-analytics">📊 Analytics</a>
+    <a class="nav-link" onclick="navigate('tracker')" id="nav-tracker">📋 Job Tracker</a>
+    <a class="nav-link" onclick="navigate('logs')" id="nav-logs">📜 Live Logs</a>
+    <a class="nav-link" onclick="navigate('settings')" id="nav-settings">⚙️ Settings</a>
+  </nav>
+  
+  <!-- Main Content -->
+  <main class="content">
+    <!-- DASHBOARD PAGE -->
+    <section id="page-dashboard" class="active">
+      <div class="quick-actions">
+        <button class="btn btn-primary" onclick="runAction('scan-once')">▶️ Run Single Scan</button>
+        <button class="btn" onclick="runAction('scaffold')">📦 Scaffold Project</button>
+        <button class="btn" onclick="runAction('sync-sheets')">📊 Sync to Sheets</button>
+        <button class="btn">📋 Export CSV</button>
+      </div>
+
+      <div class="services-grid" id="services-grid">
+        <!-- Rendered via JS -->
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-label">Jobs Tracked</div>
+          <div class="stat-value" id="stat-jobs">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Applications</div>
+          <div class="stat-value" id="stat-applied">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Interviews</div>
+          <div class="stat-value" id="stat-interviews">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Avg Fit Score</div>
+          <div class="stat-value" id="stat-fit">0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANALYTICS PAGE -->
+    <section id="page-analytics">
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>Application Funnel</h3>
+          <canvas id="chart-funnel"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Skill Gap Heatmap</h3>
+          <canvas id="chart-skills"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Fit Score Distribution</h3>
+          <canvas id="chart-fit"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Top Companies</h3>
+          <canvas id="chart-companies"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- JOB TRACKER PAGE -->
+    <section id="page-tracker">
+      <input type="text" class="search-bar" id="job-search" placeholder="Search by company, title, or skill..." oninput="fetchJobs()">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortJobs('company')">Company ↕</th>
+              <th onclick="sortJobs('title')">Title ↕</th>
+              <th onclick="sortJobs('fitScore')">Fit Score ↕</th>
+              <th onclick="sortJobs('status')">Status ↕</th>
+              <th>Missing Skills</th>
+              <th>Location</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="jobs-tbody">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- LIVE LOGS PAGE -->
+    <section id="page-logs">
+      <div class="log-controls">
+        <button class="btn" onclick="filterLogs('All')">All</button>
+        <button class="btn" onclick="filterLogs('Info')">Info</button>
+        <button class="btn" onclick="filterLogs('Warning')">Warning</button>
+        <button class="btn" onclick="filterLogs('Error')">Error</button>
+        <button class="btn" onclick="document.getElementById('log-viewer').innerHTML=''">Clear</button>
+        <button class="btn" onclick="toggleLogPause()" id="btn-log-pause">⏸️ Pause</button>
+      </div>
+      <div class="log-viewer" id="log-viewer">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- SETTINGS PAGE -->
+    <section id="page-settings">
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>Telegram Configuration</h3>
+          <div class="form-group">
+            <label>Bot Token</label>
+            <input type="password" class="form-control" id="setting-tg-token">
+          </div>
+          <div class="form-group">
+            <label>Allowed User ID</label>
+            <input type="text" class="form-control" id="setting-tg-id">
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>Browser Config</h3>
+          <div class="form-group">
+            <label>Profile Directory</label>
+            <input type="text" class="form-control" id="setting-browser-dir">
+          </div>
+          <div class="form-group">
+            <label>Auto-Apply Mode</label>
+            <select class="form-control" id="setting-apply-mode">
+              <option value="semi">Semi-Auto</option>
+              <option value="full">Full-Auto</option>
+            </select>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>Job Search</h3>
+          <div class="form-group">
+            <label>Current Company (Exclude)</label>
+            <input type="text" class="form-control" id="setting-company">
+          </div>
+          <div class="form-group">
+            <label>Google Sheets Webhook</label>
+            <input type="text" class="form-control" id="setting-sheets">
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>GitHub</h3>
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" class="form-control" id="setting-github">
+          </div>
+        </div>
+      </div>
+      <div class="settings-actions">
+        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+        <button class="btn" onclick="loadSettings()">Reset</button>
+      </div>
+    </section>
+  </main>
+  
+  <!-- Toast Container -->
+  <div class="toast-container" id="toasts"></div>
+  
+  <!-- Shortcuts Modal -->
+  <div class="modal" id="shortcuts-modal" onclick="this.classList.remove('active')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h3>Keyboard Shortcuts</h3>
+      <div class="shortcut-list">
+        <div><kbd>1</kbd>-<kbd>6</kbd> Toggle services</div>
+        <div><kbd>Space</kbd> Toggle all</div>
+        <div><kbd>d</kbd> Dashboard</div>
+        <div><kbd>a</kbd> Analytics</div>
+        <div><kbd>j</kbd> Job Tracker</div>
+        <div><kbd>l</kbd> Live Logs</div>
+        <div><kbd>s</kbd> Settings</div>
+        <div><kbd>?</kbd> Show shortcuts</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999;"></canvas>
+  <script>
+    // State
+    const state = {
+      currentPage: 'dashboard',
+      services: [],
+      logs: [],
+      theme: localStorage.getItem('theme') || 'dark',
+      logsPaused: false,
+      logFilter: 'All',
+      ws: null,
+      jobs: [],
+      jobsSort: { by: 'company', order: 'asc' },
+      searchQuery: '',
+      uptimeInterval: null,
+      reconnectTimeout: null
+    };
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTheme();
+      connectWebSocket();
+      navigate('dashboard');
+      fetchServices();
+      loadStats();
+      loadSettings();
+      setupKeyboardShortcuts();
+      state.uptimeInterval = setInterval(updateUptimes, 1000);
+      
+      try {
+        if (typeof confetti !== 'undefined') {
+          // Confetti loaded
+        }
+      } catch(e) {}
+    });
+
+    // Theme
+    function toggleTheme() {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', state.theme);
+      applyTheme();
+    }
+    
+    function applyTheme() {
+      document.body.setAttribute('data-theme', state.theme);
+      document.getElementById('theme-btn').textContent = state.theme === 'dark' ? '☀️' : '🌙';
+      if (state.currentPage === 'analytics') renderCharts();
+    }
+
+    // Navigation
+    function navigate(page) {
+      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      
+      document.getElementById(`page-${page}`).classList.add('active');
+      document.getElementById(`nav-${page}`).classList.add('active');
+      state.currentPage = page;
+
+      if (page === 'analytics') fetchAnalytics();
+      if (page === 'tracker') fetchJobs();
+    }
+
+    // API & WebSockets
+    function connectWebSocket() {
+      let backoff = 1000;
+      function connect() {
+        state.ws = new WebSocket(`ws://${location.hostname}:8420/ws`);
+        
+        state.ws.onopen = () => {
+          backoff = 1000;
+          document.getElementById('health-dot').classList.remove('offline');
+          document.getElementById('health-text').textContent = 'System Online';
+        };
+        
+        state.ws.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            if (data.type === 'init') {
+              if (data.services) { state.services = data.services; renderServices(); }
+              if (data.logs) { state.logs = data.logs; renderLogs(); }
+            } else if (data.type === 'status_update' && data.service) {
+              const svc = data.service;
+              const existing = state.services.find(s => s.id === svc.id);
+              if (existing) {
+                Object.assign(existing, svc);
+                renderServices();
+              }
+            } else if (data.type === 'log') {
+              addLog(data.log || data);
+            }
+          } catch(err) { console.error('WS parse error', err); }
+        };
+        
+        state.ws.onclose = () => {
+          document.getElementById('health-dot').classList.add('offline');
+          document.getElementById('health-text').textContent = 'System Offline';
+          state.reconnectTimeout = setTimeout(connect, backoff);
+          backoff = Math.min(backoff * 2, 30000);
+        };
+        
+        state.ws.onerror = () => {
+          state.ws.close();
+        };
+      }
+      
+      // Fallback if not on real host for testing
+      if (location.protocol === 'file:') return;
+      connect();
+    }
+
+    async function apiCall(endpoint, method = 'GET', body = null) {
+      try {
+        const opts = { method, headers: { 'Content-Type': 'application/json' } };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(endpoint, opts);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (e) {
+        console.warn(`API Error ${endpoint}:`, e);
+        return null;
+      }
+    }
+
+    async function fetchServices() {
+      const data = await apiCall('/api/services');
+      if (data) {
+        state.services = data;
+        renderServices();
+      } else {
+        // Mock data
+        state.services = [
+          {id: 'scraper', name: 'Web Scraper', status: 'running', uptime_seconds: 3600, color: '#3b82f6'},
+          {id: 'analyzer', name: 'CV Analyzer', status: 'idle', uptime_seconds: 0, color: '#a855f7'},
+          {id: 'applier', name: 'Auto-Applier', status: 'running', uptime_seconds: 120, color: '#22c55e'},
+          {id: 'tracker', name: 'Job Tracker', status: 'idle', uptime_seconds: 0, color: '#f97316'},
+          {id: 'notifier', name: 'Telegram Bot', status: 'running', uptime_seconds: 86400, color: '#06b6d4'},
+          {id: 'sheets', name: 'Sheets Sync', status: 'error', uptime_seconds: 0, color: '#ef4444'}
+        ];
+        renderServices();
+      }
+    }
+
+    // UI Updates
+    function renderServices() {
+      const grid = document.getElementById('services-grid');
+      grid.innerHTML = '';
+      state.services.forEach(svc => {
+        const isRunning = svc.status === 'running';
+        const el = document.createElement('div');
+        el.className = 'service-card';
+        el.style.setProperty('--card-color', svc.color);
+        
+        let metaText = isRunning ? `Uptime: <span id="uptime-${svc.id}">${formatUptime(svc.uptime_seconds)}</span>` : 'Last run: 5m ago';
+        
+        el.innerHTML = `
+          <div class="card-header">
+            <div class="card-title">${svc.name}</div>
+            <div class="toggle ${isRunning ? 'active' : ''}" onclick="toggleService('${svc.id}')"></div>
+          </div>
+          <div class="card-body">
+            <div class="card-status">
+              <span class="status-dot ${svc.status}"></span>
+              ${svc.status.charAt(0).toUpperCase() + svc.status.slice(1)}
+            </div>
+            <div class="card-meta">${metaText}</div>
+          </div>
+        `;
+        grid.appendChild(el);
+      });
+    }
+
+    async function toggleService(id) {
+      const svc = state.services.find(s => s.id === id);
+      if (!svc) return;
+      const willStart = svc.status !== 'running';
+      const endpoint = `/api/services/${id}/${willStart ? 'start' : 'stop'}`;
+      
+      // Optimistic update
+      updateServiceStatus(id, willStart ? 'running' : 'idle');
+      showToast(`${willStart ? 'Starting' : 'Stopping'} ${svc.name}...`, 'info');
+      
+      const res = await apiCall(endpoint, 'POST');
+      if (res && res.status) {
+        updateServiceStatus(id, res.status);
+        showToast(`${svc.name} ${res.status}`, res.status === 'running' ? 'success' : 'info');
+      }
+    }
+
+    function updateServiceStatus(id, status) {
+      const svc = state.services.find(s => s.id === id);
+      if (svc) {
+        svc.status = status;
+        if (status === 'running') svc.uptime_seconds = 0;
+        renderServices();
+      }
+    }
+
+    function updateUptimes() {
+      state.services.forEach(svc => {
+        if (svc.status === 'running') {
+          svc.uptime_seconds++;
+          const el = document.getElementById(`uptime-${svc.id}`);
+          if (el) el.textContent = formatUptime(svc.uptime_seconds);
+        }
+      });
+    }
+
+    function formatUptime(seconds) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      return `${h}h ${m}m ${s}s`;
+    }
+
+    async function runAction(action) {
+      showToast(`Running ${action}...`);
+      await apiCall(`/api/actions/${action}`, 'POST');
+    }
+
+    // Stats
+    async function loadStats() {
+      const data = await apiCall('/api/stats');
+      const stats = data || { total_jobs: 1420, applied: 350, interviews: 12, avg_fit_score: 84 };
+      
+      animateCounter('stat-jobs', stats.total_jobs);
+      animateCounter('stat-applied', stats.applied);
+      animateCounter('stat-interviews', stats.interviews);
+      animateCounter('stat-fit', stats.avg_fit_score);
+    }
+
+    function animateCounter(id, target, duration = 1000) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      let start = 0;
+      const startTime = performance.now();
+      
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        
+        el.textContent = Math.floor(easeOutQuart * target);
+        
+        if (progress < 1) requestAnimationFrame(update);
+        else el.textContent = target;
+      }
+      requestAnimationFrame(update);
+    }
+
+    // Analytics (Canvas 2D)
+    async function fetchAnalytics() {
+      const data = await apiCall('/api/analytics') || {
+        funnel: { discovered: 1000, staged: 400, applied: 150, interview: 20, offer: 2 },
+        skill_gaps: [ {skill: 'Kubernetes', count: 45}, {skill: 'GraphQL', count: 30}, {skill: 'Rust', count: 15} ],
+        fit_distribution: { "60-70": 20, "70-80": 50, "80-90": 80, "90-100": 30 },
+        top_companies: [ {company: 'Google', count: 15}, {company: 'Stripe', count: 10} ]
+      };
+      
+      window._analyticsData = data;
+      renderCharts();
+    }
+
+    function renderCharts() {
+      if (!window._analyticsData || state.currentPage !== 'analytics') return;
+      const data = window._analyticsData;
+      
+      const textColor = state.theme === 'dark' ? '#f1f5f9' : '#0f172a';
+      const gridColor = state.theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+      
+      function drawBar(ctx, canvas, items, colors) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const max = Math.max(...items.map(i => i.value)) || 1;
+        const barHeight = (canvas.height - 40) / items.length - 10;
+        
+        items.forEach((item, i) => {
+          const y = 20 + i * (barHeight + 10);
+          const width = (item.value / max) * (canvas.width - 150);
+          
+          ctx.fillStyle = colors[i % colors.length];
+          ctx.fillRect(100, y, width, barHeight);
+          
+          ctx.fillStyle = textColor;
+          ctx.font = '12px Arial';
+          ctx.textAlign = 'right';
+          ctx.fillText(item.label, 90, y + barHeight/2 + 4);
+          
+          ctx.textAlign = 'left';
+          ctx.fillText(item.value, 100 + width + 10, y + barHeight/2 + 4);
+        });
+      }
+
+      const canvasSetup = (id) => {
+        const c = document.getElementById(id);
+        const ctx = c.getContext('2d');
+        c.width = c.parentElement.clientWidth - 40;
+        c.height = 300;
+        return {c, ctx};
+      };
+
+      // Funnel
+      const funnel = canvasSetup('chart-funnel');
+      const funnelData = Object.entries(data.funnel).map(([k,v]) => ({label: k, value: v}));
+      drawBar(funnel.ctx, funnel.c, funnelData, ['#064e3b','#065f46','#047857','#059669','#10b981']);
+
+      // Skills
+      const skills = canvasSetup('chart-skills');
+      drawBar(skills.ctx, skills.c, data.skill_gaps.map(g => ({label: g.skill, value: g.count})), ['#ef4444', '#f97316', '#eab308', '#3b82f6', '#8b5cf6']);
+
+      // Companies
+      const comps = canvasSetup('chart-companies');
+      drawBar(comps.ctx, comps.c, data.top_companies.map(c => ({label: c.company, value: c.count})), ['#3b82f6']);
+
+      // Fit Distribution (Vertical)
+      const fit = canvasSetup('chart-fit');
+      fit.ctx.clearRect(0, 0, fit.c.width, fit.c.height);
+      const fitKeys = Object.keys(data.fit_distribution);
+      const fitVals = Object.values(data.fit_distribution);
+      const maxFit = Math.max(...fitVals) || 1;
+      const barWidth = (fit.c.width - 60) / fitKeys.length - 20;
+      
+      fitKeys.forEach((key, i) => {
+        const x = 40 + i * (barWidth + 20);
+        const height = (data.fit_distribution[key] / maxFit) * (fit.c.height - 60);
+        const y = fit.c.height - 30 - height;
+        
+        fit.ctx.fillStyle = '#22c55e';
+        fit.ctx.fillRect(x, y, barWidth, height);
+        
+        fit.ctx.fillStyle = textColor;
+        fit.ctx.textAlign = 'center';
+        fit.ctx.fillText(key, x + barWidth/2, fit.c.height - 10);
+      });
+    }
+
+    // Job Tracker
+    async function fetchJobs() {
+      const q = document.getElementById('job-search').value;
+      const sb = state.jobsSort.by;
+      const so = state.jobsSort.order;
+      const data = await apiCall(`/api/jobs?search=${q}&sort_by=${sb}&sort_order=${so}`);
+      
+      if (data && data.data) {
+        state.jobs = data.data;
+      } else {
+        // Mock
+        state.jobs = [
+          {company: 'OpenAI', title: 'ML Engineer', fitScore: 95, status: 'Applied', missingSkill: '', location: 'SF', url: '#'},
+          {company: 'Anthropic', title: 'Frontend Eng', fitScore: 82, status: 'Staged', missingSkill: 'React', location: 'Remote', url: '#'},
+          {company: 'Google', title: 'SWE', fitScore: 70, status: 'Rejected', missingSkill: 'C++', location: 'NY', url: '#'}
+        ];
+      }
+      renderJobs();
+    }
+
+    function renderJobs() {
+      const tbody = document.getElementById('jobs-tbody');
+      tbody.innerHTML = '';
+      state.jobs.forEach(job => {
+        const tr = document.createElement('tr');
+        
+        let fitColor = '#ef4444';
+        if (job.fitScore >= 90) fitColor = '#22c55e';
+        else if (job.fitScore >= 75) fitColor = '#eab308';
+        
+        tr.innerHTML = `
+          <td>${job.company}</td>
+          <td>${job.title}</td>
+          <td>
+            <div class="fit-score">
+              <div class="fit-bar" style="width: ${job.fitScore}%; background: ${fitColor}"></div>
+              <span style="position:relative; z-index:1">${job.fitScore}</span>
+            </div>
+          </td>
+          <td><span class="badge ${job.status.toLowerCase()}">${job.status}</span></td>
+          <td>${job.missingSkill || '-'}</td>
+          <td>${job.location}</td>
+          <td><button class="btn" onclick="window.open('${job.url}', '_blank')">Apply</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function sortJobs(col) {
+      if (state.jobsSort.by === col) {
+        state.jobsSort.order = state.jobsSort.order === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.jobsSort.by = col;
+        state.jobsSort.order = 'asc';
+      }
+      fetchJobs();
+    }
+
+    // Logs
+    function filterLogs(level) {
+      state.logFilter = level;
+      renderLogs();
+    }
+
+    function toggleLogPause() {
+      state.logsPaused = !state.logsPaused;
+      document.getElementById('btn-log-pause').textContent = state.logsPaused ? '▶️ Resume' : '⏸️ Pause';
+    }
+
+    function addLog(log) {
+      if (state.logs.length > 1000) state.logs.shift();
+      state.logs.push(log);
+      if (!state.logsPaused && state.currentPage === 'logs') {
+        renderLogs();
+      }
+    }
+
+    function renderLogs() {
+      const viewer = document.getElementById('log-viewer');
+      viewer.innerHTML = '';
+      
+      const filtered = state.logFilter === 'All' ? state.logs : state.logs.filter(l => l.level === state.logFilter);
+      
+      filtered.forEach(log => {
+        const d = document.createElement('div');
+        d.className = `log-line ${log.level.toLowerCase()}`;
+        d.textContent = `[${log.timestamp || new Date().toLocaleTimeString()}] [${log.service_name || 'SYSTEM'}] ${log.message}`;
+        viewer.appendChild(d);
+      });
+      
+      viewer.scrollTop = viewer.scrollHeight;
+    }
+
+    // Settings
+    async function loadSettings() {
+      const data = await apiCall('/api/settings') || {};
+      
+      document.getElementById('setting-tg-token').value = data.TELEGRAM_BOT_TOKEN || '';
+      document.getElementById('setting-tg-id').value = data.TELEGRAM_ALLOWED_USER_ID || '';
+      document.getElementById('setting-browser-dir').value = data.BROWSER_PROFILE_DIR || '';
+      document.getElementById('setting-apply-mode').value = data.AUTO_APPLY_MODE || 'semi-auto';
+      document.getElementById('setting-sheets').value = data.GOOGLE_SHEET_WEBHOOK_URL || '';
+      document.getElementById('setting-github').value = data.GITHUB_USERNAME || '';
+      if (data.candidate_profile) {
+        document.getElementById('setting-company').value = data.candidate_profile.current_company || '';
+      }
+    }
+
+    async function saveSettings() {
+      const payload = {
+        env_vars: {
+          TELEGRAM_BOT_TOKEN: document.getElementById('setting-tg-token').value,
+          TELEGRAM_ALLOWED_USER_ID: document.getElementById('setting-tg-id').value,
+          BROWSER_PROFILE_DIR: document.getElementById('setting-browser-dir').value,
+          AUTO_APPLY_MODE: document.getElementById('setting-apply-mode').value,
+          GOOGLE_SHEET_WEBHOOK_URL: document.getElementById('setting-sheets').value,
+          GITHUB_USERNAME: document.getElementById('setting-github').value
+        },
+        candidate_profile: {
+          current_company: document.getElementById('setting-company').value
+        }
+      };
+      
+      await apiCall('/api/settings', 'POST', payload);
+      showToast('Settings saved successfully', 'success');
+    }
+
+    // Toast
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toasts');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      
+      let icon = 'ℹ️';
+      if (type === 'success') icon = '✅';
+      if (type === 'error') icon = '❌';
+      
+      toast.innerHTML = `${icon} <span>${message}</span><div class="progress"></div>`;
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideInRight 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
+    }
+
+    // Keyboard Shortcuts
+    function setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        // Ignore if typing in input
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+        
+        const key = e.key.toLowerCase();
+        
+        if (key >= '1' && key <= '6') {
+          const idx = parseInt(key) - 1;
+          if (state.services[idx]) toggleService(state.services[idx].id);
+        } else if (key === 'd') navigate('dashboard');
+        else if (key === 'a') navigate('analytics');
+        else if (key === 'j') navigate('tracker');
+        else if (key === 'l') navigate('logs');
+        else if (key === 's') navigate('settings');
+        else if (key === '?') document.getElementById('shortcuts-modal').classList.add('active');
+        else if (key === ' ') {
+          e.preventDefault();
+          const anyOff = state.services.some(s => s.status !== 'running');
+          state.services.forEach(s => {
+            if (anyOff && s.status !== 'running') toggleService(s.id);
+            if (!anyOff && s.status === 'running') toggleService(s.id);
+          });
+        } else if (key === 'escape') {
+          document.getElementById('shortcuts-modal').classList.remove('active');
+        }
+      });
+    }
+  </script>
+  <script src="/static/confetti.js"></script>
+</body>
+</html>

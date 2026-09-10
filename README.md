@@ -57,6 +57,29 @@ The script automatically detects your OS, installs Bun, TinyTeX, Camoufox, and T
 
 ---
 
+## 🎛️ Launch Visual Web Dashboard (`make run`)
+
+Prefer a visual control panel over terminal commands?
+
+```bash
+make run
+```
+
+This single command:
+1. Installs dashboard dependencies (`fastapi`, `uvicorn`, `psutil`).
+2. Starts the localhost FastAPI server at `http://localhost:8420`.
+3. Auto-opens your default web browser to the dashboard.
+
+**Features of the Web Dashboard:**
+- 🎛️ **Service Cards Grid**: Independent start/stop toggle switches with live uptime counters for all 6 core services (Job Search Daemon, Camoufox Auto-Apply, Telegram Bot, Project Scaffolder, Recruiter Outreach, Google Sheets Sync). Turn on/off multiple services simultaneously!
+- 📊 **Funnel Analytics**: Real-time canvas charts showing your application funnel (Discovered → Staged → Applied → Interview → Offer), top skill-gap heatmap, fit score distribution, and company leaderboard.
+- 📋 **Live Job Tracker Table**: Interactive, searchable, and sortable table of all discovered opportunities with color-coded fit scores and instant apply triggers.
+- 📜 **WebSocket Real-time Logs**: Live terminal log stream from all running services with color-coding and pause/resume controls.
+- ⚙️ **In-Browser Settings**: Update Telegram tokens, Google Sheets webhooks, browser auto-apply preferences, and current company exclusion on the fly.
+- ⌨️ **Keyboard Shortcuts & Extras**: Press `1`-`6` to toggle services, `D` for dashboard, `A` for analytics, `J` for jobs, `L` for logs, `S` for settings, and enjoy confetti animations on milestones!
+
+---
+
 ## ⚡ The 6 Core Superpowers (v2)
 
 ### 1. 🤖 Anti-Detect Browser Auto-Filling (0 AI Tokens)

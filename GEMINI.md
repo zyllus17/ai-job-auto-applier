@@ -69,6 +69,9 @@ Once the user provides these 3 items:
     - Launches self-hosted Telegram bot (`tools/telegram_bot.py`) for mobile commands (`/ping`, `/jobs`, `/enable`, `/disable`).
 11. **/analytics**:
     - Generates funnel conversion report and LinkedIn profile optimization suggestions.
+12. **/dashboard** (or `make run`):
+    - Starts the localhost visual Web Dashboard on `http://localhost:8420`.
+    - Real-time toggles for all 6 services, live WebSocket log stream, interactive jobs table, and funnel charts.
 
 --------------------------------------------------------------------------------
 
