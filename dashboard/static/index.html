@@ -1035,6 +1035,10 @@
         <li class="menu-item" onclick="navigate('settings')" id="menu-settings">
           <span>⚙️ Career & Settings</span>
         </li>
+        <li class="menu-item" onclick="navigate('errors')" id="menu-errors">
+          <span>🚨 Error Diagnostics</span>
+          <span class="menu-badge" id="sider-badge-errors" style="background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); display: none;">0</span>
+        </li>
       </ul>
 
       <div class="sider-footer">
@@ -1340,6 +1344,79 @@
           </div>
         </section>
 
+        <!-- PAGE 6: ERROR TRACKER & DIAGNOSTICS -->
+        <section id="page-errors" class="page-section">
+          <div class="ant-page-header">
+            <div>
+              <h1 class="ant-page-header-title">🚨 System Health & Error Diagnostics</h1>
+              <div class="ant-page-header-sub">Full system error tracking with tracebacks, component failure detection, and health metrics.</div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn-glass" style="padding: 9px 16px; font-size: 13.5px;" onclick="fetchErrors()">
+                🔄 Refresh Logs
+              </button>
+              <button class="btn-glass" style="padding: 9px 16px; font-size: 13.5px;" onclick="exportErrors()">
+                📥 Export Log
+              </button>
+              <button class="btn-glow" style="padding: 9px 18px; font-size: 13.5px; background: linear-gradient(135deg, #ef4444, #b91c1c);" onclick="clearAllErrors()">
+                🧹 Clear All Errors
+              </button>
+            </div>
+          </div>
+
+          <!-- Error Stats Grid -->
+          <div class="stats-row" style="margin-bottom: 24px;">
+            <div class="stat-card" style="border-left: 4px solid #ef4444;">
+              <div class="stat-label">Active Errors</div>
+              <div class="stat-value" id="err-metric-errors" style="color: #f87171;">0</div>
+              <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">Recorded exceptions requiring review</div>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+              <div class="stat-label">Warnings</div>
+              <div class="stat-value" id="err-metric-warnings" style="color: #fbbf24;">0</div>
+              <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">Transient warnings & retries</div>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+              <div class="stat-label">Total Events</div>
+              <div class="stat-value" id="err-metric-total" style="color: #60a5fa;">0</div>
+              <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">All telemetry events recorded</div>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #10b981;">
+              <div class="stat-label">System Health</div>
+              <div class="stat-value" id="err-metric-health" style="font-size: 20px; color: #34d399; margin-top: 8px;">HEALTHY</div>
+              <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;" id="err-metric-health-sub">All components operational</div>
+            </div>
+          </div>
+
+          <!-- Filter Toolbar -->
+          <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+            <input type="text" id="err-filter-search" class="btn-glass" placeholder="🔍 Search error message or traceback..." style="flex: 1; min-width: 240px; padding: 10px 14px; color: #fff;" oninput="filterErrors()">
+            <select id="err-filter-service" class="btn-glass" style="padding: 10px 14px; color: #fff; background: var(--bg-card);" onchange="filterErrors()">
+              <option value="">All Services</option>
+              <option value="job_daemon">Job Search Daemon</option>
+              <option value="browser_autoapply">Browser Auto-Apply</option>
+              <option value="telegram_bot">Telegram Bot</option>
+              <option value="project_scaffolder">Project Scaffolder</option>
+              <option value="recruiter_outreach">Recruiter Outreach</option>
+              <option value="sheets_sync">Google Sheets Sync</option>
+              <option value="action_runner">Action Runner</option>
+              <option value="latex_compiler">LaTeX Compiler</option>
+            </select>
+            <select id="err-filter-severity" class="btn-glass" style="padding: 10px 14px; color: #fff; background: var(--bg-card);" onchange="filterErrors()">
+              <option value="">All Severities</option>
+              <option value="CRITICAL">Critical</option>
+              <option value="ERROR">Error</option>
+              <option value="WARNING">Warning</option>
+              <option value="INFO">Info</option>
+            </select>
+          </div>
+
+          <!-- Error Cards Container -->
+          <div id="error-cards-container" style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- Rendered dynamically by JS -->
+          </div>
+        </section>
+
       </main>
     </div>
   </div>
@@ -1389,6 +1466,9 @@
       currentPage: 'dashboard',
       services: [],
       logs: [],
+      errors: [],
+      errorSummary: {},
+      errorFilter: { service: '', severity: '', search: '' },
       theme: localStorage.getItem('app_theme') || 'dark',
       logsPaused: false,
       logFilter: 'All',
@@ -1450,6 +1530,7 @@
       applyTheme();
       connectWebSocket();
       fetchServices();
+      fetchErrors();
       loadStats();
       loadSettings();
       setInterval(updateUptimes, 1000);
@@ -1510,13 +1591,15 @@
         'tracker': 'Candidate Pipeline CRM',
         'analytics': 'Pipeline Analytics',
         'logs': 'Live Observability',
-        'settings': 'Career & Daemon Settings'
+        'settings': 'Career & Daemon Settings',
+        'errors': 'System Health & Error Diagnostics'
       };
       document.getElementById('breadcrumb-title').textContent = titles[page] || page;
 
       if (page === 'tracker') fetchJobs();
       if (page === 'analytics') fetchAnalytics();
       if (page === 'dashboard') { fetchServices(); loadStats(); }
+      if (page === 'errors') fetchErrors();
     }
 
     // API Helper
@@ -1552,6 +1635,7 @@
             if (data.type === 'init') {
               if (data.services) { state.services = data.services; renderServices(); }
               if (data.logs) { state.logs = data.logs; renderLogs(); }
+              if (data.error_summary) { updateErrorBadge(data.error_summary); }
             } else if (data.type === 'status_update' && data.service) {
               const svc = data.service;
               const idx = state.services.findIndex(s => s.id === svc.id);
@@ -1560,6 +1644,12 @@
               renderServices();
             } else if (data.type === 'log') {
               addLog(data.log);
+            } else if (data.type === 'error_recorded') {
+              if (data.summary) updateErrorBadge(data.summary);
+              if (state.currentPage === 'errors') fetchErrors();
+            } else if (data.type === 'errors_cleared') {
+              if (data.summary) updateErrorBadge(data.summary);
+              if (state.currentPage === 'errors') fetchErrors();
             } else if (data.type === 'job_updated') {
               fetchJobs();
               loadStats();
@@ -1598,6 +1688,7 @@
 
       state.services.forEach(svc => {
         const isRunning = svc.status === 'running';
+        const isError = svc.status === 'error';
         if (isRunning) runningCount++;
 
         const theme = SERVICE_THEMES[svc.id] || {
@@ -1606,13 +1697,33 @@
 
         const card = document.createElement('div');
         card.className = `service-card ${theme.class}`;
+        if (isError) {
+          card.style.borderColor = 'rgba(239, 68, 68, 0.6)';
+          card.style.boxShadow = '0 0 16px rgba(239, 68, 68, 0.25)';
+        }
 
-        const statusTag = isRunning
-          ? `<div class="pulse-indicator running"><span class="dot"></span> RUNNING</div>`
-          : `<div class="pulse-indicator idle">IDLE</div>`;
+        let statusTag = `<div class="pulse-indicator idle">IDLE</div>`;
+        if (isRunning) {
+          statusTag = `<div class="pulse-indicator running"><span class="dot"></span> RUNNING</div>`;
+        } else if (isError) {
+          statusTag = `<div class="pulse-indicator error" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4);"><span class="dot" style="background: #ef4444;"></span> ERROR</div>`;
+        }
 
         const pidBadge = svc.pid ? `<span class="stat-badge" style="background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3);">PID: ${svc.pid}</span>` : '';
         const memBadge = isRunning && svc.memory_mb ? `<span class="stat-badge" style="background: rgba(6, 182, 212, 0.15); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.3);">${svc.memory_mb} MB</span>` : '';
+
+        let actionsHtml = `
+          <button class="btn-glass" style="padding: 5px 12px; font-size: 12px;" onclick="triggerServiceOnce('${svc.id}')">
+            ⚡ Trigger Once
+          </button>
+        `;
+        if (isError) {
+          actionsHtml = `
+            <button class="btn-glass" style="padding: 5px 12px; font-size: 12px; color: #f87171; border-color: rgba(239, 68, 68, 0.5); background: rgba(239, 68, 68, 0.1);" onclick="resetServiceError('${svc.id}')">
+              🔄 Reset Error
+            </button>
+          ` + actionsHtml;
+        }
 
         card.innerHTML = `
           <div class="service-card-head">
@@ -1636,12 +1747,10 @@
 
           <div class="service-card-actions">
             <span style="font-size: 12px; color: var(--text-dim); font-family: monospace;">
-              ${isRunning ? '⏱️ ' + formatUptime(svc.uptime_seconds) : '💤 Standby'}
+              ${isRunning ? '⏱️ ' + formatUptime(svc.uptime_seconds) : (isError ? '⚠️ Error State' : '💤 Standby')}
             </span>
             <div style="display: flex; gap: 8px;">
-              <button class="btn-glass" style="padding: 5px 12px; font-size: 12px;" onclick="triggerServiceOnce('${svc.id}')">
-                ⚡ Trigger Once
-              </button>
+              ${actionsHtml}
             </div>
           </div>
         `;
@@ -1654,12 +1763,25 @@
     async function toggleService(id) {
       const svc = state.services.find(s => s.id === id);
       if (!svc) return;
+      if (svc.status === 'error') {
+        await resetServiceError(id);
+        return;
+      }
       const willStart = svc.status !== 'running';
       showToast((willStart ? 'Starting ' : 'Stopping ') + svc.name + '...', 'info');
 
       const res = await apiCall('/api/services/' + id + '/' + (willStart ? 'start' : 'stop'), 'POST');
       if (res && res.status) {
         showToast(svc.name + ' is now ' + res.status, res.status === 'running' ? 'success' : 'info');
+        fetchServices();
+      }
+    }
+
+    async function resetServiceError(id) {
+      showToast('Resetting service status...', 'info');
+      const res = await apiCall('/api/services/' + id + '/reset', 'POST');
+      if (res && res.status) {
+        showToast('Service status reset to idle', 'success');
         fetchServices();
       }
     }
@@ -2244,6 +2366,154 @@
       } else {
         showToast('Failed to save settings', 'error');
       }
+    }
+
+    // Error Diagnostics & Health Tracing
+    function updateErrorBadge(summary) {
+      if (!summary) return;
+      state.errorSummary = summary;
+      const badge = document.getElementById('sider-badge-errors');
+      const errCount = summary.total_errors || 0;
+      if (badge) {
+        badge.textContent = errCount;
+        badge.style.display = errCount > 0 ? 'inline-block' : 'none';
+      }
+
+      const errEl = document.getElementById('err-metric-errors');
+      const warnEl = document.getElementById('err-metric-warnings');
+      const totalEl = document.getElementById('err-metric-total');
+      const healthEl = document.getElementById('err-metric-health');
+      const healthSubEl = document.getElementById('err-metric-health-sub');
+
+      if (errEl) errEl.textContent = summary.total_errors || 0;
+      if (warnEl) warnEl.textContent = summary.total_warnings || 0;
+      if (totalEl) totalEl.textContent = (summary.total_errors || 0) + (summary.total_warnings || 0);
+
+      if (healthEl) {
+        if (summary.total_critical > 0) {
+          healthEl.textContent = 'CRITICAL';
+          healthEl.style.color = '#ef4444';
+          if (healthSubEl) healthSubEl.textContent = `${summary.total_critical} critical system failure(s)`;
+        } else if (summary.total_errors > 0) {
+          healthEl.textContent = 'DEGRADED';
+          healthEl.style.color = '#f59e0b';
+          if (healthSubEl) healthSubEl.textContent = `${summary.total_errors} component error(s) logged`;
+        } else {
+          healthEl.textContent = 'HEALTHY';
+          healthEl.style.color = '#34d399';
+          if (healthSubEl) healthSubEl.textContent = 'All components operational';
+        }
+      }
+    }
+
+    async function fetchErrors() {
+      const data = await apiCall('/api/errors');
+      if (!data) return;
+      state.errors = data.recent_errors || [];
+      if (data.summary) {
+        updateErrorBadge(data.summary);
+      }
+      renderErrors();
+    }
+
+    function filterErrors() {
+      const searchInput = document.getElementById('err-filter-search');
+      const serviceSelect = document.getElementById('err-filter-service');
+      const severitySelect = document.getElementById('err-filter-severity');
+
+      const search = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      const service = serviceSelect ? serviceSelect.value : '';
+      const severity = severitySelect ? severitySelect.value : '';
+
+      state.errorFilter = { search, service, severity };
+      renderErrors();
+    }
+
+    function renderErrors() {
+      const container = document.getElementById('error-cards-container');
+      if (!container) return;
+
+      const { search, service, severity } = state.errorFilter;
+
+      const filtered = state.errors.filter(err => {
+        if (service && err.service_id !== service) return false;
+        if (severity && err.severity !== severity) return false;
+        if (search) {
+          const matchMsg = (err.message || '').toLowerCase().includes(search);
+          const matchTrace = (err.traceback || '').toLowerCase().includes(search);
+          const matchSvc = (err.service_id || '').toLowerCase().includes(search);
+          if (!matchMsg && !matchTrace && !matchSvc) return false;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border-subtle); border-radius: 12px; padding: 48px 24px; text-align: center; color: var(--text-dim);">
+            <div style="font-size: 36px; margin-bottom: 12px;">🎉</div>
+            <div style="font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 6px;">No Errors Logged</div>
+            <div style="font-size: 13px; color: var(--text-muted); max-width: 420px; margin: 0 auto;">
+              ${state.errors.length === 0 ? 'All autonomous daemons, browser automations, and scrapers are running smoothly with zero active exceptions.' : 'No errors match the selected filter criteria. Try resetting your search or dropdown filters.'}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map((err, idx) => {
+        const sevColor = err.severity === 'CRITICAL' ? '#ef4444' : (err.severity === 'ERROR' ? '#f87171' : (err.severity === 'WARNING' ? '#fbbf24' : '#60a5fa'));
+        const sevBg = err.severity === 'CRITICAL' ? 'rgba(239, 68, 68, 0.18)' : (err.severity === 'ERROR' ? 'rgba(239, 68, 68, 0.12)' : (err.severity === 'WARNING' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(59, 130, 246, 0.12)'));
+        const timeStr = err.timestamp ? (err.timestamp.includes('T') ? err.timestamp.replace('T', ' ').slice(0, 19) : err.timestamp) : 'Just now';
+
+        let ctxHtml = '';
+        if (err.context && Object.keys(err.context).length > 0) {
+          ctxHtml = `<div style="font-size: 11.5px; color: var(--text-dim); margin-top: 6px; font-family: monospace;">Context: ${escapeHtml(JSON.stringify(err.context))}</div>`;
+        }
+
+        let traceHtml = '';
+        if (err.traceback) {
+          traceHtml = `
+            <details style="margin-top: 10px;">
+              <summary style="font-size: 12px; font-weight: 600; color: #93c5fd; cursor: pointer; user-select: none;">View Stack Traceback</summary>
+              <pre style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px; margin-top: 8px; font-size: 11.5px; color: #cbd5e1; font-family: monospace; white-space: pre-wrap; word-break: break-all; max-height: 240px; overflow-y: auto;">${escapeHtml(err.traceback)}</pre>
+            </details>
+          `;
+        }
+
+        return `
+          <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-left: 4px solid ${sevColor}; border-radius: 12px; padding: 16px 20px; transition: transform 0.2s, box-shadow 0.2s;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="background: ${sevBg}; color: ${sevColor}; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">${escapeHtml(err.severity || 'ERROR')}</span>
+                <span style="font-size: 13px; font-weight: 600; color: #fff;">${escapeHtml(err.service_id || 'System')}</span>
+                <span style="font-size: 12px; color: var(--text-dim);">#${escapeHtml(err.error_id || idx + 1)}</span>
+              </div>
+              <span style="font-size: 12px; color: var(--text-dim); font-family: monospace;">⏱️ ${timeStr}</span>
+            </div>
+            <div style="font-size: 13.5px; font-weight: 500; color: #f1f5f9; line-height: 1.5; word-break: break-word;">${escapeHtml(err.message)}</div>
+            ${ctxHtml}
+            ${traceHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function clearAllErrors() {
+      if (!confirm('Clear all logged errors and reset diagnostics metrics?')) return;
+      showToast('Clearing error tracker logs...', 'info');
+      const res = await apiCall('/api/errors/clear', 'POST');
+      if (res && res.status === 'ok') {
+        showToast('Error log cleared successfully', 'success');
+        state.errors = [];
+        if (res.summary) updateErrorBadge(res.summary);
+        renderErrors();
+      } else {
+        showToast('Failed to clear errors', 'error');
+      }
+    }
+
+    function exportErrors() {
+      window.location.href = '/api/errors/export';
     }
 
     // Toast Shelf

@@ -38,6 +38,39 @@ except ImportError:
         async def random_delay(self, min_ms: int = 100, max_ms: int = 500):
             await asyncio.sleep((min_ms + max_ms) / 2000.0)
 
+try:
+    from tools.error_tracker import record_error, record_warning, record_info
+except Exception:
+    def record_error(*args, **kwargs): pass
+    def record_warning(*args, **kwargs): pass
+    def record_info(*args, **kwargs): pass
+
+def update_tracker_job_status(job_url: str, new_status: str, notes_append: str = ""):
+    """Updates job status in job_search_tracker.csv to prevent infinite reprocessing."""
+    tracker_path = Path(__file__).parent.parent / "job_search_tracker.csv"
+    if not tracker_path.exists():
+        return
+    try:
+        import csv
+        rows = []
+        with open(tracker_path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            fieldnames = reader.fieldnames or ["timestamp", "company", "title", "fitScore", "status", "missingSkill", "suggestedProject", "location", "url", "notes"]
+            for row in reader:
+                if row.get("url") == job_url:
+                    row["status"] = new_status
+                    if notes_append:
+                        old_notes = row.get("notes", "")
+                        row["notes"] = f"{old_notes} | {notes_append}".strip(" |")
+                rows.append(row)
+        with open(tracker_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(rows)
+    except Exception as e:
+        logger.error(f"Failed to update tracker status for {job_url}: {e}")
+        record_warning("browser_autoapply", f"Tracker update failed: {e}")
+
 class ATSDetector:
     """Detects which ATS platform a URL belongs to using regex patterns."""
     def __init__(self):
@@ -347,14 +380,28 @@ async def run_autofill_daemon(mode='semi-auto', browser_type=None, profile_dir='
                 logger.error(f"Error reading tracker: {e}")
                 
         if staged_job:
+            job_url = staged_job.get('url', '')
             logger.info(f"🎯 Found staged application: {staged_job.get('company')} - {staged_job.get('title')}")
-            logger.info(f"   URL: {staged_job.get('url')}")
+            logger.info(f"   URL: {job_url}")
             try:
-                await applier.apply(staged_job.get('url'), 'cv/main_example.pdf', dry_run=dry_run)
+                res = await applier.apply(job_url, 'cv/main_example.pdf', dry_run=dry_run)
+                res_status = res.get("status") if isinstance(res, dict) else "unknown"
+                if res_status == "success":
+                    update_tracker_job_status(job_url, "Applied - Submitted", "Auto-applied via browser bot")
+                    record_info("browser_autoapply", f"Successfully submitted application for {staged_job.get('company')}")
+                elif res_status == "simulated":
+                    update_tracker_job_status(job_url, "Applied - Simulated", "Simulated form mapping completed")
+                    record_info("browser_autoapply", f"Simulated form mapping for {staged_job.get('company')}")
+                else:
+                    err_msg = res.get("error", "Check form manually") if isinstance(res, dict) else "Review needed"
+                    update_tracker_job_status(job_url, "Staged - Manual Review", f"Review: {err_msg[:60]}")
+                    record_warning("browser_autoapply", f"Application incomplete: {err_msg}", context={"url": job_url})
             except Exception as e:
                 logger.error(f"Error during application: {e}")
-            logger.info("Application completed. Waiting 60s before processing next opportunity...")
-            await asyncio.sleep(60)
+                record_error("browser_autoapply", f"Application exception: {e}", context={"url": job_url})
+                update_tracker_job_status(job_url, "Staged - Review Required", f"Error: {str(e)[:60]}")
+            logger.info("Application pass completed. Waiting 20s before checking next staged opportunity...")
+            await asyncio.sleep(20)
         else:
             logger.info("Standing by: No staged applications pending submission. Checking every 30s...")
             await asyncio.sleep(30)

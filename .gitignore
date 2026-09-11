@@ -17,6 +17,9 @@ venv/
 *.synctex.gz
 *.fls
 *.fdb_latexmk
+logs/
+*.jsonl
+daemon_enabled.flag
 
 # Personal data (never commit these)
 salary_data.json

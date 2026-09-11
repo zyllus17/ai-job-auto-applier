@@ -30,6 +30,11 @@ ENV_FILE = REPO_ROOT / '.env'
 CANDIDATE_PROFILE = TOOLS_DIR / 'candidate_profile.json'
 PORT = 8420
 
+from tools.error_tracker import (
+    record_error, record_warning, record_info,
+    get_errors, clear_errors, get_error_summary
+)
+
 SERVICE_REGISTRY = {
     'job_daemon': {
         'name': 'Job Search Daemon',
@@ -314,6 +319,10 @@ class ProcessManager:
         }
         self.log_buffer.append(exit_entry)
         await self.broadcast({'type': 'log', 'log': exit_entry})
+
+        if not clean_exit:
+            record_error(service_id, exit_msg, context={"exit_code": exit_code})
+            await self.broadcast({'type': 'error_recorded', 'summary': get_error_summary()})
         
         # Process ended
         if self.processes.get(service_id):
@@ -322,6 +331,106 @@ class ProcessManager:
             self.processes[service_id]['process'] = None
         status = self.get_status(service_id)
         await self.broadcast({'type': 'status_update', 'service': status})
+
+    async def reset_service(self, service_id: str) -> dict:
+        """Clears error state on a service and resets it to idle."""
+        await self.stop_service(service_id)
+        svc_name = SERVICE_REGISTRY.get(service_id, {}).get('name', service_id)
+        self.processes[service_id] = {
+            'process': None,
+            'start_time': 0,
+            'status': 'idle'
+        }
+        reset_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'service_id': service_id,
+            'service_name': 'Supervisor',
+            'message': f"🔄 Error state reset for '{svc_name}'. Ready to run.",
+            'level': 'SUCCESS'
+        }
+        self.log_buffer.append(reset_entry)
+        await self.broadcast({'type': 'log', 'log': reset_entry})
+        status = self.get_status(service_id)
+        await self.broadcast({'type': 'status_update', 'service': status})
+        return status
+
+    async def run_oneshot_action(self, action_name: str, cmd: list[str]) -> dict:
+        """Runs a one-shot CLI command with live terminal streaming and error tracking."""
+        start_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'service_id': 'action',
+            'service_name': action_name,
+            'message': f"⚡ Action '{action_name}' dispatched: {' '.join(cmd[-2:])}",
+            'level': 'INFO'
+        }
+        self.log_buffer.append(start_entry)
+        await self.broadcast({'type': 'log', 'log': start_entry})
+
+        async def _run_stream():
+            try:
+                sub_env = dict(os.environ)
+                sub_env["PYTHONUNBUFFERED"] = "1"
+                proc = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.STDOUT,
+                    env=sub_env
+                )
+                while proc.returncode is None:
+                    line = await proc.stdout.readline()
+                    if not line:
+                        break
+                    text = line.decode('utf-8', errors='replace').rstrip('\n')
+                    if not text:
+                        continue
+                    lvl = 'INFO'
+                    if 'ERROR' in text or 'Exception' in text or 'Traceback' in text:
+                        lvl = 'ERROR'
+                    elif 'WARN' in text:
+                        lvl = 'WARNING'
+                    elif '✅' in text or '[OK]' in text or 'success' in text.lower():
+                        lvl = 'SUCCESS'
+
+                    entry = {
+                        'timestamp': datetime.now().isoformat(),
+                        'service_id': 'action',
+                        'service_name': action_name,
+                        'message': text,
+                        'level': lvl
+                    }
+                    self.log_buffer.append(entry)
+                    await self.broadcast({'type': 'log', 'log': entry})
+
+                await proc.wait()
+                ok = proc.returncode == 0
+                done_msg = f"✅ Action '{action_name}' completed successfully." if ok else f"❌ Action '{action_name}' finished with exit code {proc.returncode}."
+                done_entry = {
+                    'timestamp': datetime.now().isoformat(),
+                    'service_id': 'action',
+                    'service_name': action_name,
+                    'message': done_msg,
+                    'level': 'SUCCESS' if ok else 'ERROR'
+                }
+                self.log_buffer.append(done_entry)
+                await self.broadcast({'type': 'log', 'log': done_entry})
+                if not ok:
+                    record_error("action_runner", f"Action {action_name} failed: code {proc.returncode}")
+                    await self.broadcast({'type': 'error_recorded', 'summary': get_error_summary()})
+            except Exception as ex:
+                record_error("action_runner", f"Action {action_name} exception: {ex}")
+                err_entry = {
+                    'timestamp': datetime.now().isoformat(),
+                    'service_id': 'action',
+                    'service_name': action_name,
+                    'message': f"❌ Action exception: {ex}",
+                    'level': 'ERROR'
+                }
+                self.log_buffer.append(err_entry)
+                await self.broadcast({'type': 'log', 'log': err_entry})
+                await self.broadcast({'type': 'error_recorded', 'summary': get_error_summary()})
+
+        asyncio.create_task(_run_stream())
+        return {"status": "started", "action": action_name}
 
     async def broadcast(self, message: dict):
         dead_clients = set()
@@ -372,6 +481,10 @@ async def start_service_api(service_id: str):
 @app.post('/api/services/{service_id}/stop')
 async def stop_service_api(service_id: str):
     return await manager.stop_service(service_id)
+
+@app.post('/api/services/{service_id}/reset')
+async def reset_service_api(service_id: str):
+    return await manager.reset_service(service_id)
 
 def read_tracker_csv():
     rows = []
@@ -702,21 +815,51 @@ async def update_settings(data: SettingsInput):
 
 @app.post('/api/actions/scan-once')
 async def action_scan_once():
-    cmd = [sys.executable, str(TOOLS_DIR / 'daemon_job_runner.py'), '--once']
-    subprocess.Popen(cmd)
-    return {"status": "started"}
+    cmd = [sys.executable, "-u", str(TOOLS_DIR / 'daemon_job_runner.py'), '--once']
+    return await manager.run_oneshot_action("Job Search (Once)", cmd)
 
 @app.post('/api/actions/scaffold')
 async def action_scaffold():
-    cmd = [sys.executable, str(TOOLS_DIR / 'project_scaffolder.py'), '--force']
-    subprocess.Popen(cmd)
-    return {"status": "started"}
+    cmd = [sys.executable, "-u", str(TOOLS_DIR / 'project_scaffolder.py'), '--force']
+    return await manager.run_oneshot_action("Project Scaffolder", cmd)
 
 @app.post('/api/actions/sync-sheets')
 async def action_sync_sheets():
-    cmd = [sys.executable, str(TOOLS_DIR / 'google_sheets_sync.py')]
-    subprocess.Popen(cmd)
-    return {"status": "started"}
+    cmd = [sys.executable, "-u", str(TOOLS_DIR / 'google_sheets_sync.py')]
+    return await manager.run_oneshot_action("Google Sheets Sync", cmd)
+
+@app.get('/api/errors')
+async def get_errors_api(limit: int = 100, service: Optional[str] = None, severity: Optional[str] = None, search: Optional[str] = None):
+    err_list = get_errors(limit=limit, service=service, severity=severity, search=search)
+    return {
+        "errors": err_list,
+        "recent_errors": err_list,
+        "summary": get_error_summary()
+    }
+
+@app.post('/api/errors/clear')
+async def clear_errors_api():
+    count = clear_errors()
+    clear_entry = {
+        'timestamp': datetime.now().isoformat(),
+        'service_id': 'system',
+        'service_name': 'ErrorTracker',
+        'message': f"🧹 Cleared {count} error events from system diagnostics.",
+        'level': 'SUCCESS'
+    }
+    manager.log_buffer.append(clear_entry)
+    await manager.broadcast({'type': 'log', 'log': clear_entry})
+    await manager.broadcast({'type': 'errors_cleared', 'summary': get_error_summary()})
+    return {"status": "cleared", "count": count}
+
+@app.get('/api/errors/export')
+async def export_errors_api():
+    err_file = REPO_ROOT / "logs" / "errors.jsonl"
+    if not err_file.exists() or err_file.stat().st_size == 0:
+        err_file = REPO_ROOT / "logs" / "system.log"
+    if err_file.exists():
+        return FileResponse(str(err_file), media_type='text/plain', filename=err_file.name)
+    raise HTTPException(status_code=404, detail="No error logs found")
 
 @app.get('/api/health')
 async def get_health():
@@ -776,7 +919,8 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.send_json({
         'type': 'init',
         'services': manager.get_all_statuses(),
-        'logs': list(manager.log_buffer)
+        'logs': list(manager.log_buffer),
+        'error_summary': get_error_summary()
     })
     try:
         while True:

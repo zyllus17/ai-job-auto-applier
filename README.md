@@ -51,11 +51,15 @@ Ask me only the 3 essential things you need from me, and automate all other setu
 
 ## 💻 1-Command Terminal Setup
 
+### 1. Fork and clone
+
 ```bash
-git clone https://github.com/zyllus17/ai-job-auto-applier.git
+gh repo fork zyllus17/ai-job-auto-applier --clone
 cd ai-job-auto-applier
 bash quickstart.sh
 ```
+
+> **Important Privacy Notice:** Forks of public repositories are always **public**. The setup process writes your **personal data** into tracked files. If you do not want your personal details published on GitHub, use a private repository as detailed in [SETUP.md section 8](SETUP.md#8-pulling-updates-from-upstream).
 
 The script automatically detects your OS, installs Bun, TinyTeX, Camoufox, and Telegram dependencies, prompts for your profile details, registers the global Antigravity skill, and sets up your workspace.
 

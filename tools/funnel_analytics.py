@@ -14,8 +14,8 @@ if not TRACKER_CSV.exists() and (REPO_ROOT / "scratch" / "job_tracker.csv").exis
 class FunnelTracker:
     """Tracks: Discovered -> Staged -> Applied -> Interview -> Offer"""
     
-    def __init__(self, tracker_file: Path = TRACKER_CSV):
-        self.tracker_file = tracker_file
+    def __init__(self, tracker_file = TRACKER_CSV):
+        self.tracker_file = Path(tracker_file)
         self._ensure_file()
         
     def _ensure_file(self):
