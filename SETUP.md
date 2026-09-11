@@ -264,7 +264,29 @@ If you have salary data (from a union, salary survey, Glassdoor, or personal res
 
 This creates `salary_data.json` which the `/apply` workflow uses for salary benchmarking. If you skip this step, salary lookup is simply omitted.
 
-## 6. Test the workflow
+## 6. Launch the Visual Web Dashboard
+
+You can monitor and control all 6 automation services via the built-in browser dashboard (`http://localhost:8420`):
+
+- **macOS / Linux:**
+  ```bash
+  make run
+  ```
+- **Windows (Double-click or Command Prompt):**
+  Double-click `run.bat` or run:
+  ```cmd
+  run.bat
+  ```
+- **Windows (PowerShell):**
+  ```powershell
+  .\run.ps1
+  ```
+- **Universal (Any OS / No Make Required):**
+  ```bash
+  python run.py
+  ```
+
+## 7. Test the workflow
 
 Find a job posting you're interested in, then:
 
@@ -285,7 +307,7 @@ Claude will:
 4. Have a reviewer agent critique the drafts
 5. Revise and present the final output
 
-## 7. Compile your documents
+## 8. Compile your documents
 
 After `/apply` creates the LaTeX files:
 
@@ -303,7 +325,7 @@ Set-Location cover_letters; xelatex cover_<company>_<role>.tex; Set-Location ..
 
 These commands apply to the stock templates (moderncv CV, `cover.cls` cover letter). If you'd rather use your own LaTeX template, run `/add-template` — it captures the template's compile engine, fonts, style rules, and page limit, test-compiles it, and wires it into `/apply`. See the "LaTeX templates" section in the README.
 
-## 8. Pulling upstream updates into your fork
+## 9. Pulling upstream updates into your fork
 
 Upstream keeps improving the methodology files your fork has personalized, so plan for updates from day one:
 

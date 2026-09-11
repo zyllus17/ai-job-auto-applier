@@ -61,13 +61,28 @@ The script automatically detects your OS, installs Bun, TinyTeX, Camoufox, and T
 
 ---
 
-## 🎛️ Launch Visual Web Dashboard (`make run`)
+## 🎛️ Launch Visual Web Dashboard
 
-Prefer a visual control panel over terminal commands?
+Prefer a visual control panel over terminal commands? Start it with a single command on any OS:
 
+#### 🍎 macOS / 🐧 Linux:
 ```bash
 make run
 ```
+
+#### 🪟 Windows Users:
+- **Double-Click or Command Prompt**: Double-click `run.bat` or run:
+  ```cmd
+  run.bat
+  ```
+- **PowerShell**:
+  ```powershell
+  .\run.ps1
+  ```
+- **Universal (Any OS / No Make Required)**:
+  ```bash
+  python run.py
+  ```
 
 <p align="center">
   <img src="assets/dashboard_live.png" alt="Live AI Job Auto-Applier Dashboard" width="100%" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
@@ -75,8 +90,9 @@ make run
 
 This single command:
 1. Installs dashboard dependencies (`fastapi`, `uvicorn`, `psutil`).
-2. Starts the localhost FastAPI server at `http://localhost:8420`.
-3. Auto-opens your default web browser to the dashboard.
+2. Cleans up any zombie processes previously occupying port 8420.
+3. Starts the localhost FastAPI server at `http://localhost:8420`.
+4. Auto-opens your default web browser to the dashboard.
 
 **Features of the Web Dashboard:**
 - 🎛️ **Service Cards Grid**: Independent start/stop toggle switches with live uptime counters for all 6 core services (Job Search Daemon, Camoufox Auto-Apply, Telegram Bot, Project Scaffolder, Recruiter Outreach, Google Sheets Sync). Turn on/off multiple services simultaneously!
