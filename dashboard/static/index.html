@@ -2046,8 +2046,8 @@
 
     async function runAutofillForJob(url) {
       if (!url) { showToast('No URL provided for this job', 'error'); return; }
-      showToast('Starting anti-detect browser autofill...', 'info');
-      await apiCall('/api/services/browser_autoapply/start', 'POST');
+      showToast('Launching browser autofill for selected opportunity...', 'info');
+      await apiCall('/api/actions/apply-job', 'POST', { url: url, mode: 'semi-auto' });
       navigate('logs');
     }
 

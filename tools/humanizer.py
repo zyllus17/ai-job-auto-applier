@@ -50,6 +50,10 @@ class HumanBehavior:
         """Set or update the active page."""
         self.page = page
 
+    async def random_delay(self, min_ms: int = 100, max_ms: int = 500):
+        """Pause for a randomized duration within the given millisecond window."""
+        await asyncio.sleep(random.uniform(min_ms, max_ms) / 1000.0)
+
     async def type_text(self, element, text: str):
         """Alias for human_type to maintain API compatibility."""
         await self.human_type(element, text)

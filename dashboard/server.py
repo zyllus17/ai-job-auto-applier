@@ -828,6 +828,15 @@ async def action_sync_sheets():
     cmd = [sys.executable, "-u", str(TOOLS_DIR / 'google_sheets_sync.py')]
     return await manager.run_oneshot_action("Google Sheets Sync", cmd)
 
+class ApplyJobInput(BaseModel):
+    url: str
+    mode: Optional[str] = "semi-auto"
+
+@app.post('/api/actions/apply-job')
+async def action_apply_job(data: ApplyJobInput):
+    cmd = [sys.executable, "-u", str(TOOLS_DIR / 'browser_autofill.py'), data.url, '--mode', data.mode or 'semi-auto']
+    return await manager.run_oneshot_action("Browser Auto-Apply", cmd)
+
 @app.get('/api/errors')
 async def get_errors_api(limit: int = 100, service: Optional[str] = None, severity: Optional[str] = None, search: Optional[str] = None):
     err_list = get_errors(limit=limit, service=service, severity=severity, search=search)
