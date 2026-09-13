@@ -192,12 +192,38 @@ class FormFiller:
 
         return platforms_map
 
+    def _sanitize_selector(self, sel: str) -> str:
+        """Sanitizes selector strings, converting any raw 'aria-label=...' into valid CSS attribute queries."""
+        if not sel:
+            return ""
+        parts = [p.strip() for p in sel.split(",") if p.strip()]
+        sanitized = []
+        for p in parts:
+            if p.startswith("aria-label="):
+                val = p[len("aria-label="):].strip("\"'")
+                sanitized.append(f"[aria-label*='{val}' i]")
+            else:
+                sanitized.append(p)
+        return ", ".join(sanitized)
+
     async def _safe_fill(self, selector: str, value: str, field_name: str) -> bool:
         """Safely types value into selector with fallback query and human delay."""
         if not value or not selector:
             return False
+        selector = self._sanitize_selector(selector)
         try:
             element = await self.page.query_selector(selector)
+            if not element and "," in selector:
+                for sub in selector.split(","):
+                    sub = sub.strip()
+                    if not sub:
+                        continue
+                    try:
+                        element = await self.page.query_selector(sub)
+                        if element and await element.is_visible():
+                            break
+                    except Exception:
+                        continue
             if element:
                 is_visible = await element.is_visible()
                 if not is_visible:
@@ -235,12 +261,12 @@ class FormFiller:
 
         if plat_sel.get("first_name"):
             await self._safe_fill(plat_sel.get("first_name"), first, "first_name")
-        else:
+        elif not full_name_sel:
             await self._safe_fill("input[name*='first' i], input[id*='first' i], [aria-label*='First Name' i]", first, "first_name")
 
         if plat_sel.get("last_name"):
             await self._safe_fill(plat_sel.get("last_name"), last, "last_name")
-        else:
+        elif not full_name_sel:
             await self._safe_fill("input[name*='last' i], input[id*='last' i], [aria-label*='Last Name' i]", last, "last_name")
 
         # Email
@@ -524,6 +550,15 @@ class AutoApplier:
             except Exception as e:
                 logger.debug(f"Aggregator follow exception: {e}")
 
+        # Check if browser opened a new tab/window during interaction
+        if hasattr(page, "context") and len(page.context.pages) > 1:
+            page = page.context.pages[-1]
+            try:
+                await page.bring_to_front()
+            except Exception:
+                pass
+            platform = self.detector.detect(page.url)
+
         logger.info(f"🎯 Resolved Application Target: [{platform.upper()}] at {page.url[:80]}")
         return page, platform
 
@@ -532,6 +567,16 @@ class AutoApplier:
         page, platform = await self._resolve_application_page(page, application_url)
         if platform == "needs_login":
             return {"status": "needs_login", "platform": "linkedin", "message": "Sign-in required to access application"}
+
+        # Wait for form or input elements to be rendered (handles React, Lever, Ashby hydration)
+        try:
+            await page.wait_for_selector(
+                "form, input[type='text'], input[type='email'], input[name='name'], [data-qa='name-input'], #first_name, .application-form",
+                timeout=7000
+            )
+        except Exception:
+            pass
+        await asyncio.sleep(1.0)
 
         # Check if posting has expired or closed
         closed_keywords = [

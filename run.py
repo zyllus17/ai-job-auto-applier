@@ -179,7 +179,12 @@ def main():
     if args.test:
         check_and_install_dependencies()
         print("🧪 Running automated test suite...")
-        test_cmd = [sys.executable, "-m", "pytest", "tests/test_security_guards.py", "tests/test_tracker_status_vocab.py"]
+        test_cmd = [
+            sys.executable, "-m", "pytest",
+            "tests/test_security_guards.py",
+            "tests/test_tracker_status_vocab.py",
+            "tests/test_browser_automation.py"
+        ]
         rc = subprocess.run(test_cmd).returncode
         sys.exit(rc)
 

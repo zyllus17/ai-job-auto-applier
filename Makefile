@@ -34,9 +34,9 @@ help: ## Show this help
 	@echo ""
 	@echo "Windows Alternatives (no GNU make required):"
 	@echo "  make.bat      - Native Windows CMD make shim (type 'make run')"
-	@echo "  .\\make.ps1   - Native Windows PowerShell make shim"
+	@printf "  .\\\\make.ps1   - Native Windows PowerShell make shim\n"
 	@echo "  run.bat       - Double-click or run from CMD"
-	@echo "  .\\run.ps1    - Run in Windows PowerShell"
+	@printf "  .\\\\run.ps1    - Run in Windows PowerShell\n"
 	@echo "  python run.py - Universal cross-platform launcher"
 	@echo ""
 
