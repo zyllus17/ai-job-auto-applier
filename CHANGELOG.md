@@ -13,25 +13,6 @@ per-file diff commands.
 
 ## [Unreleased]
 
-## [4.0.1] - 2026-09-13
-
-### Added
-- **Browser Automation Test Suite** (`tests/test_browser_automation.py`):
-  Comprehensive unit and integration test suite (6 tests) validating ATS platform detection, company exclusion filtering, selector syntax integrity, CSS attribute selector sanitization, and live mock form filling for Lever and Greenhouse in Playwright.
-
-### Fixed
-- **Lever & Ashby Selector Resilience** (`tools/ats_selectors.json`):
-  - Fixed Lever submit button selector to support `#btn-submit, button[data-qa="btn-submit"]` (type `button`) in addition to submit buttons.
-  - Normalized Ashby ARIA selectors to valid CSS attribute brackets `[aria-label*='...']`, eliminating selector syntax parsing errors.
-  - Set `first_name: null` on Lever so that the single `full_name` field (`Maruf Hassan`) is not erroneously overwritten with `first_name` (`Maruf`).
-- **Selector Sanitizer & Multi-part Fallback** (`tools/browser_autofill.py`):
-  Added `_sanitize_selector()` to dynamically convert raw `aria-label=` selectors to standard CSS attribute queries, and added fallback iteration for comma-separated selectors.
-- **Dynamic SPA Hydration Waiting** (`tools/browser_autofill.py`):
-  Added pre-fill DOM readiness check (`page.wait_for_selector`) to wait for React/Lever/Ashby client-side hydration before attempting to populate input elements.
-- **Multi-Tab / Popup Context Adoption** (`tools/browser_autofill.py`):
-  Automatically detects and adopts external application tabs or popups opened by job board aggregators.
-- **Root `requirements.txt`**: Added clean, cross-platform dependencies list for turnkey installation.
-
 ## [4.0.0] - 2026-09-13
 
 ### Added
@@ -42,12 +23,28 @@ per-file diff commands.
   One-command automated environment setup for Windows, verifying Python 3.10+, installing dependencies, and configuring local directories.
 - **Playwright Chromium Browser Auto-Installer**:
   `run.py`, `quickstart.bat`, and `quickstart.ps1` automatically detect if the Playwright browser binaries are missing on Windows and download them via `python -m playwright install chromium`, eliminating manual installation errors.
+- **Browser Automation Test Suite** (`tests/test_browser_automation.py`):
+  Comprehensive unit and integration test suite (6 tests, 48 tests total) validating ATS platform detection across 12 portals, company exclusion filtering, selector syntax integrity, CSS attribute selector sanitization, and live mock form filling for Lever and Greenhouse in Playwright.
 - **Windows Event Loop Policy Configuration**:
   Enforced `asyncio.WindowsProactorEventLoopPolicy()` in `run.py` and `dashboard/server.py` to ensure async subprocess streaming runs without `NotImplementedError` on Windows.
 - **Targeted Application API**:
   Added `POST /api/actions/apply-job` in `dashboard/server.py` and connected the Opportunity Details drawer button in `dashboard/static/index.html` to run targeted browser auto-fill with live WebSocket streaming.
 - **Closed Position Detection**:
   `browser_autofill.py` automatically detects expired job postings (e.g. "position is no longer available"), records verification screenshots, and updates the tracker status to `Closed - Position Expired`.
+- **Root `requirements.txt`**: Added clean, cross-platform dependencies list for turnkey installation.
+
+### Fixed
+
+- **Lever & Ashby Selector Resilience** (`tools/ats_selectors.json`):
+  - Fixed Lever submit button selector to support `#btn-submit, button[data-qa="btn-submit"]` (type `button`) in addition to submit buttons.
+  - Normalized Ashby ARIA selectors to valid CSS attribute brackets `[aria-label*='...']`, eliminating selector syntax parsing errors.
+  - Set `first_name: null` on Lever so that the single `full_name` field (`Maruf Hassan`) is not erroneously overwritten with `first_name` (`Maruf`).
+- **Selector Sanitizer & Multi-part Fallback** (`tools/browser_autofill.py`):
+  Added `_sanitize_selector()` to dynamically convert raw `aria-label=` selectors to standard CSS attribute queries, and added fallback iteration for comma-separated selectors.
+- **Dynamic SPA Hydration Waiting** (`tools/browser_autofill.py`):
+  Added pre-fill DOM readiness check (`page.wait_for_selector`) to wait for React/Lever/Ashby client-side hydration before attempting to populate input elements, resolving premature browser teardown.
+- **Multi-Tab / Popup Context Adoption** (`tools/browser_autofill.py`):
+  Automatically detects and adopts external application tabs or popups opened by job board aggregators.
 
 ### Changed
 
