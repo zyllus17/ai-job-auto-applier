@@ -44,6 +44,14 @@ def print_banner():
     print(f"  {rocket} AI Job Auto-Applier Dashboard - Universal Launcher")
     print("=" * 62 + "\n")
 
+# Set Windows Proactor Event Loop Policy for proper asyncio subprocess support
+if sys.platform == "win32":
+    import asyncio
+    try:
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    except Exception:
+        pass
+
 def check_and_install_dependencies():
     """Checks for required packages and installs any that are missing."""
     missing = []
@@ -53,18 +61,36 @@ def check_and_install_dependencies():
         except ImportError:
             missing.append(pkg_name)
 
-    if not missing:
-        return
+    if missing:
+        print(f"📦 Installing missing dependencies: {', '.join(missing)}...")
+        cmd = [sys.executable, "-m", "pip", "install"] + missing
+        try:
+            subprocess.check_call(cmd)
+            print("✅ All Python dependencies installed successfully!\n")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to install dependencies: {e}")
+            print("Please run: python -m pip install -r requirements.txt")
+            sys.exit(1)
 
-    print(f"📦 Installing missing dependencies: {', '.join(missing)}...")
-    cmd = [sys.executable, "-m", "pip", "install"] + missing
+    # Ensure Playwright browser binary is downloaded (especially crucial on Windows)
+    check_playwright_browsers()
+
+def check_playwright_browsers():
+    """Ensures Playwright Chromium browser binary is installed."""
     try:
-        subprocess.check_call(cmd)
-        print("✅ All dependencies installed successfully!\n")
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Failed to install dependencies: {e}")
-        print("Please run: python -m pip install -r requirements.txt")
-        sys.exit(1)
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            try:
+                browser = p.chromium.launch(headless=True)
+                browser.close()
+            except Exception as e:
+                err_str = str(e).lower()
+                if "playwright install" in err_str or "executable doesn't exist" in err_str:
+                    print("🌐 Playwright Chromium browser missing. Installing now...")
+                    subprocess.check_call([sys.executable, "-m", "playwright", "install", "chromium"])
+                    print("✅ Playwright Chromium installed successfully!\n")
+    except Exception:
+        pass
 
 def kill_port_owner(port: int):
     """Terminates any process currently bound to the specified port across Windows, macOS, and Linux."""
@@ -145,9 +171,17 @@ def main():
     parser.add_argument("--no-browser", action="store_true", help="Do not open browser automatically")
     parser.add_argument("--clean-only", action="store_true", help="Kill processes on dashboard port and exit")
     parser.add_argument("--install", action="store_true", help="Install dependencies and exit")
+    parser.add_argument("--test", action="store_true", help="Run automated test suite and exit")
     args = parser.parse_args()
 
     print_banner()
+
+    if args.test:
+        check_and_install_dependencies()
+        print("🧪 Running automated test suite...")
+        test_cmd = [sys.executable, "-m", "pytest", "tests/test_security_guards.py", "tests/test_tracker_status_vocab.py"]
+        rc = subprocess.run(test_cmd).returncode
+        sys.exit(rc)
 
     if args.clean_only:
         kill_port_owner(args.port)

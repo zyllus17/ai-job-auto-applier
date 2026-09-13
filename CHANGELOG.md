@@ -13,6 +13,34 @@ per-file diff commands.
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-09-13
+
+### Added
+
+- **Native Windows Support & Make Command Shims** (`make.bat`, `make.cmd`, `make.ps1`):
+  Windows Command Prompt and PowerShell users can now run `make run`, `make install`, `make clean`, and `make test` without installing GNU Make. Windows Command Prompt automatically executes `make.bat`, routing commands directly to the cross-platform runner.
+- **Windows Turnkey Quickstart** (`quickstart.bat`, `quickstart.ps1`):
+  One-command automated environment setup for Windows, verifying Python 3.10+, installing dependencies, and configuring local directories.
+- **Playwright Chromium Browser Auto-Installer**:
+  `run.py`, `quickstart.bat`, and `quickstart.ps1` automatically detect if the Playwright browser binaries are missing on Windows and download them via `python -m playwright install chromium`, eliminating manual installation errors.
+- **Windows Event Loop Policy Configuration**:
+  Enforced `asyncio.WindowsProactorEventLoopPolicy()` in `run.py` and `dashboard/server.py` to ensure async subprocess streaming runs without `NotImplementedError` on Windows.
+- **Targeted Application API**:
+  Added `POST /api/actions/apply-job` in `dashboard/server.py` and connected the Opportunity Details drawer button in `dashboard/static/index.html` to run targeted browser auto-fill with live WebSocket streaming.
+- **Closed Position Detection**:
+  `browser_autofill.py` automatically detects expired job postings (e.g. "position is no longer available"), records verification screenshots, and updates the tracker status to `Closed - Position Expired`.
+
+### Changed
+
+- **Browser Autofill Lifecycle & Review Persistence**:
+  In semi-auto mode, Chrome now remains open for 75 seconds (or until manually closed or submitted by the user), and 30 seconds in dry-run mode, resolving immediate browser teardown.
+- **Strict Queue Progression**:
+  Updated `run_autofill_daemon()` to strictly match `['staged', 'staged - ready to submit']` and transition failed or reviewed items to `Applied - Submitted`, `Needs Login - Manual Review`, or `Closed - Position Expired`, permanently eliminating infinite retry loops.
+- **Selector Schema Alignment**:
+  Synchronized `tools/browser_autofill.py` with `tools/ats_selectors.json` across Greenhouse, Lever, Ashby, Workday, SmartRecruiters, JazzHR, and LinkedIn Easy Apply.
+- **Humanizer Method Compatibility**:
+  Added `random_delay()` to `HumanBehavior` in `tools/humanizer.py` with randomized millisecond variance.
+
 ### Security
 
 - **`settings.json` no longer pre-approves `bun run` on arbitrary files** (#396) - the

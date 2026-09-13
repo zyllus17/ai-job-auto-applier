@@ -23,19 +23,22 @@ Write-Host "  🚀 AI Job Auto-Applier Dashboard - PowerShell Launcher" -Foregro
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
 
+# Clean up script arguments
+$passedArgs = if ($ScriptArgs) { $ScriptArgs | Where-Object { $_ -ne $null -and $_ -ne "" } } else { @() }
+
 # Find available Python command
 $pythonCmd = $null
 $pythonArgs = @()
 
 if (Get-Command py -ErrorAction SilentlyContinue) {
     $pythonCmd = "py"
-    $pythonArgs = @("-3", "run.py") + $ScriptArgs
+    $pythonArgs = @("-3", "run.py") + $passedArgs
 } elseif (Get-Command python -ErrorAction SilentlyContinue) {
     $pythonCmd = "python"
-    $pythonArgs = @("run.py") + $ScriptArgs
+    $pythonArgs = @("run.py") + $passedArgs
 } elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
     $pythonCmd = "python3"
-    $pythonArgs = @("run.py") + $ScriptArgs
+    $pythonArgs = @("run.py") + $passedArgs
 } else {
     Write-Host "[ERROR] Python 3 was not found in your PATH!" -ForegroundColor Red
     Write-Host "Please install Python from https://www.python.org/ and verify 'Add to PATH' is selected." -ForegroundColor Yellow

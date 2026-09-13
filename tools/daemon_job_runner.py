@@ -36,9 +36,41 @@ from tools.error_tracker import record_error, record_warning, record_info
 
 SEEN_JOBS_FILE = REPO_ROOT / "seen_jobs.json"
 DAEMON_FLAG_FILE = REPO_ROOT / "daemon_enabled.flag"
-BUN_BIN = shutil.which("bun") or "/opt/homebrew/bin/bun"
-LUALATEX_BIN = shutil.which("lualatex") or str(Path.home() / "Library/TinyTeX/bin/universal-darwin/lualatex")
-XELATEX_BIN = shutil.which("xelatex") or str(Path.home() / "Library/TinyTeX/bin/universal-darwin/xelatex")
+
+def _resolve_binary(name: str, fallbacks: list[str]) -> str:
+    found = shutil.which(name)
+    if found:
+        return found
+    if sys.platform == "win32" and not name.endswith(".exe"):
+        found = shutil.which(f"{name}.exe")
+        if found:
+            return found
+    for fb in fallbacks:
+        p = Path(fb).expanduser()
+        if p.exists():
+            return str(p)
+    return name
+
+BUN_BIN = _resolve_binary("bun", [
+    "/opt/homebrew/bin/bun",
+    str(Path.home() / ".bun/bin/bun"),
+    str(Path.home() / ".bun/bin/bun.exe"),
+    str(Path(os.environ.get("USERPROFILE", "")) / ".bun/bin/bun.exe")
+])
+
+LUALATEX_BIN = _resolve_binary("lualatex", [
+    str(Path.home() / "Library/TinyTeX/bin/universal-darwin/lualatex"),
+    str(Path.home() / ".TinyTeX/bin/x86_64-linux/lualatex"),
+    str(Path(os.environ.get("APPDATA", "")) / "TinyTeX/bin/windows/lualatex.exe"),
+    str(Path(os.environ.get("LOCALAPPDATA", "")) / "Programs/TinyTeX/bin/windows/lualatex.exe")
+])
+
+XELATEX_BIN = _resolve_binary("xelatex", [
+    str(Path.home() / "Library/TinyTeX/bin/universal-darwin/xelatex"),
+    str(Path.home() / ".TinyTeX/bin/x86_64-linux/xelatex"),
+    str(Path(os.environ.get("APPDATA", "")) / "TinyTeX/bin/windows/xelatex.exe"),
+    str(Path(os.environ.get("LOCALAPPDATA", "")) / "Programs/TinyTeX/bin/windows/xelatex.exe")
+])
 
 SHORT_TECH_WORDS = {"ai", "ml", "qa", "go", "ui", "ux", "c#", "c++", "r", "kmp", "ci", "cd"}
 GENERIC_MODIFIERS = {

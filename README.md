@@ -1,8 +1,8 @@
 <p align="center">
-  <h1 align="center">🤖 AI Job Auto-Applier v3: Autonomous Career Engine</h1>
+  <h1 align="center">🤖 AI Job Auto-Applier v4: Autonomous Career Engine</h1>
   <p align="center">
     <b>The continuous, self-driving career acquisition framework that runs locally on your laptop.</b><br>
-    <i>Visual Web Dashboard • Anti-Detect Form Auto-Filling • 0 AI Tokens • ATS Tailored 2-Page CVs • 1-Page Cover Letters • Daily Frontend Demo Projects • Recruiter Cold Outreach • Free Self-Hosted Telegram Bot • Google Sheets Daily Tracking</i>
+    <i>Full Native Windows Support • Visual Web Dashboard • Anti-Detect Form Auto-Filling • 0 AI Tokens • ATS Tailored 2-Page CVs • 1-Page Cover Letters • Daily Frontend Demo Projects • Recruiter Cold Outreach • Free Self-Hosted Telegram Bot • Google Sheets Daily Tracking</i>
   </p>
 </p>
 
@@ -20,7 +20,7 @@ Most job searches are exhausting: hours spent browsing boards, rewriting resumes
 1. **Scrapes active postings** on LinkedIn, FreeHire, and global aggregators 24/7.
 2. **Evaluates fit (0–100)** against your real work experience while **automatically skipping your current employer**.
 3. **Compiles tailored 2-page ModernCV PDFs** (`lualatex`) and **1-page Cover Letters** (`xelatex`) for every matching role.
-4. **Auto-fills and submits application forms** on Greenhouse, Lever, Ashby, Workday, SmartRecruiters, LinkedIn Easy Apply, Indeed, Naukri, and Monster with **Camoufox C++ anti-detect browser engine (0 AI tokens consumed)**.
+4. **Auto-fills and submits application forms** on Greenhouse, Lever, Ashby, Workday, SmartRecruiters, LinkedIn Easy Apply, Indeed, Naukri, and Monster with **Camoufox / Playwright anti-detect browser engine (0 AI tokens consumed)**.
 5. **Scaffolds 1 visual demo project per day** (with Streamlit/Gradio frontend for LinkedIn video recordings) and automatically creates/pushes repos to your GitHub.
 6. **Discovers hiring managers and recruiters** via Google X-Ray search (zero LinkedIn ban risk) and drafts personalized 4-sentence emails and LinkedIn connection requests.
 7. **Pushes real-time alerts to your Telegram bot** with inline buttons to view PDFs and trigger actions directly from your phone.
@@ -45,58 +45,73 @@ Ask me only the 3 essential things you need from me, and automate all other setu
 2. **Your Target Roles & Location**: (e.g. *AI Automation Engineer, Senior Flutter Developer, Remote Worldwide, India, US, Europe*).
 3. **Google Sheets Webhook URL (Optional)**: If you want real-time tracking with a new tab created each day (see setup below).
 
-**That's it!** The AI installs Bun, Python libraries, Camoufox, and TinyTeX in user-space, compiles your master CV PDF, and launches discovery.
+**That's it!** The AI installs Bun, Python libraries, Playwright/Camoufox, and TinyTeX in user-space, compiles your master CV PDF, and launches discovery.
 
 ---
 
-## 💻 1-Command Terminal Setup
+## 💻 1-Command Turnkey Setup
 
 ### 1. Fork and clone
 
 ```bash
 gh repo fork zyllus17/ai-job-auto-applier --clone
 cd ai-job-auto-applier
-bash quickstart.sh
 ```
 
 > **Important Privacy Notice:** Forks of public repositories are always **public**. The setup process writes your **personal data** into tracked files. If you do not want your personal details published on GitHub, use a private repository as detailed in [SETUP.md section 8](SETUP.md#8-pulling-updates-from-upstream).
 
-The script automatically detects your OS, installs Bun, TinyTeX, Camoufox, and Telegram dependencies, prompts for your profile details, registers the global Antigravity skill, and sets up your workspace.
+### 2. Run the quickstart installer for your OS:
+
+#### 🍎 macOS / 🐧 Linux:
+```bash
+bash quickstart.sh
+```
+
+#### 🪟 Windows (Command Prompt / CMD):
+Double-click `quickstart.bat` or execute in Command Prompt:
+```cmd
+quickstart.bat
+```
+
+#### 🪟 Windows (PowerShell):
+```powershell
+.\quickstart.ps1
+```
+
+The script automatically verifies Python, installs required packages, fetches the Playwright Chromium browser binaries, initializes `.env` from template, and creates required document workspaces.
 
 ---
 
 ## 🎛️ Launch Visual Web Dashboard
 
-Prefer a visual control panel over terminal commands? Start it with a single command on any OS:
+Prefer a visual control panel over terminal commands? The web dashboard runs identically across Windows, macOS, and Linux on `http://localhost:8420`.
 
-#### 🍎 macOS / 🐧 Linux:
-```bash
-make run
-```
+### Cross-Platform Command Matrix
 
-#### 🪟 Windows Users:
-- **Double-Click or Command Prompt**: Double-click `run.bat` or run:
-  ```cmd
-  run.bat
-  ```
-- **PowerShell**:
-  ```powershell
-  .\run.ps1
-  ```
-- **Universal (Any OS / No Make Required)**:
-  ```bash
-  python run.py
-  ```
+| Action | macOS / Linux | Windows Command Prompt (CMD) | Windows PowerShell |
+| :--- | :--- | :--- | :--- |
+| **🚀 Start Dashboard** | `make run` | `make run` *or* `run.bat` | `.\make.ps1 run` *or* `.\run.ps1` |
+| **📦 Install Dependencies** | `make install` | `make install` *or* `run.bat --install` | `.\make.ps1 install` |
+| **🧹 Stop / Free Port 8420** | `make clean` | `make clean` *or* `run.bat --clean-only` | `.\make.ps1 clean` |
+| **🧪 Run Test Suite** | `make test` | `make test` *or* `run.bat --test` | `.\make.ps1 test` |
+| **🌐 Universal Launcher** | `python3 run.py` | `python run.py` | `python run.py` |
+
+> [!TIP]
+> **Windows Tip (No GNU Make needed!)**:
+> - If you don't have GNU Make installed on Windows, **typing `make run` in Command Prompt still works automatically** because Windows native executes the included `make.bat` shim!
+> - When installing Python on Windows, make sure the checkbox **"Add Python to PATH"** is selected.
+> - The runner automatically verifies and downloads the Playwright Chromium browser binary on first launch.
 
 <p align="center">
   <img src="assets/dashboard_live.png" alt="Live AI Job Auto-Applier Dashboard" width="100%" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
 </p>
 
 This single command:
-1. Installs dashboard dependencies (`fastapi`, `uvicorn`, `psutil`).
-2. Cleans up any zombie processes previously occupying port 8420.
-3. Starts the localhost FastAPI server at `http://localhost:8420`.
-4. Auto-opens your default web browser to the dashboard.
+1. Installs dashboard dependencies (`fastapi`, `uvicorn`, `psutil`, `playwright`).
+2. Automatically downloads the Playwright Chromium browser binary if missing.
+3. Cleans up any zombie processes previously occupying port 8420.
+4. Starts the FastAPI supervisor server at `http://localhost:8420`.
+5. Auto-opens your default web browser to the dashboard.
 
 **Features of the Web Dashboard:**
 - 🎛️ **Service Cards Grid**: Independent start/stop toggle switches with live uptime counters for all 6 core services (Job Search Daemon, Camoufox Auto-Apply, Telegram Bot, Project Scaffolder, Recruiter Outreach, Google Sheets Sync). Turn on/off multiple services simultaneously!

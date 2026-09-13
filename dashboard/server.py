@@ -22,6 +22,13 @@ from fastapi.responses import HTMLResponse, FileResponse
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
+# Ensure Windows uses ProactorEventLoop for subprocess streaming
+if sys.platform == "win32":
+    try:
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    except Exception:
+        pass
+
 # Constants
 REPO_ROOT = Path(__file__).parent.parent.resolve()
 TOOLS_DIR = REPO_ROOT / 'tools'
