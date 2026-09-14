@@ -45,7 +45,7 @@
         "location": "input[name=\"location\"], input[data-qa=\"location-input\"], input#location-input",
         "city": null,
         "country": null,
-        "submit_button": "#btn-submit, button[data-qa=\"btn-submit\"], button.postings-btn, button.template-btn-submit",
+        "submit_button": "button#btn-submit, button.postings-btn.template-btn-submit, button.template-btn-submit, button[data-qa=\"btn-submit\"], button:has-text(\"SUBMIT APPLICATION\"), button:has-text(\"Submit application\")",
         "next_button": null
       },
       "notes": "Lever uses a single 'name' field for full name. Cover letter is often just a text area for 'Additional information'."

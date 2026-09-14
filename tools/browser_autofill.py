@@ -10,6 +10,7 @@ import sys
 import logging
 from pathlib import Path
 from typing import Optional, Dict, Any, Tuple
+from datetime import datetime
 from urllib.parse import urlparse, urlunparse
 
 # Configure logging
@@ -466,8 +467,15 @@ class FormFiller:
         if "race" in lt or "ethnicity" in lt:
             return self.candidate.get("eeo_responses", {}).get("race_ethnicity", "Decline to self-identify")
             
+        # Sponsorship / Visa (evaluated before geographic queries to avoid false positives on 'work from your country of residence')
+        if "sponsorship" in lt or "visa" in lt or "sponsor" in lt:
+            if any(k in lt for k in ["remain in your current location", "remain in your home country", "work from your country of residence"]):
+                return "No"
+            requires = self.candidate.get("work_authorization", {}).get("requires_sponsorship", False)
+            return "Yes" if requires else "No"
+
         # Geographic / Location questions
-        if any(k in lt for k in ["country in which you are located", "country of residence", "current country", "residence country"]):
+        if any(k in lt for k in ["country in which you are located", "country of residence", "current country", "residence country", "legally registered to work in", "authorized to work in"]):
             return self.candidate.get("country", "India")
         if lt == "country" or "phone country" in lt or "country code" in lt:
             return self.candidate.get("country", "India")
@@ -480,16 +488,13 @@ class FormFiller:
                 return "Yes"
             return "No"
 
-        # Sponsorship / Visa
-        if "sponsorship" in lt or "visa" in lt or "sponsor" in lt:
-            if "remain in your current location" in lt or "remain in your home country" in lt:
-                return "No"
-            requires = self.candidate.get("work_authorization", {}).get("requires_sponsorship", False)
-            return "Yes" if requires else "No"
-
         # Work authorization
-        if any(k in lt for k in ["authorized to work", "legally authorized", "work authorization", "legal right"]):
+        if any(k in lt for k in ["authorized to work", "legally authorized", "work authorization", "legal right", "authorization"]):
             return "Yes"
+
+        # Notice period
+        if any(k in lt for k in ["notice period", "notice to begin", "notice time", "availability to start", "how soon can you start"]):
+            return "1-2 weeks"
 
         # Restrictions & prior affiliation
         if any(k in lt for k in ["employment agreement", "post-employment", "restriction", "non-compete", "non-disclosure"]):
@@ -608,6 +613,14 @@ class FormFiller:
                     if lbl:
                         label_text = (await lbl.inner_text()).strip()
                 if not label_text:
+                    # Check parent question container (Lever, Ashby, Workday)
+                    try:
+                        label_text = (await sel.evaluate(
+                            "el => { const q = el.closest('.application-question, .custom-question, [class*=\"question\"]') || el.parentElement; if (q) { const l = q.querySelector('.text, .application-label, label, legend'); return l ? l.innerText.trim() : ''; } return ''; }"
+                        )) or ""
+                    except Exception:
+                        label_text = ""
+                if not label_text:
                     label_text = await sel.get_attribute("aria-label") or await sel.get_attribute("name") or ""
 
                 if not label_text:
@@ -623,7 +636,7 @@ class FormFiller:
                 for opt in options:
                     txt = (await opt.inner_text()).strip()
                     val = await opt.get_attribute("value") or txt
-                    if not val:
+                    if not val or val.lower().startswith("select"):
                         continue
                     tl = txt.lower()
                     target_l = target.lower()
@@ -635,10 +648,18 @@ class FormFiller:
                         score = 90
                     elif target_l in tl or tl in target_l:
                         score = 80
+                    elif target_l in ["decline", "decline to self-identify", "i do not wish to answer"] and any(d in tl for d in ["decline", "not want", "not wish", "do not answer", "do not care"]):
+                        score = 85
                     elif target_l == "no" and (tl == "no" or tl.startswith("no,") or tl.startswith("no ")):
                         score = 95
                     elif target_l == "yes" and (tl == "yes" or tl.startswith("yes,") or tl.startswith("yes ")):
                         score = 95
+                    elif "veteran" in target_l and "not a protected veteran" in tl:
+                        score = 95
+                    elif "1-2 weeks" in target_l and any(w in tl for w in ["1-2", "available", "2 weeks", "immediate"]):
+                        score = 95
+                    elif target_l == "yes" and any(w in tl for w in ["authorized", "eligible", "citizen", "nationality"]):
+                        score = 85
 
                     if score > best_score:
                         best_score = score
@@ -652,6 +673,127 @@ class FormFiller:
         except Exception as e:
             logger.debug(f"HTML select handling note: {e}")
 
+    async def _handle_custom_cards_and_radios(self):
+        """
+        Fills custom application question cards (used prominently in Lever and other modern ATS),
+        handling checkboxes (referrals, prior employment, privacy consent), radio button groups
+        (EEO race/ethnicity), text inputs (signature, date, salary, legal country).
+        """
+        try:
+            questions = await self.page.query_selector_all(".application-question, .custom-question, div[class*='question']")
+            for q in questions:
+                if not await q.is_visible():
+                    continue
+
+                lbl_el = await q.query_selector(".text, .application-label, label, legend")
+                ltxt = (await lbl_el.inner_text()).strip() if lbl_el else ""
+                lt = ltxt.lower()
+
+                # 1. Checkboxes
+                checkboxes = await q.query_selector_all("input[type='checkbox']")
+                if checkboxes:
+                    if "hear about us" in lt or "how did you" in lt:
+                        for cb in checkboxes:
+                            val = (await cb.get_attribute("value") or "").lower()
+                            if "linkedin" in val or "other" in val or "career site" in val:
+                                await cb.evaluate("el => { el.checked = true; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }")
+                                await self._highlight_element(cb)
+                                logger.info(f"   ✓ Checked '{val}' for: '{ltxt[:35]}'")
+                                break
+                    elif "previously been employed" in lt or "worked here" in lt or "former employee" in lt:
+                        for cb in checkboxes:
+                            val = (await cb.get_attribute("value") or "").lower()
+                            if val == "no":
+                                await cb.evaluate("el => { el.checked = true; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }")
+                                await self._highlight_element(cb)
+                                logger.info(f"   ✓ Checked 'No' for: '{ltxt[:35]}'")
+                                break
+                    elif any(k in lt for k in ["privacy", "terms", "agree", "acknowledge", "consent", "notice", "understand how my personal"]):
+                        for cb in checkboxes:
+                            await cb.evaluate("el => { el.checked = true; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }")
+                            await self._highlight_element(cb)
+                            logger.info(f"   ✓ Checked agreement for: '{ltxt[:35]}'")
+
+                # 2. Radio buttons
+                radios = await q.query_selector_all("input[type='radio']")
+                if radios:
+                    target_val = None
+                    if "race" in lt or "ethnicity" in lt:
+                        target_val = self.candidate.get("eeo_responses", {}).get("race_ethnicity", "Decline to self-identify")
+                    elif "gender" in lt:
+                        target_val = self.candidate.get("eeo_responses", {}).get("gender", "Male")
+                    elif "veteran" in lt:
+                        target_val = self.candidate.get("eeo_responses", {}).get("veteran_status", "I am not a protected veteran")
+                    elif "disability" in lt:
+                        target_val = self.candidate.get("eeo_responses", {}).get("disability_status", "I do not wish to answer")
+                    elif "authorized" in lt or "authorization" in lt:
+                        target_val = "Yes"
+                    elif "sponsorship" in lt:
+                        target_val = "No" if not self.candidate.get("work_authorization", {}).get("requires_sponsorship") else "Yes"
+
+                    if target_val:
+                        best_radio = None
+                        best_score = 0
+                        for r in radios:
+                            r_val = (await r.get_attribute("value") or "").lower()
+                            try:
+                                r_lbl = await r.evaluate("el => el.closest('label') ? el.closest('label').innerText : ''")
+                            except Exception:
+                                r_lbl = ""
+                            combined_r = f"{r_val} {r_lbl.lower()}".strip()
+                            tl = target_val.lower()
+
+                            score = 0
+                            if tl == r_val:
+                                score = 100
+                            elif tl in combined_r or r_val in tl:
+                                score = 90
+                            elif "decline" in tl and "decline" in combined_r:
+                                score = 95
+                            elif tl == "no" and (r_val == "no" or combined_r.startswith("no")):
+                                score = 95
+                            elif tl == "yes" and (r_val == "yes" or combined_r.startswith("yes")):
+                                score = 95
+
+                            if score > best_score:
+                                best_score = score
+                                best_radio = (r, r_val or r_lbl[:25])
+
+                        if best_radio and best_score >= 80:
+                            await best_radio[0].evaluate("el => { el.checked = true; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }")
+                            await self._highlight_element(best_radio[0])
+                            logger.info(f"   ✓ Checked radio '{best_radio[1]}' for: '{ltxt[:35]}'")
+
+                # 3. Custom text inputs inside cards (signature, date, country, salary)
+                text_inputs = await q.query_selector_all("input[type='text']:not([name='name']):not([name='phone']):not([name='location'])")
+                for ti in text_inputs:
+                    curr = await ti.input_value()
+                    if curr:
+                        continue
+                    name_attr = await ti.get_attribute("name") or ""
+                    
+                    if "disabilitysignaturedate" in name_attr.lower() or "date" in lt:
+                        today_str = datetime.now().strftime("%m/%d/%Y")
+                        await self._highlight_element(ti)
+                        await self.humanizer.type_text(ti, today_str)
+                        logger.info(f"   ✓ Filled signature date '{today_str}' for: '{name_attr or ltxt[:25]}'")
+                    elif "disabilitysignature" in name_attr.lower() or "signature" in lt or lt == "name":
+                        val = self.candidate.get("full_name", "")
+                        await self._highlight_element(ti)
+                        await self.humanizer.type_text(ti, val)
+                        logger.info(f"   ✓ Filled legal signature '{val}' for: '{name_attr or ltxt[:25]}'")
+                    elif "country" in lt and any(w in lt for w in ["work in", "registered", "residence"]):
+                        val = self.candidate.get("country", "India")
+                        await self._highlight_element(ti)
+                        await self.humanizer.type_text(ti, val)
+                        logger.info(f"   ✓ Filled registered country '{val}' for: '{ltxt[:35]}'")
+                    elif any(k in lt for k in ["salary", "compensation", "ote", "rate", "expectations"]):
+                        await self._highlight_element(ti)
+                        await self.humanizer.type_text(ti, "Negotiable")
+                        logger.info(f"   ✓ Filled compensation 'Negotiable' for: '{ltxt[:35]}'")
+        except Exception as e:
+            logger.error(f"Custom cards and radios error: {e}", exc_info=True)
+
     async def fill_form(self) -> bool:
         """Main entry point. Detects all form fields and fills them."""
         logger.info(f"📋 Starting form fill for detected ATS: [{self.platform.upper()}]")
@@ -661,6 +803,7 @@ class FormFiller:
         await self._upload_cover_letter()
         await self._handle_custom_questions()
         await self._handle_dropdown_questions()
+        await self._handle_custom_cards_and_radios()
         return True
 
     async def advance_wizard_step(self) -> bool:

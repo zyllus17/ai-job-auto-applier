@@ -60,6 +60,10 @@ class HumanBehavior:
         
     async def _get_random_point_in_element(self, element) -> Optional[Tuple[float, float]]:
         """Get a random point within 20-80% of element's bounding box."""
+        try:
+            await element.scroll_into_view_if_needed(timeout=2000)
+        except Exception:
+            pass
         box = await element.bounding_box()
         if not box:
             return None
