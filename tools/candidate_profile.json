@@ -54,5 +54,16 @@
     "veteran_status": "I am not a protected veteran",
     "disability_status": "I do not wish to answer"
   },
+  "notice_period_days": 15,
+  "notice_period_text": "15 Days or less",
+  "current_ctc_lakhs": 12.0,
+  "expected_ctc_lakhs": 18.0,
+  "preferred_locations": [
+    "Kolkata",
+    "Remote",
+    "Bengaluru",
+    "Hyderabad",
+    "Pune"
+  ],
   "workday_password": "WorkdayApplier2026!#"
 }

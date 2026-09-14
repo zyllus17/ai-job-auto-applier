@@ -1386,6 +1386,163 @@ class FormFiller:
 
         return True
 
+    async def _fill_naukri_flow(self) -> bool:
+        """
+        Fills a Naukri application flow:
+        1. Contact / Profile details (Name, Email, Mobile).
+        2. Experience (Numeric inputs / years of experience).
+        3. Notice Period (Dropdown, radio, or input with 15 Days / Immediate).
+        4. Current & Expected CTC (in Lakhs or numeric).
+        5. Current & Preferred Location.
+        6. Radio questions (Work authorization, relocation, skill familiarity).
+        7. Resume upload.
+        8. Custom screening questions fallback.
+        9. Confirmation / Submission detection.
+        """
+        logger.info("   🇮🇳 Naukri: Traversing application & screening questions...")
+        scope = await self._get_scope()
+
+        # 1. Contact / Profile Fields (if drawer/form asks for basic info)
+        await self._fill_standard_fields()
+
+        # 2. Experience fields
+        try:
+            exp_inputs = await scope.query_selector_all(
+                "input[placeholder*='experience' i], input[id*='experience' i], input[name*='experience' i], input[placeholder*='years' i], input[id*='totalExp' i], input[id*='workExp' i], input[id*='exp' i]"
+            )
+            years = str(self.candidate.get("years_experience", 5))
+            for ei in exp_inputs:
+                el_id = ((await ei.get_attribute("id")) or "").lower()
+                el_name = ((await ei.get_attribute("name")) or "").lower()
+                el_ph = ((await ei.get_attribute("placeholder")) or "").lower()
+                if any(x in el_id or x in el_name or x in el_ph for x in ["ctc", "salary", "expect"]):
+                    continue
+                if await ei.is_visible() and not (await ei.input_value()):
+                    await ei.fill(years)
+                    logger.info(f"   ✓ Filled Naukri experience: {years} years")
+        except Exception as e:
+            logger.debug(f"Naukri experience fill note: {e}")
+
+        # 3. Notice Period
+        try:
+            notice_inputs = await scope.query_selector_all(
+                "input[placeholder*='notice' i], select[name*='notice' i], select[id*='notice' i], input[id*='notice' i], [class*='notice' i] input"
+            )
+            notice_val = str(self.candidate.get("notice_period_days", 15))
+            notice_text = self.candidate.get("notice_period_text", "15 Days or less")
+            for ni in notice_inputs:
+                if await ni.is_visible():
+                    tag = await ni.evaluate("el => el.tagName.toLowerCase()")
+                    if tag == "select":
+                        options = await ni.query_selector_all("option")
+                        for opt in options:
+                            otext = (await opt.inner_text()).lower()
+                            if any(k in otext for k in ["15", "immediate", "30", "1 month"]):
+                                opt_val = await opt.get_attribute("value")
+                                await ni.select_option(opt_val or "")
+                                logger.info(f"   ✓ Selected notice period option: {otext.strip()}")
+                                break
+                    else:
+                        if not (await ni.input_value()):
+                            await ni.fill(notice_text)
+                            logger.info(f"   ✓ Filled notice period: {notice_text}")
+        except Exception as e:
+            logger.debug(f"Naukri notice period note: {e}")
+
+        # 4. CTC Fields (Current CTC & Expected CTC)
+        try:
+            current_ctc = str(self.candidate.get("current_ctc_lakhs", 12.0))
+            expected_ctc = str(self.candidate.get("expected_ctc_lakhs", 18.0))
+
+            cur_inputs = await scope.query_selector_all(
+                "input[placeholder*='current ctc' i], input[placeholder*='current salary' i], input[id*='currentCtc' i], input[name*='currentCtc' i], input[placeholder*='present ctc' i]"
+            )
+            for ci in cur_inputs:
+                if await ci.is_visible() and not (await ci.input_value()):
+                    await ci.fill(current_ctc)
+                    logger.info(f"   ✓ Filled Current CTC: {current_ctc} Lakhs")
+
+            exp_ctc_inputs = await scope.query_selector_all(
+                "input[placeholder*='expected ctc' i], input[placeholder*='expected salary' i], input[id*='expectedCtc' i], input[name*='expectedCtc' i]"
+            )
+            for ei in exp_ctc_inputs:
+                if await ei.is_visible() and not (await ei.input_value()):
+                    await ei.fill(expected_ctc)
+                    logger.info(f"   ✓ Filled Expected CTC: {expected_ctc} Lakhs")
+        except Exception as e:
+            logger.debug(f"Naukri CTC note: {e}")
+
+        # 5. Location
+        try:
+            loc_inputs = await scope.query_selector_all(
+                "input[placeholder*='current location' i], input[placeholder*='preferred location' i], input[id*='location' i], input[name*='location' i]"
+            )
+            loc_val = self.candidate.get("city", "Kolkata")
+            for li in loc_inputs:
+                if await li.is_visible() and not (await li.input_value()):
+                    await li.fill(loc_val)
+                    logger.info(f"   ✓ Filled Location: {loc_val}")
+        except Exception as e:
+            logger.debug(f"Naukri location note: {e}")
+
+        # 6. Radios & Questions
+        try:
+            radios = await scope.query_selector_all("input[type='radio']")
+            handled_groups = set()
+            for r in radios:
+                r_name = await r.get_attribute("name")
+                if r_name and r_name in handled_groups:
+                    continue
+                parent = await r.evaluate_handle("el => el.closest('fieldset, div[class*=\"question\" i], div[class*=\"group\" i]') || el.parentElement")
+                p_text = (await parent.as_element().inner_text()).lower() if parent.as_element() else ""
+
+                if "sponsorship" in p_text or "visa" in p_text:
+                    req_sponsorship = self.candidate.get("work_authorization", {}).get("requires_sponsorship", True)
+                    val_target = "yes" if req_sponsorship else "no"
+                elif any(q in p_text for q in ["relocate", "commute", "travel", "shift", "immediate", "experience", "comfortable", "familiar"]):
+                    val_target = "yes"
+                else:
+                    val_target = "yes"
+
+                group_radios = await parent.as_element().query_selector_all("input[type='radio']") if parent.as_element() else [r]
+                for gr in group_radios:
+                    gr_lbl = (await gr.evaluate("el => (el.labels && el.labels[0] ? el.labels[0].innerText : '') || el.value || el.parentElement.innerText")).lower()
+                    if val_target in gr_lbl:
+                        await gr.click(force=True)
+                        logger.info(f"   ✓ Selected Naukri radio ({val_target}): '{p_text[:35]}...'")
+                        break
+                if r_name:
+                    handled_groups.add(r_name)
+        except Exception as e:
+            logger.debug(f"Naukri radio note: {e}")
+
+        # 7. Resume Upload
+        resume_path = self.candidate.get("resume_pdf_path")
+        if resume_path:
+            p = Path(resume_path).expanduser().resolve()
+            if p.exists():
+                file_input = await scope.query_selector("input[type='file'], input[id*='resume' i]")
+                if file_input:
+                    try:
+                        logger.info(f"   📎 Uploading resume to Naukri: {p.name}")
+                        await file_input.set_input_files(str(p))
+                        await asyncio.sleep(2)
+                    except Exception as e:
+                        logger.debug(f"Naukri resume upload note: {e}")
+
+        # 8. Custom Fallbacks
+        await self._handle_custom_questions()
+        await self._handle_dropdown_questions()
+
+        # 9. Confirmation check
+        success_msg = await scope.query_selector(
+            "div.apply-message, div:has-text('successfully applied'), span:has-text('Applied'), button:has-text('Applied')"
+        )
+        if success_msg:
+            logger.info("   🎉 Naukri: Application successfully submitted!")
+
+        return True
+
     async def fill_form(self) -> bool:
         """Main entry point. Detects all form fields and fills them."""
         logger.info(f"📋 Starting form fill for detected ATS: [{self.platform.upper()}]")
@@ -1393,6 +1550,8 @@ class FormFiller:
             return await self._fill_workday_flow()
         if self.platform == "indeed":
             return await self._fill_indeed_flow()
+        if self.platform == "naukri":
+            return await self._fill_naukri_flow()
         await self._fill_standard_fields()
         await self._fill_url_fields()
         await self._handle_location_autocomplete()
@@ -1404,11 +1563,12 @@ class FormFiller:
         return True
 
     async def advance_wizard_step(self) -> bool:
-        """Clicks 'Next' / 'Save and Continue' / 'Review' button in multi-step forms (e.g. Workday, Indeed, Easy Apply)."""
+        """Clicks 'Next' / 'Save and Continue' / 'Review' button in multi-step forms (e.g. Workday, Indeed, Easy Apply, Naukri)."""
         scope = await self._get_scope()
         plat_sel = self.selectors.get(self.platform, {})
         next_sel = (
             plat_sel.get("next_button") or 
+            "button:has-text('Save & Apply'), button:has-text('Submit and Apply'), button:has-text('Submit & Apply'), "
             "button:has-text('Continue'), button:has-text('Review your application'), [data-testid='continue-button'], button.ia-continueButton, "
             "div[data-automation-id='click_filter'][aria-label*='Save and Continue' i], "
             "div[data-automation-id='click_filter'][aria-label*='Next' i], "
@@ -1698,6 +1858,68 @@ class AutoApplier:
                 except Exception as e:
                     logger.debug(f"Indeed unwrap exception: {e}")
 
+        # 7. Naukri Job Posting -> Check for Login Wall, Company Site Apply, or Direct Apply
+        elif "naukri.com" in current_url.lower():
+            platform = "naukri"
+            # Check for unauthenticated state
+            login_el = await page.query_selector("a#login_Layer, .nI-gNb-lg-rg__login, button#continue-with-google-button, button:has-text('Continue with Google')")
+            logged_in_avatar = await page.query_selector(".nI-gNb-drawer__user-name, .nI-gNb-bar__icon-user, a[title*='profile' i], a[href*='mynaukri' i]")
+
+            if login_el and not logged_in_avatar:
+                logger.warning("🔒 [NAUKRI LOGIN REQUIRED] Naukri session is not active.")
+                if self.mode == 'semi-auto':
+                    logger.info("   💡 Please log in or continue with Google in the browser window now.")
+                    logger.info("   Session cookies will be preserved in ~/.job-autoapply-profile.")
+                    logger.info("   Waiting up to 45s for sign-in...")
+                    for _ in range(45):
+                        if page.is_closed(): break
+                        logged_in = await page.query_selector(".nI-gNb-drawer__user-name, .nI-gNb-bar__icon-user, a[href*='mynaukri' i], button#apply-button")
+                        if logged_in:
+                            logger.info("   ✅ Logged in to Naukri successfully!")
+                            break
+                        await asyncio.sleep(1)
+
+            if "/job-listings" in current_url.lower() or "/jobs" in current_url.lower() or "/desc" in current_url.lower():
+                try:
+                    # 1. Check for offsite company apply button
+                    offsite_btn = await page.query_selector(
+                        "button#company-site-button, button:has-text('Apply on company site'), a:has-text('Apply on company site'), a[href*='company-site']"
+                    )
+                    if offsite_btn and await offsite_btn.is_visible():
+                        logger.info("   -> Naukri offsite application detected: Following external apply link...")
+                        href = await offsite_btn.get_attribute("href")
+                        if href and href.startswith("http") and "naukri.com" not in href:
+                            await page.goto(href, wait_until="domcontentloaded", timeout=20000)
+                            return page, self.detector.detect(page.url)
+                        else:
+                            await offsite_btn.click()
+                            await asyncio.sleep(3)
+                            if hasattr(page, "context") and len(page.context.pages) > 1:
+                                page = page.context.pages[-1]
+                                await page.bring_to_front()
+                            return page, self.detector.detect(page.url)
+
+                    # 2. Check for native Apply button
+                    apply_btn = await page.query_selector(
+                        "button#apply-button, button.apply-button, [id*='apply-button'], button:has-text('Apply')"
+                    )
+                    if apply_btn:
+                        is_vis = await apply_btn.is_visible()
+                        if not is_vis:
+                            await page.evaluate("window.scrollTo(0, 400)")
+                            await asyncio.sleep(1)
+                            is_vis = await apply_btn.is_visible()
+
+                        if is_vis or not login_el:
+                            logger.info("   -> Naukri Apply button detected: Clicking 'Apply'...")
+                            try:
+                                await apply_btn.click(force=True)
+                            except Exception:
+                                await apply_btn.evaluate("el => el.click()")
+                            await asyncio.sleep(3)
+                except Exception as e:
+                    logger.debug(f"Naukri unwrap exception: {e}")
+
         # Check if browser opened a new tab/window during interaction
         if hasattr(page, "context") and len(page.context.pages) > 1:
             page = page.context.pages[-1]
@@ -1867,16 +2089,29 @@ class AutoApplier:
                     return res
             else:
                 async with async_playwright() as p:
-                    browser = await p.chromium.launch_persistent_context(
-                        user_data_dir=str(self.profile_dir),
-                        headless=False,
-                        args=[
+                    # Auto-detect native Google Chrome on Mac for Akamai/Cloudflare anti-bot resilience
+                    chrome_app = Path("/Applications/Google Chrome.app")
+                    launch_kwargs = {
+                        "user_data_dir": str(self.profile_dir),
+                        "headless": False,
+                        "viewport": {"width": 1920, "height": 1080},
+                        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+                        "args": [
                             '--disable-blink-features=AutomationControlled',
                             '--start-maximized',
-                            '--no-default-browser-check'
+                            '--no-default-browser-check',
+                            '--no-sandbox'
                         ]
-                    )
+                    }
+                    if chrome_app.exists():
+                        launch_kwargs["channel"] = "chrome"
+
+                    browser = await p.chromium.launch_persistent_context(**launch_kwargs)
                     page = browser.pages[0] if browser.pages else await browser.new_page()
+                    try:
+                        await page.add_init_script("delete Object.getPrototypeOf(navigator).webdriver")
+                    except Exception:
+                        pass
                     try:
                         res = await self._process_page(page, application_url, resume_path, cover_letter_path, dry_run, candidate)
                         return res
