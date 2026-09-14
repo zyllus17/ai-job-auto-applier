@@ -500,7 +500,8 @@ def read_tracker_csv():
     try:
         with open(TRACKER_CSV, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
-            for row in reader:
+            for i, row in enumerate(reader):
+                row['_orig_idx'] = i
                 rows.append(row)
     except Exception as e:
         logging.error(f"Error reading CSV: {e}")
@@ -514,6 +515,7 @@ async def get_stats():
     applied = 0
     interviews = 0
     offers = 0
+    closed = 0
     fit_scores = []
     missing_skills = []
     
@@ -523,6 +525,7 @@ async def get_stats():
         if 'applied' in st: applied += 1
         if 'interview' in st: interviews += 1
         if 'offer' in st: offers += 1
+        if 'closed' in st: closed += 1
         
         fs = r.get('fitScore', '')
         if fs.isdigit():
@@ -548,6 +551,7 @@ async def get_stats():
         'applied': applied,
         'interviews': interviews,
         'offers': offers,
+        'closed': closed,
         'avg_fit_score': round(avg_fit, 2),
         'top_skills_missing': top_missing
     }
@@ -576,9 +580,9 @@ async def get_jobs(search: str = '', sort_by: str = '', sort_order: str = 'asc',
     start = (page - 1) * per_page
     end = start + per_page
     
-    # Attach stable indices
-    for i, r in enumerate(rows):
-        r['idx'] = i
+    # Attach stable indices from the original CSV row position
+    for r in rows:
+        r['idx'] = r.get('_orig_idx', 0)
         
     paginated = rows[start:end]
     
@@ -628,13 +632,40 @@ async def get_job_detail(idx: int):
 
 class JobStatusUpdate(BaseModel):
     status: str
+    url: Optional[str] = None
+    company: Optional[str] = None
+    title: Optional[str] = None
 
 @app.post('/api/jobs/{idx}/status')
 async def update_job_status(idx: int, data: JobStatusUpdate):
     rows = read_tracker_csv()
-    if idx < 0 or idx >= len(rows):
-        raise HTTPException(status_code=404, detail="Job not found")
-    rows[idx]['status'] = data.status
+    target_idx = -1
+
+    # 1. Match by URL if provided
+    if data.url:
+        clean_url = data.url.strip()
+        for i, r in enumerate(rows):
+            if r.get('url') and r.get('url').strip() == clean_url:
+                target_idx = i
+                break
+
+    # 2. Match by company and title if provided
+    if target_idx == -1 and data.company and data.title:
+        comp = data.company.strip().lower()
+        title = data.title.strip().lower()
+        for i, r in enumerate(rows):
+            if r.get('company', '').strip().lower() == comp and r.get('title', '').strip().lower() == title:
+                target_idx = i
+                break
+
+    # 3. Fallback to idx
+    if target_idx == -1:
+        if 0 <= idx < len(rows):
+            target_idx = idx
+        else:
+            raise HTTPException(status_code=404, detail="Job not found")
+
+    rows[target_idx]['status'] = data.status
     
     fieldnames = [
         "timestamp", "company", "title", "fitScore", "status",
@@ -645,8 +676,14 @@ async def update_job_status(idx: int, data: JobStatusUpdate):
         writer.writeheader()
         writer.writerows(rows)
         
-    await manager.broadcast({'type': 'job_updated', 'idx': idx, 'status': data.status})
-    return {'status': 'success', 'new_status': data.status}
+    updated_url = rows[target_idx].get('url', '')
+    await manager.broadcast({
+        'type': 'job_updated',
+        'idx': target_idx,
+        'url': updated_url,
+        'status': data.status
+    })
+    return {'status': 'success', 'new_status': data.status, 'idx': target_idx}
 
 @app.post('/api/jobs/{idx}/outreach')
 async def generate_job_outreach(idx: int):
@@ -696,6 +733,7 @@ async def get_analytics():
     applied = 0
     interviews = 0
     offers = 0
+    closed = 0
     missing_skills = []
     fit_dist = {"60-70": 0, "70-80": 0, "80-90": 0, "90-100": 0}
     daily_counts = Counter()
@@ -707,6 +745,7 @@ async def get_analytics():
         if 'applied' in st: applied += 1
         if 'interview' in st: interviews += 1
         if 'offer' in st: offers += 1
+        if 'closed' in st: closed += 1
         
         fs = r.get('fitScore', '')
         if fs.isdigit():
@@ -746,7 +785,8 @@ async def get_analytics():
             'staged': staged,
             'applied': applied,
             'interview': interviews,
-            'offer': offers
+            'offer': offers,
+            'closed': closed
         },
         'skill_gaps': top_skills,
         'fit_distribution': fit_dist,

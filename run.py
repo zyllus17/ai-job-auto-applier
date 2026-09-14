@@ -184,6 +184,7 @@ def main():
             "tests/test_security_guards.py",
             "tests/test_tracker_status_vocab.py",
             "tests/test_browser_automation.py",
+            "tests/test_dashboard_pipeline.py",
             "tests/test_greenhouse_live.py",
             "tests/test_lever_live.py",
             "tests/test_ashby_live.py",

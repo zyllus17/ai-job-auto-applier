@@ -1171,6 +1171,7 @@
                 <button class="btn-glass stage-btn" style="padding: 5px 12px; font-size: 12px;" onclick="setFilterStage('applied')">Applied</button>
                 <button class="btn-glass stage-btn" style="padding: 5px 12px; font-size: 12px;" onclick="setFilterStage('interview')">Interviews</button>
                 <button class="btn-glass stage-btn" style="padding: 5px 12px; font-size: 12px;" onclick="setFilterStage('offer')">Offers</button>
+                <button class="btn-glass stage-btn" style="padding: 5px 12px; font-size: 12px;" onclick="setFilterStage('closed')">Closed</button>
               </div>
             </div>
 
@@ -1651,7 +1652,13 @@
               if (data.summary) updateErrorBadge(data.summary);
               if (state.currentPage === 'errors') fetchErrors();
             } else if (data.type === 'job_updated') {
-              fetchJobs();
+              const matched = state.jobs.find(j => (data.url && j.url === data.url) || j.idx === data.idx);
+              if (matched && data.status) {
+                matched.status = data.status;
+                renderJobs();
+              } else {
+                fetchJobs();
+              }
               loadStats();
             } else if (data.type === 'logs_cleared') {
               state.logs = [];
@@ -1891,11 +1898,12 @@
           <td><span class="fit-badge ${scoreClass}">${score}%</span></td>
           <td>
             <select class="btn-glass" style="width: 140px; cursor: pointer; padding: 6px 10px; font-size: 12.5px; border-radius: 6px;" onclick="event.stopPropagation()" onchange="updateJobStatus(${job.idx}, this.value)">
-              <option value="Staged - Ready to Submit" ${job.status.includes('Staged') ? 'selected' : ''}>Staged</option>
-              <option value="Applied" ${job.status.includes('Applied') ? 'selected' : ''}>Applied</option>
-              <option value="Interview" ${job.status.includes('Interview') ? 'selected' : ''}>Interview</option>
-              <option value="Offer" ${job.status.includes('Offer') ? 'selected' : ''}>Offer</option>
-              <option value="Rejected" ${job.status.includes('Rejected') ? 'selected' : ''}>Rejected</option>
+              <option value="Staged - Ready to Submit" ${(job.status || '').toLowerCase().includes('staged') ? 'selected' : ''}>Staged</option>
+              <option value="Applied" ${(job.status || '').toLowerCase().includes('applied') ? 'selected' : ''}>Applied</option>
+              <option value="Interview" ${(job.status || '').toLowerCase().includes('interview') ? 'selected' : ''}>Interview</option>
+              <option value="Offer" ${(job.status || '').toLowerCase().includes('offer') ? 'selected' : ''}>Offer</option>
+              <option value="Rejected" ${(job.status || '').toLowerCase().includes('rejected') ? 'selected' : ''}>Rejected</option>
+              <option value="Closed" ${(job.status || '').toLowerCase().includes('closed') ? 'selected' : ''}>Closed</option>
             </select>
           </td>
           <td>
@@ -1905,9 +1913,10 @@
           </td>
           <td><span style="font-size: 12.5px; color: var(--text-muted);">${escapeHtml(job.location || 'Remote')}</span></td>
           <td>
-            <div style="display: flex; gap: 8px;" onclick="event.stopPropagation()">
+            <div style="display: flex; gap: 8px; align-items: center;" onclick="event.stopPropagation()">
               <button class="btn-glass" style="padding: 5px 12px; font-size: 12px;" onclick="openDrawer(${job.idx})">Inspect</button>
               ${job.url ? '<a href="' + job.url + '" target="_blank" class="btn-glow" style="padding: 5px 12px; font-size: 12px; text-decoration: none; display: inline-block;">Link ↗</a>' : ''}
+              ${job.url ? `<button class="btn-glow" style="padding: 5px 12px; font-size: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: rgba(16, 185, 129, 0.4); display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;" onclick="event.stopPropagation(); runAutofillForJobIdx(${job.idx})">⚡ Auto Apply</button>` : ''}
             </div>
           </td>
         `;
@@ -1925,11 +1934,49 @@
       fetchJobs();
     }
 
+    async function runAutofillForJobIdx(idx) {
+      const job = state.jobs.find(j => j.idx === idx);
+      if (!job || !job.url) {
+        showToast('No application URL available for this job', 'error');
+        return;
+      }
+      await runAutofillForJob(job.url);
+    }
+
     async function updateJobStatus(idx, newStatus) {
-      const res = await apiCall('/api/jobs/' + idx + '/status', 'POST', { status: newStatus });
-      if (res && res.status === 'success') {
-        showToast('Status updated to ' + newStatus, 'success');
-        loadStats();
+      const job = state.jobs.find(j => j.idx === idx);
+      const oldStatus = job ? job.status : null;
+      const url = job ? job.url : '';
+      const company = job ? job.company : '';
+      const title = job ? job.title : '';
+
+      // Optimistically update in-memory state immediately so UI and filters don't revert
+      if (job) {
+        job.status = newStatus;
+      }
+      loadStats();
+
+      try {
+        const res = await apiCall('/api/jobs/' + idx + '/status', 'POST', {
+          status: newStatus,
+          url: url,
+          company: company,
+          title: title
+        });
+        if (res && res.status === 'success') {
+          showToast('Status updated to ' + newStatus, 'success');
+        } else {
+          throw new Error((res && res.detail) || 'Failed to update status');
+        }
+      } catch (err) {
+        console.error('Status update failed:', err);
+        showToast('Status update error: ' + err.message, 'error');
+        // Revert on error
+        if (job && oldStatus !== null) {
+          job.status = oldStatus;
+          renderJobs();
+          loadStats();
+        }
       }
     }
 
