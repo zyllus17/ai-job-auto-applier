@@ -222,24 +222,45 @@ class FormFiller:
         except Exception:
             pass
 
+    async def _get_scope(self):
+        """Returns the active execution scope (Playwright Frame or Page). Detects Indeed Apply iframes."""
+        if self.platform == "indeed":
+            try:
+                iframe_el = await self.page.query_selector(
+                    "iframe[src*='indeedapply'], iframe[title*='application' i], iframe[id*='indeedapply' i], iframe[name*='indeedapply' i]"
+                )
+                if iframe_el:
+                    frame = await iframe_el.content_frame()
+                    if frame:
+                        return frame
+            except Exception:
+                pass
+        return self.page
+
     async def _safe_fill(self, selector: str, value: str, field_name: str) -> bool:
         """Safely types value into selector with fallback query and human delay."""
         if not value or not selector:
             return False
         selector = self._sanitize_selector(selector)
+        scope = await self._get_scope()
         try:
-            element = await self.page.query_selector(selector)
+            element = await scope.query_selector(selector)
             if not element and "," in selector:
                 for sub in selector.split(","):
                     sub = sub.strip()
                     if not sub:
                         continue
                     try:
-                        element = await self.page.query_selector(sub)
+                        element = await scope.query_selector(sub)
                         if element and await element.is_visible():
                             break
                     except Exception:
                         continue
+            if not element and scope != self.page:
+                try:
+                    element = await self.page.query_selector(selector)
+                except Exception:
+                    pass
             if element:
                 is_visible = await element.is_visible()
                 if not is_visible:
@@ -1253,11 +1274,125 @@ class FormFiller:
         await self._handle_custom_cards_and_radios()
         return True
 
+    async def _fill_indeed_flow(self) -> bool:
+        """Executes Indeed Apply flow (Contact Info, Resume, Screening Questions, Review)."""
+        scope = await self._get_scope()
+        first_name = self.candidate.get("first_name", "")
+        last_name = self.candidate.get("last_name", "")
+        full_name = self.candidate.get("full_name") or f"{first_name} {last_name}".strip()
+        email = self.candidate.get("email", "")
+        phone = self.candidate.get("phone", "")
+        city = self.candidate.get("city", "") or self.candidate.get("location", "")
+
+        # 1. Contact Information
+        fn_input = await scope.query_selector("input#input-firstName, input[name='firstName'], [data-testid*='firstName' i]")
+        if fn_input and not await fn_input.input_value():
+            await fn_input.fill(first_name)
+            logger.info(f"   ✓ Filled first_name: {first_name}")
+
+        ln_input = await scope.query_selector("input#input-lastName, input[name='lastName'], [data-testid*='lastName' i]")
+        if ln_input and not await ln_input.input_value():
+            await ln_input.fill(last_name)
+            logger.info(f"   ✓ Filled last_name: {last_name}")
+
+        name_input = await scope.query_selector("input#input-name, input[name='name'], [data-testid*='ContactInfo-Name' i]")
+        if name_input and not await name_input.input_value():
+            await name_input.fill(full_name)
+            logger.info(f"   ✓ Filled full_name: {full_name}")
+
+        email_input = await scope.query_selector("input#input-email, input[name='email'], input[type='email'], [data-testid*='ContactInfo-Email' i]")
+        if email_input and not await email_input.input_value():
+            await email_input.fill(email)
+            logger.info(f"   ✓ Filled email: {email}")
+
+        phone_input = await scope.query_selector("input#input-phoneNumber, input[name='phoneNumber'], input[type='tel'], [data-testid*='ContactInfo-PhoneNumber' i]")
+        if phone_input and not await phone_input.input_value():
+            raw_phone = re.sub(r"[^\d]", "", phone)[-10:]
+            await phone_input.fill(raw_phone)
+            logger.info(f"   ✓ Filled phone: {raw_phone}")
+
+        loc_input = await scope.query_selector("input#input-location, input#input-applicant\\.location\\.city, input[name*='location' i], [data-testid*='Location' i]")
+        if loc_input and not await loc_input.input_value():
+            await loc_input.fill(city)
+            logger.info(f"   ✓ Filled location: {city}")
+
+        # 2. Resume Upload
+        resume_path = self.candidate.get("resume_pdf_path")
+        if resume_path:
+            p = Path(resume_path).expanduser().resolve()
+            if p.exists():
+                file_input = await scope.query_selector("input[type='file'], input[data-testid*='resume' i]")
+                if file_input:
+                    try:
+                        logger.info(f"   📎 Uploading resume to Indeed: {p.name}")
+                        await file_input.set_input_files(str(p))
+                        await asyncio.sleep(2)
+                    except Exception as e:
+                        logger.debug(f"Indeed resume upload note: {e}")
+
+        # 3. Screening Questions & Experience
+        num_inputs = await scope.query_selector_all("input[type='number'], input[id*='experience' i]")
+        for ni in num_inputs:
+            if await ni.is_visible() and not await ni.input_value():
+                years = str(self.candidate.get("years_experience", 5))
+                await ni.fill(years)
+                logger.info(f"   ✓ Filled years of experience question: {years}")
+
+        try:
+            radios = await scope.query_selector_all("input[type='radio']")
+            handled_groups = set()
+            for r in radios:
+                r_name = await r.get_attribute("name")
+                if r_name and r_name in handled_groups:
+                    continue
+                parent = await r.evaluate_handle("el => el.closest('fieldset, .ia-Question, div[role=\"radiogroup\"]') || el.parentElement")
+                p_text = (await parent.as_element().inner_text()).lower() if parent.as_element() else ""
+                
+                if "sponsorship" in p_text or "visa" in p_text:
+                    req_sponsorship = self.candidate.get("work_authorization", {}).get("requires_sponsorship", True)
+                    val_target = "yes" if req_sponsorship else "no"
+                elif "authorized" in p_text or "legally" in p_text:
+                    val_target = "yes"
+                elif "driver" in p_text or "license" in p_text:
+                    val_target = "yes"
+                elif "background" in p_text or "drug" in p_text:
+                    val_target = "yes"
+                elif any(q in p_text for q in ["comfortable", "willing", "commute", "relocate", "experience"]):
+                    val_target = "yes"
+                else:
+                    val_target = "yes"
+
+                group_radios = await parent.as_element().query_selector_all("input[type='radio']") if parent.as_element() else [r]
+                for gr in group_radios:
+                    gr_lbl = (await gr.evaluate("el => (el.labels && el.labels[0] ? el.labels[0].innerText : '') || el.value || el.parentElement.innerText")).lower()
+                    if val_target in gr_lbl:
+                        await gr.click(force=True)
+                        logger.info(f"   ✓ Selected Indeed radio ({val_target}): '{p_text[:35]}...'")
+                        break
+                if r_name:
+                    handled_groups.add(r_name)
+        except Exception as e:
+            logger.debug(f"Indeed radio note: {e}")
+
+        await self._handle_custom_questions()
+        await self._handle_dropdown_questions()
+
+        # 4. Review Page Detection
+        review_heading = await scope.query_selector(
+            "h1:has-text('Review your application'), h2:has-text('Review your application'), [data-testid='review-page']"
+        )
+        if review_heading:
+            logger.info("   🔍 Indeed: Review page reached.")
+
+        return True
+
     async def fill_form(self) -> bool:
         """Main entry point. Detects all form fields and fills them."""
         logger.info(f"📋 Starting form fill for detected ATS: [{self.platform.upper()}]")
         if self.platform == "workday":
             return await self._fill_workday_flow()
+        if self.platform == "indeed":
+            return await self._fill_indeed_flow()
         await self._fill_standard_fields()
         await self._fill_url_fields()
         await self._handle_location_autocomplete()
@@ -1269,10 +1404,12 @@ class FormFiller:
         return True
 
     async def advance_wizard_step(self) -> bool:
-        """Clicks 'Next' / 'Save and Continue' / 'Review' button in multi-step forms (e.g. Workday, Easy Apply)."""
+        """Clicks 'Next' / 'Save and Continue' / 'Review' button in multi-step forms (e.g. Workday, Indeed, Easy Apply)."""
+        scope = await self._get_scope()
         plat_sel = self.selectors.get(self.platform, {})
         next_sel = (
             plat_sel.get("next_button") or 
+            "button:has-text('Continue'), button:has-text('Review your application'), [data-testid='continue-button'], button.ia-continueButton, "
             "div[data-automation-id='click_filter'][aria-label*='Save and Continue' i], "
             "div[data-automation-id='click_filter'][aria-label*='Next' i], "
             "div[data-automation-id='click_filter'][aria-label*='Review' i], "
@@ -1283,7 +1420,9 @@ class FormFiller:
             "button[aria-label*='Next' i], button[aria-label*='Continue' i]"
         )
         try:
-            btn = await self.page.query_selector(next_sel)
+            btn = await scope.query_selector(next_sel)
+            if not btn and scope != self.page:
+                btn = await self.page.query_selector(next_sel)
             if btn and await btn.is_visible() and await btn.is_enabled():
                 logger.info("   ⏩ Multi-step wizard: Advancing to next step...")
                 try:
@@ -1508,6 +1647,57 @@ class AutoApplier:
                 logger.debug(f"Workday unwrap exception: {e}")
             platform = "workday"
 
+        # 6. Indeed Job Posting -> Check for 'Apply now' (Indeed Apply) or 'Apply on company site'
+        elif "indeed.com" in current_url.lower() or "indeedapply" in current_url.lower() or "smartapply" in current_url.lower():
+            platform = "indeed"
+            # Check for bot detection / sign in wall
+            if "secure.indeed.com/auth" in current_url.lower() or "bot-detection" in current_url.lower():
+                logger.warning("🔒 [INDEED LOGIN REQUIRED] Indeed requires an active user session.")
+                if self.mode == 'semi-auto':
+                    logger.info("   💡 Please sign in to Indeed in the browser window now.")
+                    logger.info("   Session cookies will be preserved in ~/.job-autoapply-profile.")
+                    logger.info("   Waiting up to 45s for sign-in...")
+                    for _ in range(45):
+                        if page.is_closed():
+                            break
+                        if "viewjob" in page.url.lower() or "indeedapply" in page.url.lower() or "smartapply" in page.url.lower():
+                            logger.info("   ✅ Indeed authenticated!")
+                            current_url = page.url
+                            break
+                        await asyncio.sleep(1)
+
+            # Check if this is an Indeed job view page (needs clicking Apply)
+            if "/viewjob" in current_url.lower() or "/jobs" in current_url.lower():
+                try:
+                    # 1. Check for offsite company apply button
+                    offsite_btn = await page.query_selector(
+                        "button:has-text('Apply on company site'), a:has-text('Apply on company site'), a[href*='apply']:has-text('Apply on company')"
+                    )
+                    if offsite_btn and await offsite_btn.is_visible():
+                        logger.info("   -> Indeed offsite application detected: Following external apply link...")
+                        href = await offsite_btn.get_attribute("href")
+                        if href and href.startswith("http") and "indeed.com" not in href:
+                            await page.goto(href, wait_until="domcontentloaded", timeout=20000)
+                            return page, self.detector.detect(page.url)
+                        else:
+                            await offsite_btn.click()
+                            await asyncio.sleep(3)
+                            if hasattr(page, "context") and len(page.context.pages) > 1:
+                                page = page.context.pages[-1]
+                                await page.bring_to_front()
+                            return page, self.detector.detect(page.url)
+
+                    # 2. Check for Indeed Apply button
+                    apply_btn = await page.query_selector(
+                        "button#indeedApplyButton, [data-gnav-element-name='indeedApply'], .ia-IndeedApplyButton, button:has-text('Apply now'), a:has-text('Apply now')"
+                    )
+                    if apply_btn and await apply_btn.is_visible():
+                        logger.info("   -> Indeed Apply detected: Clicking 'Apply now'...")
+                        await apply_btn.click()
+                        await asyncio.sleep(3)
+                except Exception as e:
+                    logger.debug(f"Indeed unwrap exception: {e}")
+
         # Check if browser opened a new tab/window during interaction
         if hasattr(page, "context") and len(page.context.pages) > 1:
             page = page.context.pages[-1]
@@ -1526,10 +1716,10 @@ class AutoApplier:
         if platform == "needs_login":
             return {"status": "needs_login", "platform": "linkedin", "message": "Sign-in required to access application"}
 
-        # Wait for form or input elements to be rendered (handles React, Lever, Ashby hydration)
+        # Wait for form or input elements to be rendered (handles React, Lever, Ashby, Indeed hydration)
         try:
             await page.wait_for_selector(
-                "form, input[type='text'], input[type='email'], input[name='name'], [data-qa='name-input'], #first_name, .application-form, [data-automation-id='applyFlowPage'], [data-automation-id='progressBar']",
+                "form, input[type='text'], input[type='email'], input[name='name'], [data-qa='name-input'], #first_name, .application-form, [data-automation-id='applyFlowPage'], [data-automation-id='progressBar'], iframe[src*='indeedapply'], #indeedApplyButton, [data-testid*='ContactInfo']",
                 timeout=7000
             )
         except Exception:
@@ -1572,9 +1762,9 @@ class AutoApplier:
         # Fill Step 1
         await filler.fill_form()
 
-        # Handle multi-step wizard if present (e.g. Workday, Easy Apply)
+        # Handle multi-step wizard if present (e.g. Workday, Indeed, Easy Apply)
         steps_navigated = 0
-        max_steps = 7 if platform == "workday" else 4
+        max_steps = 7 if platform in ["workday", "indeed"] else 4
         while steps_navigated < max_steps:
             advanced = await filler.advance_wizard_step()
             if not advanced:
