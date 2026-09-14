@@ -206,6 +206,21 @@ class FormFiller:
                 sanitized.append(p)
         return ", ".join(sanitized)
 
+    async def _highlight_element(self, element, color="#22c55e"):
+        """Visually highlights a form field with a green outline and subtle glow."""
+        try:
+            if element:
+                await element.evaluate(
+                    """(el, col) => {
+                        el.style.outline = `2px solid ${col}`;
+                        el.style.boxShadow = `0 0 10px ${col}`;
+                        el.style.transition = 'outline 0.2s, box-shadow 0.2s';
+                    }""",
+                    color
+                )
+        except Exception:
+            pass
+
     async def _safe_fill(self, selector: str, value: str, field_name: str) -> bool:
         """Safely types value into selector with fallback query and human delay."""
         if not value or not selector:
@@ -230,7 +245,9 @@ class FormFiller:
                     return False
                 current_val = await element.input_value() if hasattr(element, "input_value") else ""
                 if current_val and current_val.strip() == str(value).strip():
+                    await self._highlight_element(element)
                     return True  # Already filled
+                await self._highlight_element(element)
                 await self.humanizer.type_text(element, str(value))
                 logger.info(f"   ✓ Filled {field_name}: {value}")
                 await self.humanizer.random_delay(150, 350)
@@ -315,17 +332,17 @@ class FormFiller:
 
         try:
             file_input = await self.page.query_selector(selector)
-            if file_input:
-                await file_input.set_input_files(str(path))
+            target = file_input or await self.page.query_selector("input[type='file']")
+            if target:
+                await target.set_input_files(str(path))
+                await self._highlight_element(target)
                 logger.info(f"   📎 Uploaded {field_name}: {path.name}")
+                try:
+                    await target.dispatch_event("change")
+                except Exception:
+                    pass
                 await self.humanizer.random_delay(400, 800)
                 return True
-            else:
-                generic_input = await self.page.query_selector("input[type='file']")
-                if generic_input:
-                    await generic_input.set_input_files(str(path))
-                    logger.info(f"   📎 Uploaded {field_name} via generic file input: {path.name}")
-                    return True
         except Exception as e:
             logger.warning(f"Could not upload {field_name}: {e}")
         return False
@@ -361,15 +378,16 @@ class FormFiller:
                 area = await self.page.query_selector(text_sel)
                 if area and await area.is_visible():
                     pitch = f"Hello, I am {self.candidate.get('full_name')}, an {self.candidate.get('current_title', 'Engineer')} with 5+ YOE. Please review my attached credentials."
+                    await self._highlight_element(area)
                     await self.humanizer.type_text(area, pitch)
                     logger.info("   ✓ Filled cover letter text note")
             except Exception:
                 pass
 
     async def _handle_custom_questions(self):
-        """Fill common screening questions (salary, sponsorship, authorization, gender, etc.)."""
+        """Fill common screening questions (salary, sponsorship, authorization, preferred name, URLs)."""
         try:
-            inputs = await self.page.query_selector_all("input[type='text'], textarea")
+            inputs = await self.page.query_selector_all("input[type='text'], input[type='search'], textarea")
             for el in inputs:
                 if not await el.is_visible():
                     continue
@@ -380,24 +398,259 @@ class FormFiller:
                 name = (await el.get_attribute("name") or "").lower()
                 id_ = (await el.get_attribute("id") or "").lower()
                 aria = (await el.get_attribute("aria-label") or "").lower()
-                combined = f"{name} {id_} {aria}"
+                placeholder = (await el.get_attribute("placeholder") or "").lower()
+                combined = f"{name} {id_} {aria} {placeholder}"
 
-                if any(w in combined for w in ["salary", "compensation", "rate", "expected_salary"]):
+                if any(w in combined for w in ["prefer us to use", "preferred name"]):
+                    val = self.candidate.get("full_name") or self.candidate.get("first_name", "")
+                    if val:
+                        await self._highlight_element(el)
+                        await self.humanizer.type_text(el, val)
+                        logger.info(f"   ✓ Filled preferred name question: '{val}'")
+                elif any(w in combined for w in ["salary", "compensation", "rate", "expected_salary"]):
+                    await self._highlight_element(el)
                     await self.humanizer.type_text(el, "Negotiable")
                     logger.info("   ✓ Filled compensation screening: 'Negotiable'")
                 elif any(w in combined for w in ["sponsor", "visa"]):
                     val = "Yes" if self.candidate.get("work_authorization", {}).get("requires_sponsorship") else "No"
+                    await self._highlight_element(el)
                     await self.humanizer.type_text(el, val)
                     logger.info(f"   ✓ Filled visa sponsorship question: '{val}'")
                 elif any(w in combined for w in ["authorized", "authorization", "legally"]):
+                    await self._highlight_element(el)
                     await self.humanizer.type_text(el, "Yes")
                     logger.info("   ✓ Filled work authorization question: 'Yes'")
                 elif any(w in combined for w in ["experience", "years"]):
                     years = str(self.candidate.get("years_experience", 5))
+                    await self._highlight_element(el)
                     await self.humanizer.type_text(el, years)
                     logger.info(f"   ✓ Filled years of experience: '{years}'")
+                elif "linkedin" in combined and not current_val:
+                    val = self.candidate.get("linkedin_url", "")
+                    if val:
+                        await self._highlight_element(el)
+                        await self.humanizer.type_text(el, val)
+                        logger.info(f"   ✓ Filled custom LinkedIn question: '{val}'")
+                elif "github" in combined and not current_val:
+                    val = self.candidate.get("github_url", "")
+                    if val:
+                        await self._highlight_element(el)
+                        await self.humanizer.type_text(el, val)
+                        logger.info(f"   ✓ Filled custom GitHub question: '{val}'")
+                elif any(w in combined for w in ["portfolio", "website", "personal site"]) and not current_val:
+                    val = self.candidate.get("portfolio_url") or self.candidate.get("github_url", "")
+                    if val:
+                        await self._highlight_element(el)
+                        await self.humanizer.type_text(el, val)
+                        logger.info(f"   ✓ Filled custom Website question: '{val}'")
+                elif any(w in combined for w in ["notice", "start date", "availability"]):
+                    await self._highlight_element(el)
+                    await self.humanizer.type_text(el, "2 weeks")
+                    logger.info("   ✓ Filled notice/availability question: '2 weeks'")
         except Exception as e:
             logger.debug(f"Custom question handling note: {e}")
+
+    def _determine_dropdown_target(self, label_text: str) -> Optional[str]:
+        """Maps question label/prompt to candidate profile response for dropdowns."""
+        lt = label_text.lower().strip()
+        
+        # EEO / Diversity questions
+        if "gender" in lt or "sex" in lt:
+            return self.candidate.get("eeo_responses", {}).get("gender", "Male")
+        if "hispanic" in lt or "latino" in lt:
+            return "No"
+        if "veteran" in lt:
+            return self.candidate.get("eeo_responses", {}).get("veteran_status", "I am not a protected veteran")
+        if "disability" in lt:
+            return self.candidate.get("eeo_responses", {}).get("disability_status", "I do not wish to answer")
+        if "race" in lt or "ethnicity" in lt:
+            return self.candidate.get("eeo_responses", {}).get("race_ethnicity", "Decline to self-identify")
+            
+        # Geographic / Location questions
+        if any(k in lt for k in ["country in which you are located", "country of residence", "current country", "residence country"]):
+            return self.candidate.get("country", "India")
+        if lt == "country" or "phone country" in lt or "country code" in lt:
+            return self.candidate.get("country", "India")
+            
+        # City/specific location queries (e.g. "located in Bangalore", "located in US")
+        if "located in" in lt or "live in" in lt or "based in" in lt:
+            cand_loc = (self.candidate.get("location", "") + " " + self.candidate.get("city", "")).lower()
+            words = [w for w in lt.split() if len(w) > 3 and w not in ["located", "currently", "live", "based", "are", "you", "city"]]
+            if any(w in cand_loc for w in words):
+                return "Yes"
+            return "No"
+
+        # Sponsorship / Visa
+        if "sponsorship" in lt or "visa" in lt or "sponsor" in lt:
+            if "remain in your current location" in lt or "remain in your home country" in lt:
+                return "No"
+            requires = self.candidate.get("work_authorization", {}).get("requires_sponsorship", False)
+            return "Yes" if requires else "No"
+
+        # Work authorization
+        if any(k in lt for k in ["authorized to work", "legally authorized", "work authorization", "legal right"]):
+            return "Yes"
+
+        # Restrictions & prior affiliation
+        if any(k in lt for k in ["employment agreement", "post-employment", "restriction", "non-compete", "non-disclosure"]):
+            return "No"
+        if any(k in lt for k in ["previously worked", "prior employee", "former employee", "consulted for", "worked at"]):
+            return "No"
+
+        # Experience & Technical proficiencies
+        if any(k in lt for k in ["proficiency", "fluency", "hands-on", "scripting", "programming", "python", "llm", "api", "ai"]):
+            return "Yes"
+
+        # General boolean fallback
+        if lt.endswith("?*") or lt.endswith("?"):
+            if any(lt.startswith(prefix) for prefix in ["are you authorized", "do you have experience", "do you have 5+", "are you comfortable"]):
+                return "Yes"
+
+        return None
+
+    async def _handle_dropdown_questions(self):
+        """Fills both modern React-Select and classic HTML select dropdown questions."""
+        # 1. Modern React-Select dropdowns (used in modern Greenhouse, Remix, React apps)
+        try:
+            containers = await self.page.query_selector_all(".select__container, [class*='select__container']")
+            for c in containers:
+                if not await c.is_visible():
+                    continue
+
+                # Check if already has a selected value
+                val_el = await c.query_selector(".select__single-value")
+                if val_el and (await val_el.inner_text()).strip():
+                    continue
+
+                label_text = ""
+                label_el = await c.query_selector("label")
+                if label_el:
+                    label_text = (await label_el.inner_text()).strip()
+                if not label_text:
+                    inp = await c.query_selector("input")
+                    if inp:
+                        label_text = await inp.get_attribute("aria-label") or await inp.get_attribute("placeholder") or ""
+
+                if not label_text:
+                    continue
+
+                target = self._determine_dropdown_target(label_text)
+                if not target:
+                    continue
+
+                control = await c.query_selector(".select__control")
+                if not control:
+                    continue
+
+                await self._highlight_element(c)
+                await control.click()
+                await self.humanizer.random_delay(150, 300)
+
+                inp = await c.query_selector("input")
+                if inp and len(target) > 2 and target.lower() not in ["yes", "no"]:
+                    await inp.fill(target[:4])
+                    await self.humanizer.random_delay(150, 250)
+
+                options = await self.page.query_selector_all(".select__option, [role='option'], div[id*='-option-']")
+                best_opt = None
+                best_score = 0
+
+                for opt in options:
+                    txt = (await opt.inner_text()).strip()
+                    tl = txt.lower()
+                    target_l = target.lower()
+
+                    score = 0
+                    if tl == target_l:
+                        score = 100
+                    elif tl.startswith(target_l) or target_l.startswith(tl):
+                        score = 90
+                    elif target_l in tl or tl in target_l:
+                        score = 80
+                    elif target_l in ["decline", "decline to self-identify", "i do not wish to answer"] and any(d in tl for d in ["decline", "not want", "not wish", "do not answer"]):
+                        score = 85
+                    elif target_l == "no" and (tl == "no" or tl.startswith("no,") or tl.startswith("no ")):
+                        score = 95
+                    elif target_l == "yes" and (tl == "yes" or tl.startswith("yes,") or tl.startswith("yes ")):
+                        score = 95
+                    elif "veteran" in target_l and "not a protected veteran" in tl:
+                        score = 95
+
+                    if score > best_score:
+                        best_score = score
+                        best_opt = (opt, txt)
+
+                if best_opt and best_score >= 80:
+                    await best_opt[0].click()
+                    logger.info(f"   ✓ Selected dropdown for '{label_text[:40]}': {best_opt[1]}")
+                    await self.humanizer.random_delay(150, 300)
+                else:
+                    await self.page.keyboard.press("Escape")
+                    await self.humanizer.random_delay(100, 200)
+        except Exception as e:
+            logger.debug(f"React-Select handling note: {e}")
+
+        # 2. Classic HTML <select> elements
+        try:
+            selects = await self.page.query_selector_all("select")
+            for sel in selects:
+                if not await sel.is_visible():
+                    continue
+
+                curr = await sel.input_value()
+                if curr and curr != "":
+                    continue
+
+                sel_id = await sel.get_attribute("id") or ""
+                label_text = ""
+                if sel_id:
+                    lbl = await self.page.query_selector(f"label[for='{sel_id}']")
+                    if lbl:
+                        label_text = (await lbl.inner_text()).strip()
+                if not label_text:
+                    label_text = await sel.get_attribute("aria-label") or await sel.get_attribute("name") or ""
+
+                if not label_text:
+                    continue
+
+                target = self._determine_dropdown_target(label_text)
+                if not target:
+                    continue
+
+                options = await sel.query_selector_all("option")
+                best_val = None
+                best_score = 0
+                for opt in options:
+                    txt = (await opt.inner_text()).strip()
+                    val = await opt.get_attribute("value") or txt
+                    if not val:
+                        continue
+                    tl = txt.lower()
+                    target_l = target.lower()
+
+                    score = 0
+                    if tl == target_l:
+                        score = 100
+                    elif tl.startswith(target_l) or target_l.startswith(tl):
+                        score = 90
+                    elif target_l in tl or tl in target_l:
+                        score = 80
+                    elif target_l == "no" and (tl == "no" or tl.startswith("no,") or tl.startswith("no ")):
+                        score = 95
+                    elif target_l == "yes" and (tl == "yes" or tl.startswith("yes,") or tl.startswith("yes ")):
+                        score = 95
+
+                    if score > best_score:
+                        best_score = score
+                        best_val = val
+
+                if best_val and best_score >= 80:
+                    await sel.select_option(value=best_val)
+                    await self._highlight_element(sel)
+                    logger.info(f"   ✓ Selected HTML select for '{label_text[:40]}': {best_val}")
+                    await self.humanizer.random_delay(150, 300)
+        except Exception as e:
+            logger.debug(f"HTML select handling note: {e}")
 
     async def fill_form(self) -> bool:
         """Main entry point. Detects all form fields and fills them."""
@@ -407,6 +660,7 @@ class FormFiller:
         await self._upload_resume()
         await self._upload_cover_letter()
         await self._handle_custom_questions()
+        await self._handle_dropdown_questions()
         return True
 
     async def advance_wizard_step(self) -> bool:
@@ -549,6 +803,18 @@ class AutoApplier:
                         platform = self.detector.detect(page.url)
             except Exception as e:
                 logger.debug(f"Aggregator follow exception: {e}")
+
+        # 4. Greenhouse Job Posting -> Check for top 'Apply' button to scroll down / reveal form
+        elif "greenhouse.io" in current_url.lower():
+            try:
+                apply_btn = await page.query_selector("button:has-text('Apply'), a:has-text('Apply'), button[aria-label='Apply'], a[href*='#app']")
+                if apply_btn and await apply_btn.is_visible():
+                    logger.info("   -> Greenhouse 'Apply' button found. Clicking to reveal application form...")
+                    await apply_btn.click()
+                    await asyncio.sleep(1.5)
+            except Exception as e:
+                logger.debug(f"Greenhouse apply scroll note: {e}")
+            platform = "greenhouse"
 
         # Check if browser opened a new tab/window during interaction
         if hasattr(page, "context") and len(page.context.pages) > 1:
@@ -816,9 +1082,15 @@ if __name__ == '__main__':
     parser.add_argument('--browser', choices=['camoufox', 'patchright', 'playwright'], default=default_b)
     parser.add_argument('--dry-run', action='store_true', help='Fill form but never submit')
     parser.add_argument('--profile-dir', default='~/.job-autoapply-profile', help='Persistent browser profile dir')
+    parser.add_argument('--test-greenhouse', action='store_true', help='Run visual inspection test on a verified live Greenhouse posting')
     args = parser.parse_args()
 
-    if args.url:
+    if args.test_greenhouse:
+        target_url = args.url or "https://job-boards.greenhouse.io/gitlab/jobs/8556658002"
+        logger.info(f"🧪 [TEST GREENHOUSE] Initiating headful visual verification on: {target_url}")
+        applier = AutoApplier(mode='semi-auto', browser_type=args.browser, profile_dir=args.profile_dir)
+        asyncio.run(applier.apply(target_url, args.resume, args.cover_letter, dry_run=True))
+    elif args.url:
         applier = AutoApplier(mode=args.mode, browser_type=args.browser, profile_dir=args.profile_dir)
         asyncio.run(applier.apply(args.url, args.resume, args.cover_letter, args.dry_run))
     else:
