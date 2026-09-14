@@ -186,7 +186,8 @@ def main():
             "tests/test_browser_automation.py",
             "tests/test_greenhouse_live.py",
             "tests/test_lever_live.py",
-            "tests/test_ashby_live.py"
+            "tests/test_ashby_live.py",
+            "tests/test_workday_live.py"
         ]
         rc = subprocess.run(test_cmd).returncode
         sys.exit(rc)

@@ -77,28 +77,29 @@
     },
     {
       "platform_name": "Workday",
-      "url_pattern": "myworkdayjobs\\.com",
+      "url_pattern": "(?:myworkdayjobs\\.com|myworkday\\.com)",
       "selectors": {
-        "first_name": "[data-automation-id=\"legalNameSection_firstName\"]",
-        "last_name": "[data-automation-id=\"legalNameSection_lastName\"]",
+        "first_name": "[data-automation-id=\"formField-legalName--firstName\"] input, [data-automation-id=\"legalNameSection_firstName\"], [data-automation-id=\"legalName--firstName\"] input",
+        "last_name": "[data-automation-id=\"formField-legalName--lastName\"] input, [data-automation-id=\"legalNameSection_lastName\"], [data-automation-id=\"legalName--lastName\"] input",
         "full_name": null,
         "email": "[data-automation-id=\"email\"]",
-        "phone": "[data-automation-id=\"phone-number\"]",
-        "resume_upload": "[data-automation-id=\"file-upload-input-ref\"]",
-        "cover_letter_upload": "[data-automation-id=\"file-upload-input-ref\"]",
+        "phone": "[data-automation-id=\"formField-phoneNumber\"] input, [data-automation-id=\"phone-number\"], input#phoneNumber--phoneNumber",
+        "resume_upload": "input[type=\"file\"][data-automation-id=\"file-upload-input-ref\"], input[type=\"file\"]",
+        "cover_letter_upload": "input[type=\"file\"][data-automation-id=\"file-upload-input-ref\"], input[type=\"file\"]",
         "cover_letter_text": null,
-        "linkedin_url": "[data-automation-id=\"linkedin\"]",
+        "linkedin_url": "[data-automation-id=\"formField-website\"] input, [data-automation-id=\"linkedin\"], input[id*=\"website\" i]",
         "github_url": "[data-automation-id=\"github\"]",
         "portfolio_url": "[data-automation-id=\"portfolio\"]",
         "current_company": "[data-automation-id=\"company\"]",
         "current_title": "[data-automation-id=\"jobTitle\"]",
-        "location": "[data-automation-id=\"addressSection_city\"]",
-        "city": "[data-automation-id=\"addressSection_city\"]",
-        "country": "[data-automation-id=\"addressSection_countryRegion\"]",
-        "submit_button": "[data-automation-id=\"submit\"]",
-        "next_button": "[data-automation-id=\"bottom-navigation-next-button\"]"
+        "location": "[data-automation-id=\"formField-addressLine1\"] input, [data-automation-id=\"addressSection_city\"]",
+        "city": "[data-automation-id=\"formField-city\"] input, [data-automation-id=\"addressSection_city\"]",
+        "postal_code": "[data-automation-id=\"formField-postalCode\"] input",
+        "country": "[data-automation-id=\"formField-country\"] [data-automation-id=\"promptIcon\"], [data-automation-id=\"addressSection_countryRegion\"]",
+        "submit_button": "button[data-automation-id=\"pageFooterSubmitButton\"], button[data-automation-id=\"submit\"], button:has-text(\"Submit\")",
+        "next_button": "button[data-automation-id=\"pageFooterNextButton\"], button[data-automation-id=\"bottom-navigation-next-button\"], button:has-text(\"Save and Continue\"), button:has-text(\"Next\")"
       },
-      "notes": "Workday is a multi-step wizard. Always uses data-automation-id attributes."
+      "notes": "Workday is a multi-step wizard. Uses data-automation-id and formField-* containers with Canvas Kit click-filters."
     },
     {
       "platform_name": "SmartRecruiters",

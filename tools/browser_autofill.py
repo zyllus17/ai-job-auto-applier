@@ -929,9 +929,335 @@ class FormFiller:
         except Exception as e:
             logger.error(f"Custom cards and radios error: {e}", exc_info=True)
 
+    # -------------------------------------------------------------
+    # Workday Specialized Multi-Step Handlers
+    # -------------------------------------------------------------
+    async def _handle_workday_auth_step(self):
+        """Handles Workday Step 1: Sign in or Create Account with beecatcher honeypot evasion."""
+        email_btn = await self.page.query_selector("[data-automation-id='SignInWithEmailButton']")
+        if email_btn and await email_btn.is_visible():
+            logger.info("   🔐 Workday: Clicking 'Sign in with email'...")
+            try:
+                await email_btn.click(force=True)
+            except Exception:
+                await email_btn.evaluate("el => el.click()")
+            await asyncio.sleep(2)
+
+        email_val = self.candidate.get("email", "")
+        password_val = self.candidate.get("workday_password", "WorkdayApplier2026!#")
+
+        email_input = await self.page.query_selector("input[data-automation-id='email']")
+        pwd_input = await self.page.query_selector("input[data-automation-id='password']")
+        verify_inp = await self.page.query_selector("input[data-automation-id='verifyPassword']")
+
+        if verify_inp:
+            # We are on Create Account screen
+            logger.info(f"   📝 Workday: Creating candidate account for {email_val}...")
+            cb = await self.page.query_selector("input[data-automation-id='createAccountCheckbox']")
+            if email_input:
+                await email_input.fill("")
+                await email_input.type(email_val, delay=10)
+            if pwd_input:
+                await pwd_input.fill("")
+                await pwd_input.type(password_val, delay=10)
+            if verify_inp:
+                await verify_inp.fill("")
+                await verify_inp.type(password_val, delay=10)
+            if cb:
+                try:
+                    await cb.check(force=True)
+                except Exception:
+                    pass
+
+            # CRITICAL: Never touch beecatcher honeypot!
+            ca_filter = await self.page.query_selector(
+                "div[data-automation-id='click_filter'][aria-label*='Create Account' i], button[data-automation-id='createAccountSubmitButton']"
+            )
+            if ca_filter:
+                try:
+                    await ca_filter.click(force=True)
+                except Exception:
+                    await ca_filter.evaluate("el => el.click()")
+                await asyncio.sleep(4)
+
+        # If redirected to /login or on sign-in screen
+        email_input = await self.page.query_selector("input[data-automation-id='email']")
+        pwd_input = await self.page.query_selector("input[data-automation-id='password']")
+        si_filter = await self.page.query_selector(
+            "div[data-automation-id='click_filter'][aria-label*='Sign In' i], button[data-automation-id='signInSubmitButton']"
+        )
+        if si_filter and email_input and pwd_input:
+            logger.info(f"   🔑 Workday: Attempting Sign In with {email_val}...")
+            await email_input.fill("")
+            await email_input.type(email_val, delay=10)
+            await pwd_input.fill("")
+            await pwd_input.type(password_val, delay=10)
+            try:
+                await si_filter.click(force=True)
+            except Exception:
+                await si_filter.evaluate("el => el.click()")
+            await asyncio.sleep(4)
+
+        # Check if auth passed or requires email verification / manual sign in
+        active_step = await self.page.query_selector("[data-automation-id='progressBarActiveStep']")
+        st = (await active_step.inner_text()).lower() if active_step else ""
+        if "sign in" in st or "create account" in st or "/login" in self.page.url.lower():
+            err_el = await self.page.query_selector("[role='alert'], .errorMessage, [data-automation-id*='error' i]")
+            err_txt = (await err_el.inner_text()).strip() if err_el else "Sign-in required"
+            logger.warning(f"🔒 [WORKDAY AUTH REQUIRED] {err_txt}")
+            logger.info("   💡 Please complete Workday verification/sign-in in the browser window.")
+            logger.info("   Waiting up to 45s for step 2 (My Information)...")
+            for _ in range(45):
+                if self.page.is_closed():
+                    break
+                curr_step = await self.page.query_selector("[data-automation-id='progressBarActiveStep']")
+                curr_txt = (await curr_step.inner_text()).lower() if curr_step else ""
+                if "my information" in curr_txt or await self.page.query_selector("[data-automation-id='applyFlowMyInfoPage']"):
+                    logger.info("   ✅ Workday authenticated! Advanced to My Information.")
+                    break
+                await asyncio.sleep(1)
+
+        logger.info("   ✅ Workday: Authentication step handled.")
+
+    async def _handle_workday_my_info_step(self):
+        """Fills Workday Step 2: Personal information, contact, address, state, source."""
+        logger.info("   📋 Workday: Populating 'My Information'...")
+        await asyncio.sleep(2)
+
+        # 1. Source (How Did You Hear About Us?)
+        source_field = await self.page.query_selector("[data-automation-id='formField-source']")
+        if source_field:
+            curr_text = await source_field.inner_text()
+            if "0 items selected" in curr_text or "Expanded" in curr_text or not curr_text.strip():
+                icon = await source_field.query_selector("[data-automation-id='promptIcon'], [data-automation-id='multiselectInputContainer'], input")
+                if icon:
+                    try:
+                        await icon.click()
+                        await asyncio.sleep(1)
+                        jb = await self.page.query_selector("[data-automation-id='menuItem']:has-text('Job Board'), [data-automation-id='menuItem']:has-text('Career')")
+                        if jb:
+                            await jb.click()
+                            await asyncio.sleep(1)
+                            sub = await self.page.query_selector(
+                                "[data-automation-id='menuItem']:has-text('Careers'), "
+                                "[data-automation-id='menuItem']:has-text('LinkedIn'), "
+                                "[data-automation-id='menuItem']:has-text('Indeed')"
+                            )
+                            if not sub:
+                                sub_items = await self.page.query_selector_all("[data-automation-id='menuItem']")
+                                if sub_items:
+                                    sub = sub_items[0]
+                            if sub:
+                                await sub.click()
+                                logger.info("      ✓ Selected Source: Career / Job Board")
+                        else:
+                            opts = await self.page.query_selector_all("[data-automation-id='menuItem'], [data-automation-id='promptOption']")
+                            for o in opts:
+                                lbl = (await o.inner_text()).strip()
+                                if lbl and "india" not in lbl.lower() and "select" not in lbl.lower():
+                                    await o.click()
+                                    logger.info(f"      ✓ Selected Source: {lbl}")
+                                    break
+                    except Exception as e:
+                        logger.debug(f"Workday source selection note: {e}")
+                    finally:
+                        await self.page.keyboard.press("Escape")
+                        await asyncio.sleep(0.4)
+
+        # 2. Previous Worker (Have you previously worked for...?) -> No
+        pw_field = await self.page.query_selector("[data-automation-id='formField-candidateIsPreviousWorker'], fieldset:has-text('previously worked')")
+        if pw_field:
+            no_lbl = await pw_field.query_selector("label:has-text('No'), input[value*='n' i] + label")
+            if no_lbl:
+                try:
+                    await no_lbl.click(force=True)
+                    logger.info("      ✓ Selected Previous Worker: No")
+                except Exception:
+                    pass
+
+        # 3. Legal Name
+        fn_input = await self.page.query_selector("[data-automation-id='formField-legalName--firstName'] input, [data-automation-id='legalNameSection_firstName'], [data-automation-id='legalName--firstName'] input")
+        if fn_input and not await fn_input.input_value():
+            first_name = self.candidate.get("first_name", "Maruf")
+            await fn_input.fill(first_name)
+            logger.info(f"      ✓ Filled First Name: {first_name}")
+
+        ln_input = await self.page.query_selector("[data-automation-id='formField-legalName--lastName'] input, [data-automation-id='legalNameSection_lastName'], [data-automation-id='legalName--lastName'] input")
+        if ln_input and not await ln_input.input_value():
+            last_name = self.candidate.get("last_name", "Hassan")
+            await ln_input.fill(last_name)
+            logger.info(f"      ✓ Filled Last Name: {last_name}")
+
+        # 4. Address & Location
+        addr_input = await self.page.query_selector("[data-automation-id='formField-addressLine1'] input")
+        if addr_input and not await addr_input.input_value():
+            addr = self.candidate.get("location", "Park Street").split(",")[0].strip()
+            await addr_input.fill(addr)
+            logger.info(f"      ✓ Filled Address: {addr}")
+
+        city_input = await self.page.query_selector("[data-automation-id='formField-city'] input, [data-automation-id='addressSection_city']")
+        if city_input and not await city_input.input_value():
+            city = self.candidate.get("city", "Kolkata")
+            await city_input.fill(city)
+            logger.info(f"      ✓ Filled City: {city}")
+
+        postal_input = await self.page.query_selector("[data-automation-id='formField-postalCode'] input")
+        if postal_input and not await postal_input.input_value():
+            await postal_input.fill("700016")
+            logger.info("      ✓ Filled Postal Code: 700016")
+
+        # 5. State / Region
+        state_btn = await self.page.query_selector("button#address--countryRegion, button[name='countryRegion'], [data-automation-id='formField-countryRegion'] button")
+        if state_btn:
+            st_text = await state_btn.inner_text()
+            if "select one" in st_text.lower():
+                try:
+                    await state_btn.click(force=True)
+                    await asyncio.sleep(1)
+                    st_opt = await self.page.query_selector("li[role='option']:has-text('West Bengal'), [data-automation-label*='West Bengal' i]")
+                    if not st_opt:
+                        opts = await self.page.query_selector_all("li[role='option'], [data-automation-id='promptOption']")
+                        for o in opts:
+                            t = (await o.inner_text()).strip()
+                            if t and "select one" not in t.lower():
+                                st_opt = o
+                                break
+                    if st_opt:
+                        logger.info(f"      ✓ Selected State: {(await st_opt.inner_text()).strip()}")
+                        await st_opt.click()
+                except Exception as e:
+                    logger.debug(f"Workday state selection note: {e}")
+                finally:
+                    await self.page.keyboard.press("Escape")
+                    await asyncio.sleep(0.4)
+
+        # 6. Phone Device Type
+        pt_btn = await self.page.query_selector("button#phoneNumber--phoneType, button[name='phoneType'], [data-automation-id='formField-phoneType'] button")
+        if pt_btn:
+            pt_text = await pt_btn.inner_text()
+            if "select one" in pt_text.lower():
+                try:
+                    await pt_btn.click(force=True)
+                    await asyncio.sleep(1)
+                    mobile_opt = await self.page.query_selector("li[role='option']:has-text('Mobile'), [data-automation-label*='Mobile' i]")
+                    if mobile_opt:
+                        await mobile_opt.click()
+                        logger.info("      ✓ Selected Phone Type: Mobile")
+                except Exception as e:
+                    logger.debug(f"Workday phone type selection note: {e}")
+                finally:
+                    await self.page.keyboard.press("Escape")
+                    await asyncio.sleep(0.4)
+
+        # 7. Phone Number
+        phone_input = await self.page.query_selector("[data-automation-id='formField-phoneNumber'] input, input#phoneNumber--phoneNumber, [data-automation-id='phone-number']")
+        if phone_input and not await phone_input.input_value():
+            raw_phone = self.candidate.get("phone", "7980356852")
+            cleaned_phone = re.sub(r"[^\d]", "", raw_phone)[-10:]
+            await phone_input.fill(cleaned_phone)
+            logger.info(f"      ✓ Filled Phone: {cleaned_phone}")
+
+    async def _handle_workday_experience_step(self):
+        """Fills Workday Step 3: Resume upload and Websites."""
+        logger.info("   💼 Workday: Populating 'My Experience'...")
+        await asyncio.sleep(2)
+
+        resume_path = self.candidate.get("resume_pdf_path")
+        if resume_path:
+            p = Path(resume_path).expanduser().resolve()
+            if p.exists():
+                file_input = await self.page.query_selector("input[type='file']")
+                if file_input:
+                    logger.info(f"      📎 Uploading resume to Workday: {p.name}")
+                    await file_input.set_input_files(str(p))
+                    await asyncio.sleep(3)
+
+        linkedin_url = self.candidate.get("linkedin_url", "")
+        if linkedin_url:
+            web_input = await self.page.query_selector("[data-automation-id='formField-website'] input, input[aria-label*='website' i], input[placeholder*='website' i]")
+            if web_input and not await web_input.input_value():
+                await web_input.fill(linkedin_url)
+                logger.info(f"      ✓ Filled Website: {linkedin_url}")
+
+    async def _handle_workday_questions_step(self):
+        """Fills Workday Step 4: Screening questions, notice period, legal/authorization."""
+        logger.info("   ❓ Workday: Populating 'Application Questions'...")
+        await self._handle_custom_questions()
+        await self._handle_dropdown_questions()
+        await self._handle_custom_cards_and_radios()
+
+    async def _handle_workday_disclosures_step(self):
+        """Fills Workday Step 5: EEO demographics, veteran status, disability, acknowledgment."""
+        logger.info("   🏛️ Workday: Populating 'Voluntary Disclosures'...")
+        await asyncio.sleep(1)
+        await self._handle_dropdown_questions()
+        await self._handle_custom_cards_and_radios()
+
+        ack_cb = await self.page.query_selector(
+            "input[type='checkbox'][data-automation-id*='agree' i], "
+            "input[type='checkbox'][data-automation-id*='terms' i], "
+            "label:has-text('I agree'), label:has-text('I acknowledge')"
+        )
+        if ack_cb:
+            try:
+                await ack_cb.click(force=True)
+                logger.info("      ✓ Checked Voluntary Disclosure Acknowledgment")
+            except Exception:
+                pass
+
+    async def _fill_workday_flow(self) -> bool:
+        """Detects current Workday step and executes appropriate step logic."""
+        active_step_el = await self.page.query_selector("[data-automation-id='progressBarActiveStep']")
+        active_text = (await active_step_el.inner_text()).lower() if active_step_el else ""
+
+        # Step 1: Authentication
+        if "create account" in active_text or "sign in" in active_text or await self.page.query_selector("button[data-automation-id='createAccountSubmitButton'], button[data-automation-id='SignInWithEmailButton']"):
+            await self._handle_workday_auth_step()
+            new_active_el = await self.page.query_selector("[data-automation-id='progressBarActiveStep']")
+            new_text = (await new_active_el.inner_text()).lower() if new_active_el else ""
+            if "my information" in new_text or await self.page.query_selector("[data-automation-id='applyFlowMyInfoPage']"):
+                await self._handle_workday_my_info_step()
+            return True
+
+        # Step 2: My Information
+        if "my information" in active_text or await self.page.query_selector("[data-automation-id='applyFlowMyInfoPage']"):
+            await self._handle_workday_my_info_step()
+            return True
+
+        # Step 3: My Experience
+        if "my experience" in active_text or await self.page.query_selector("h3:has-text('Work Experience'), h2:has-text('My Experience'), input[type='file']"):
+            await self._handle_workday_experience_step()
+            return True
+
+        # Step 4: Application Questions
+        if "application questions" in active_text or "questions" in active_text:
+            await self._handle_workday_questions_step()
+            return True
+
+        # Step 5: Voluntary Disclosures
+        if "voluntary disclosures" in active_text or "disclosures" in active_text:
+            await self._handle_workday_disclosures_step()
+            return True
+
+        # Step 6: Review
+        if "review" in active_text:
+            logger.info("   🔍 Workday: Review page reached.")
+            return True
+
+        # Fallback to standard fill
+        await self._fill_standard_fields()
+        await self._fill_url_fields()
+        await self._upload_resume()
+        await self._handle_custom_questions()
+        await self._handle_dropdown_questions()
+        await self._handle_custom_cards_and_radios()
+        return True
+
     async def fill_form(self) -> bool:
         """Main entry point. Detects all form fields and fills them."""
         logger.info(f"📋 Starting form fill for detected ATS: [{self.platform.upper()}]")
+        if self.platform == "workday":
+            return await self._fill_workday_flow()
         await self._fill_standard_fields()
         await self._fill_url_fields()
         await self._handle_location_autocomplete()
@@ -943,19 +1269,32 @@ class FormFiller:
         return True
 
     async def advance_wizard_step(self) -> bool:
-        """Clicks 'Next' / 'Continue' / 'Review' button in multi-step forms (e.g. Workday, Easy Apply)."""
+        """Clicks 'Next' / 'Save and Continue' / 'Review' button in multi-step forms (e.g. Workday, Easy Apply)."""
         plat_sel = self.selectors.get(self.platform, {})
         next_sel = (
             plat_sel.get("next_button") or 
-            "button:has-text('Next'), button:has-text('Continue'), button:has-text('Review'), button[aria-label*='Next' i], button[aria-label*='Continue' i]"
+            "div[data-automation-id='click_filter'][aria-label*='Save and Continue' i], "
+            "div[data-automation-id='click_filter'][aria-label*='Next' i], "
+            "div[data-automation-id='click_filter'][aria-label*='Review' i], "
+            "button[data-automation-id='pageFooterNextButton'], "
+            "button[data-automation-id='bottom-navigation-next-button'], "
+            "button:has-text('Save and Continue'), button:has-text('Next'), "
+            "button:has-text('Continue'), button:has-text('Review'), "
+            "button[aria-label*='Next' i], button[aria-label*='Continue' i]"
         )
         try:
             btn = await self.page.query_selector(next_sel)
             if btn and await btn.is_visible() and await btn.is_enabled():
                 logger.info("   ⏩ Multi-step wizard: Advancing to next step...")
-                await btn.click()
-                await self.page.wait_for_load_state("domcontentloaded", timeout=7000)
-                await asyncio.sleep(2)
+                try:
+                    await btn.click(force=True)
+                except Exception:
+                    await btn.evaluate("el => el.click()")
+                try:
+                    await self.page.wait_for_load_state("domcontentloaded", timeout=7000)
+                except Exception:
+                    pass
+                await asyncio.sleep(3)
                 return True
         except Exception as e:
             logger.debug(f"No further wizard steps: {e}")
@@ -1115,6 +1454,60 @@ class AutoApplier:
                 logger.debug(f"Greenhouse apply scroll note: {e}")
             platform = "greenhouse"
 
+        # 5. Workday Job Posting -> Click 'Apply' button to open modal, then click 'Apply Manually'
+        elif "myworkdayjobs.com" in current_url.lower() or "myworkday.com" in current_url.lower():
+            try:
+                if "/apply" in current_url.lower():
+                    try:
+                        await page.wait_for_selector(
+                            "input[data-automation-id='email'], [data-automation-id='applyFlowPage'], [data-automation-id='progressBarActiveStep']",
+                            timeout=15000
+                        )
+                    except Exception:
+                        pass
+                else:
+                    apply_btn = None
+                    try:
+                        apply_btn = await page.wait_for_selector(
+                            "a[data-automation-id='adventureButton'], [data-automation-id='applyButton'], a:has-text('Apply'), button:has-text('Apply')",
+                            timeout=12000
+                        )
+                    except Exception:
+                        pass
+
+                    if apply_btn and await apply_btn.is_visible():
+                        logger.info("   -> Workday job description detected: Clicking 'Apply'...")
+                        await apply_btn.click()
+                        
+                        manually_btn = None
+                        try:
+                            manually_btn = await page.wait_for_selector(
+                                "a[data-automation-id='applyManually'], button[data-automation-id='applyManually'], [data-automation-id='applyManually'], a:has-text('Apply Manually')",
+                                timeout=8000
+                            )
+                        except Exception:
+                            pass
+
+                        if manually_btn and await manually_btn.is_visible():
+                            logger.info("   -> Workday modal detected: Clicking 'Apply Manually'...")
+                            await manually_btn.click()
+                            try:
+                                await page.wait_for_selector(
+                                    "input[data-automation-id='email'], [data-automation-id='applyFlowPage'], [data-automation-id='progressBarActiveStep']",
+                                    timeout=15000
+                                )
+                            except Exception:
+                                pass
+                        else:
+                            parsed = urlparse(current_url)
+                            path = parsed.path.rstrip('/') + "/apply/applyManually"
+                            direct_apply_url = urlunparse((parsed.scheme, parsed.netloc, path, parsed.params, parsed.query, parsed.fragment))
+                            logger.info(f"   -> Workday navigating directly to: {direct_apply_url}")
+                            await page.goto(direct_apply_url, wait_until="domcontentloaded", timeout=20000)
+            except Exception as e:
+                logger.debug(f"Workday unwrap exception: {e}")
+            platform = "workday"
+
         # Check if browser opened a new tab/window during interaction
         if hasattr(page, "context") and len(page.context.pages) > 1:
             page = page.context.pages[-1]
@@ -1136,7 +1529,7 @@ class AutoApplier:
         # Wait for form or input elements to be rendered (handles React, Lever, Ashby hydration)
         try:
             await page.wait_for_selector(
-                "form, input[type='text'], input[type='email'], input[name='name'], [data-qa='name-input'], #first_name, .application-form",
+                "form, input[type='text'], input[type='email'], input[name='name'], [data-qa='name-input'], #first_name, .application-form, [data-automation-id='applyFlowPage'], [data-automation-id='progressBar']",
                 timeout=7000
             )
         except Exception:
@@ -1181,7 +1574,8 @@ class AutoApplier:
 
         # Handle multi-step wizard if present (e.g. Workday, Easy Apply)
         steps_navigated = 0
-        while steps_navigated < 4:
+        max_steps = 7 if platform == "workday" else 4
+        while steps_navigated < max_steps:
             advanced = await filler.advance_wizard_step()
             if not advanced:
                 break
