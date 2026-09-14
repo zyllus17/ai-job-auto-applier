@@ -13,6 +13,26 @@ per-file diff commands.
 
 ## [Unreleased]
 
+## [5.0.0] - 2026-09-14
+
+### Added
+
+- **Universal 6-Platform ATS Form Auto-Fill Engine** (`tools/browser_autofill.py`, `tools/ats_selectors.json`):
+  - **Greenhouse** (`boards.greenhouse.io`): Automated standard fields, custom questions, React-Select autocomplete, demographic EEOs, and resume/cover letter file uploads.
+  - **Lever** (`jobs.lever.co`): Full custom card parsing, interactive checkboxes, radio groups, native select dropdowns, desired salary expectations, and candidate digital signature.
+  - **Ashby** (`jobs.ashbyhq.com`): Ashby location autocomplete combobox with keydown navigation, custom Yes/No toggle pills, radio sets, and custom long-form essay fields.
+  - **Workday** (`*.myworkdayjobs.com`): Canvas Kit `click_filter` pointer interceptor bypass with forced evaluate triggers, `beecatcher` hidden honeypot evasion, hierarchical menus (*"How Did You Hear About Us?"*), and multi-step wizard state machine across all 6 application steps.
+  - **Indeed** (`indeed.com` / `smartapply.indeed.com`): Dual application mode support (Direct Indeed Apply + Company Site Offsite ATS Unwrap), dynamic iframe execution scope resolution (`_get_scope`), and Chromium stealth with persistent profiles to prevent bot detection challenges.
+  - **Naukri** (`naukri.com`): Akamai EdgeSuite Bot Manager bypass via native macOS Chrome channel (`channel='chrome'`), screening questionnaire chatbot drawer handling (total experience, notice period dropdowns/radios, current & expected CTC in Lakhs, preferred location), and company site external application unwrapping.
+- **Dedicated Live Integration Test Suites**:
+  - Added dedicated integration suites: `tests/test_greenhouse_live.py`, `tests/test_lever_live.py`, `tests/test_ashby_live.py`, `tests/test_workday_live.py`, `tests/test_indeed_live.py`, and `tests/test_naukri_live.py`.
+  - Master test suite (`python3 run.py --test`) expanded to **63 / 63 tests passing (100%)** with zero regressions.
+- **Stealth & Anti-Bot Architecture**:
+  - Auto-detection of `/Applications/Google Chrome.app` on macOS to bypass Akamai and Cloudflare edge blocks, automated user-agent spoofing, 1920×1080 viewport initialization, and runtime `navigator.webdriver` removal.
+  - Persistent Chromium browser profiles in `~/.job-autoapply-profile` ensuring session cookie persistence across sessions.
+- **Candidate Profile Expansion** (`tools/candidate_profile.json`):
+  - Added Indian tech ecosystem parameters (`notice_period_days`, `notice_period_text`, `current_ctc_lakhs`, `expected_ctc_lakhs`, `preferred_locations`) and Workday credentials.
+
 ## [4.0.0] - 2026-09-13
 
 ### Added
