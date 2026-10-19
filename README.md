@@ -8,15 +8,15 @@
 
 <!-- 1-CLICK DESKTOP APP DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest" title="Download AI Job Auto-Applier for Windows (64-bit EXE)">
+  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-Setup-6.0.0.exe" title="Download AI Job Auto-Applier for Windows (64-bit EXE)">
     <img src="assets/download_windows.png" alt="Download for Windows (.exe)" width="260" />
   </a>
   &nbsp;&nbsp;
-  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest" title="Download AI Job Auto-Applier for macOS (Universal DMG)">
+  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.dmg" title="Download AI Job Auto-Applier for macOS (Universal DMG)">
     <img src="assets/download_mac.png" alt="Download for macOS (.dmg)" width="260" />
   </a>
   &nbsp;&nbsp;
-  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest" title="Download AI Job Auto-Applier for Linux (.AppImage / .deb)">
+  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.AppImage" title="Download AI Job Auto-Applier for Linux (.AppImage / .deb)">
     <img src="assets/download_linux.png" alt="Download for Linux (.AppImage)" width="260" />
   </a>
 </p>

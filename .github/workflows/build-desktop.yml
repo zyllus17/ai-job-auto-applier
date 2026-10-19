@@ -4,9 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-    paths:
-      - 'desktop/**'
-      - '.github/workflows/build-desktop.yml'
   workflow_dispatch:
 
 permissions:

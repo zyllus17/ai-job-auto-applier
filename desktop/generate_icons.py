@@ -101,25 +101,25 @@ def create_master_icon(size=1024):
     return base
 
 def main():
-    print("🎨 Generating Master Icon (1024x1024)...")
+    print("[INFO] Generating Master Icon (1024x1024)...")
     icon1024 = create_master_icon(1024)
     png_path = ASSETS_DIR / "icon.png"
     icon1024.save(png_path, "PNG")
-    print(f"✅ Saved master PNG: {png_path}")
+    print(f"[OK] Saved master PNG: {png_path}")
 
     # Generate Linux Freedesktop Icons (assets/icons/{w}x{h}.png)
-    print("🐧 Generating Linux Freedesktop icons (16x16 through 1024x1024)...")
+    print("[INFO] Generating Linux Freedesktop icons (16x16 through 1024x1024)...")
     linux_icons_dir = ASSETS_DIR / "icons"
     linux_icons_dir.mkdir(parents=True, exist_ok=True)
     linux_sizes = [16, 24, 32, 48, 64, 128, 256, 512, 1024]
     for sz in linux_sizes:
         resized_icon = icon1024.resize((sz, sz), Image.Resampling.LANCZOS)
         resized_icon.save(linux_icons_dir / f"{sz}x{sz}.png", "PNG")
-    print(f"✅ Saved Linux icons to: {linux_icons_dir}")
+    print(f"[OK] Saved Linux icons to: {linux_icons_dir}")
 
     # Generate Windows .ico
 
-    print("🪟 Generating Windows icon.ico...")
+    print("[INFO] Generating Windows icon.ico...")
     ico_sizes = [(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)]
     ico_images = [icon1024.resize(s, Image.Resampling.LANCZOS) for s in ico_sizes]
     ico_path = ASSETS_DIR / "icon.ico"
@@ -129,11 +129,11 @@ def main():
         sizes=ico_sizes,
         append_images=ico_images[1:]
     )
-    print(f"✅ Saved Windows ICO: {ico_path}")
+    print(f"[OK] Saved Windows ICO: {ico_path}")
 
     # Generate macOS .icns via iconutil
     if sys.platform == "darwin":
-        print("🍎 Generating macOS icon.icns via iconutil...")
+        print("[INFO] Generating macOS icon.icns via iconutil...")
         iconset_dir = ASSETS_DIR / "icon.iconset"
         if iconset_dir.exists():
             shutil.rmtree(iconset_dir)
@@ -159,9 +159,9 @@ def main():
         icns_path = ASSETS_DIR / "icon.icns"
         subprocess.run(["iconutil", "-c", "icns", str(iconset_dir), "-o", str(icns_path)], check=True)
         shutil.rmtree(iconset_dir)
-        print(f"✅ Saved macOS ICNS: {icns_path}")
+        print(f"[OK] Saved macOS ICNS: {icns_path}")
 
-    print("\n🎉 All cross-platform icon assets generated successfully!")
+    print("\n[SUCCESS] All cross-platform icon assets generated successfully!")
 
 if __name__ == "__main__":
     main()

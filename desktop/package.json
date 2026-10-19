@@ -2,6 +2,7 @@
   "name": "ai-job-auto-applier-launcher",
   "version": "6.0.0",
   "description": "AI Job Auto-Applier Desktop Launcher & Autonomous Operations Cockpit",
+  "homepage": "https://github.com/zyllus17/ai-job-auto-applier",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
@@ -17,7 +18,10 @@
     "crawler",
     "desktop-launcher"
   ],
-  "author": "Maruf Hassan",
+  "author": {
+    "name": "Maruf Hassan",
+    "email": "contact@marufhassan.com"
+  },
   "license": "MIT",
   "build": {
     "appId": "com.aijobapplier.launcher",
@@ -111,6 +115,7 @@
         "deb",
         "tar.gz"
       ],
+      "maintainer": "Maruf Hassan <contact@marufhassan.com>",
       "category": "Utility",
       "icon": "assets/icons",
       "synopsis": "Autonomous Job Discovery, Resume Tailoring & Cockpit",
