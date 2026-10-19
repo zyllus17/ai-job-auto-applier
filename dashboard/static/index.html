@@ -1003,6 +1003,171 @@
     body.light-theme .pipeline-table tbody tr:hover { background: #f8fafc; }
     body.light-theme .ant-drawer-content-wrapper { background: #ffffff; border-left-color: #e2e8f0; }
     body.light-theme .ant-drawer-title { color: #0f172a; }
+
+    /* ==========================================================================
+       PROJECT PROMPT CARD — Copyable AI Coding Prompt for Skill Gap POC
+       ========================================================================== */
+    .poc-prompt-section {
+      background: rgba(139, 92, 246, 0.06);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 12px;
+      margin-top: 14px;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .poc-prompt-section:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+      box-shadow: 0 0 24px rgba(139, 92, 246, 0.08);
+    }
+    .poc-prompt-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .poc-prompt-header:hover {
+      background: rgba(139, 92, 246, 0.08);
+    }
+    .poc-prompt-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .poc-prompt-header-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 2px 10px rgba(139, 92, 246, 0.35);
+      flex-shrink: 0;
+    }
+    .poc-prompt-header-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: #c4b5fd;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .poc-prompt-header-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-top: 2px;
+    }
+    .poc-prompt-chevron {
+      font-size: 14px;
+      color: var(--text-dim);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .poc-prompt-section.expanded .poc-prompt-chevron {
+      transform: rotate(180deg);
+    }
+    .poc-prompt-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s;
+      padding: 0 16px;
+    }
+    .poc-prompt-section.expanded .poc-prompt-body {
+      max-height: 800px;
+      padding: 0 16px 16px 16px;
+    }
+    .poc-prompt-code {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 360px;
+      overflow-y: auto;
+      position: relative;
+    }
+    .poc-prompt-code::-webkit-scrollbar {
+      width: 6px;
+    }
+    .poc-prompt-code::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .poc-prompt-code::-webkit-scrollbar-thumb {
+      background: rgba(139, 92, 246, 0.3);
+      border-radius: 3px;
+    }
+    .poc-prompt-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      align-items: center;
+    }
+    .btn-copy-prompt {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+      border: none !important;
+      color: white !important;
+      font-weight: 600 !important;
+      font-size: 12.5px !important;
+      border-radius: 8px !important;
+      padding: 9px 18px !important;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4) !important;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-copy-prompt:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6) !important;
+    }
+    .btn-copy-prompt:active {
+      transform: scale(0.97);
+    }
+    .btn-copy-prompt.copied {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+    }
+    .btn-copy-prompt.copied:hover {
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6) !important;
+    }
+    .poc-prompt-hint {
+      font-size: 11px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    @keyframes promptCopiedPulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+      70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .btn-copy-prompt.copied {
+      animation: promptCopiedPulse 0.6s ease-out;
+    }
+    body.light-theme .poc-prompt-section {
+      background: rgba(139, 92, 246, 0.04);
+      border-color: rgba(139, 92, 246, 0.15);
+    }
+    body.light-theme .poc-prompt-header-text { color: #7c3aed; }
+    body.light-theme .poc-prompt-code {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      color: #1e293b;
+    }
   </style>
 </head>
 <body>
@@ -2046,6 +2211,30 @@
             <strong>Identified Skill Gap:</strong> <span style="color: #f87171;">${escapeHtml(job.missingSkill || 'None')}</span><br>
             <strong>Recommended POC Project:</strong> <span style="color: #38bdf8;">${escapeHtml(job.suggestedProject || 'Production Deployment Checklist')}</span>
           </div>
+
+          ${(job.missingSkill && job.missingSkill !== 'None' && job.missingSkill !== 'Fully Matched') ? `
+          <div class="poc-prompt-section" id="poc-prompt-section-${idx}">
+            <div class="poc-prompt-header" onclick="togglePocPrompt(${idx})">
+              <div class="poc-prompt-header-left">
+                <div class="poc-prompt-header-icon">🛠️</div>
+                <div>
+                  <div class="poc-prompt-header-text">Build This Project — AI Prompt Ready</div>
+                  <div class="poc-prompt-header-sub">Copy the prompt below into any AI coding assistant to scaffold the POC</div>
+                </div>
+              </div>
+              <span class="poc-prompt-chevron" id="poc-chevron-${idx}">▼</span>
+            </div>
+            <div class="poc-prompt-body" id="poc-prompt-body-${idx}">
+              <div class="poc-prompt-code" id="poc-prompt-text-${idx}">${escapeHtml(generateProjectPrompt(job))}</div>
+              <div class="poc-prompt-actions">
+                <button class="btn-copy-prompt" id="btn-copy-prompt-${idx}" onclick="event.stopPropagation(); copyProjectPrompt(${idx})">
+                  📋 Copy Prompt
+                </button>
+                <span class="poc-prompt-hint">💡 Paste into Antigravity, Claude, Cursor, or ChatGPT</span>
+              </div>
+            </div>
+          </div>
+          ` : ''}
         </div>
 
         ${outreachHtml}
@@ -2089,6 +2278,436 @@
         }, 2000);
       }
       showToast('Pitch copied to clipboard!', 'success');
+    }
+
+    // ── POC Project Prompt Builder (Randomized Templates) ─────────────
+    function _hashStr(s) {
+      let h = 0;
+      for (let i = 0; i < s.length; i++) {
+        h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+      }
+      return Math.abs(h);
+    }
+
+    function generateProjectPrompt(job) {
+      const skill = job.missingSkill || 'Unknown Skill';
+      const project = job.suggestedProject || 'Quick Demo Project';
+      const company = job.company || 'the target company';
+      const role = job.title || 'the target role';
+
+      // Deterministic pick per job so the same job always shows the same template,
+      // but different jobs get different styles.
+      const seed = _hashStr(company + role + skill);
+      const templates = [_tplVisualDashboard, _tplInteractiveTool, _tplBeforeAfter, _tplMiniSaas, _tplLivePipeline];
+      const pick = templates[seed % templates.length];
+      return pick(skill, project, company, role);
+    }
+
+    // ── Template 1: Visual Dashboard ────────────────────────────────────
+    function _tplVisualDashboard(skill, project, company, role) {
+      return `# 🚀 30-Minute Build Challenge: ${project}
+
+## Why I'm Building This
+I'm targeting the "${role}" role at ${company}. My profile analysis flagged **${skill}** as a gap I need to demonstrate. This project is my proof — a polished, visual mini-dashboard I can screenshot for LinkedIn and link in my application.
+
+## The Mission (30 Minutes, Start to Finish)
+Build a beautiful, single-page **dashboard UI** that showcases ${skill} in action. It must look impressive in a screenshot and be immediately understandable to a recruiter scrolling LinkedIn.
+
+## Exact Blueprint
+
+### Visual Design (This is Critical)
+- Use a modern dark theme with vibrant accent colors (gradients, glassmorphism)
+- Include at least 3 metric cards, 1 interactive chart or visualization, and a data table
+- Add smooth animations on load (fade-in, slide-up for cards)
+- Use a professional font (Inter or Roboto from Google Fonts)
+- The page title should include "${skill}" so it's obvious in screenshots
+- Must look stunning at 1200×630px — the LinkedIn preview image size
+
+### Core Functionality
+1. Demonstrate the #1 most relevant use-case of **${skill}** for a ${role} position
+2. Use realistic mock data (not lorem ipsum — use domain-specific numbers, names, and scenarios)
+3. Include at least one interactive element (filter, toggle, search, or live update)
+4. Show loading states and error handling — signal production-readiness
+
+### Tech Stack
+- **Frontend**: HTML + vanilla CSS + vanilla JS (single index.html is fine) OR React/Next.js if it speeds things up
+- **Backend** (if needed): Python FastAPI or Node.js — keep it minimal, one file
+- **Data**: Hardcoded JSON or a tiny SQLite DB — no external API keys needed
+- **Launch**: Must run with a single command: \`npx serve .\` or \`python -m http.server\` or \`npm run dev\`
+
+## Deliverables
+- [ ] Working project that runs with one command
+- [ ] At least one polished screenshot (1200×630px) ready for LinkedIn — save as \`demo_screenshot.png\`
+- [ ] README.md with:
+  - "What this demonstrates" (2 sentences about ${skill})
+  - Setup: \`git clone → one command → open browser\`
+  - "What I Learned" section (3 bullet points about ${skill})
+- [ ] LINKEDIN_POST.md — a draft LinkedIn post (under 200 words) with:
+  - Hook line mentioning ${skill}
+  - What I built and why
+  - 3 key takeaways
+  - Call to action + GitHub link placeholder
+  - Hashtag suggestions
+
+## Hard Rules
+- ⏱️ 30 minutes maximum build time. Scope ruthlessly — cut features, not quality
+- 🎨 The visual output MUST look professional. If it looks like a homework assignment, redo the styling
+- 📱 Must be responsive enough to screenshot nicely on desktop
+- 🆓 No paid APIs. Use mocks, free tiers, or local data
+- 🧹 Clean code with comments explaining the ${skill}-specific parts
+
+Start building now. Create every file, write all the code, and include the LinkedIn post draft.`;
+    }
+
+    // ── Template 2: Interactive Tool / Playground ────────────────────────
+    function _tplInteractiveTool(skill, project, company, role) {
+      return `# 🛠️ Build a Micro-Tool in 30 Minutes: ${project}
+
+## Context
+I need to prove **${skill}** competence for the "${role}" position at ${company}. Instead of a static demo, I'm building a small interactive tool that anyone can try — perfect for a LinkedIn post with a live link or GIF.
+
+## What to Build
+Create a focused, single-purpose **interactive tool or playground** where a user inputs something and sees ${skill} working in real time. Think: a converter, analyzer, validator, generator, or visualizer powered by ${skill}.
+
+## Step-by-Step Plan (Stick to 30 Minutes)
+
+### Minutes 0–5: Scaffold
+- Create project structure (keep it flat: index.html, style.css, app.js or a single framework page)
+- Set up the layout: header with tool name, input area on the left, output/visualization on the right
+- Pick a vibrant color scheme — dark mode with neon accents works great for screenshots
+
+### Minutes 5–15: Core Logic
+- Implement the main ${skill} functionality
+- Wire up the input → processing → output pipeline
+- Use realistic sample inputs that auto-populate on page load so the demo looks good immediately
+- Add a prominent "Run" or "Analyze" button with a loading spinner
+
+### Minutes 15–25: Polish & Visual Impact
+- Add smooth transitions when results appear (fade-in, typewriter effect, or progressive reveal)
+- Style the output beautifully — cards, color-coded results, or a mini-chart
+- Add a "Copy Result" or "Export" button for utility
+- Include a footer: "Built in 30 min to demonstrate ${skill} • [Your Name]"
+
+### Minutes 25–30: Package for LinkedIn
+- Take 2–3 screenshots at 1200×630px showing the tool with sample data loaded
+- Write the LinkedIn post (see deliverables)
+- Verify the README has a one-command startup
+
+## Technical Constraints
+- Single command to run: \`npx serve .\`, \`python3 -m http.server 8080\`, or \`npm run dev\`
+- Zero external API keys — use local processing, mocks, or free browser APIs
+- Must work in Chrome/Firefox without any setup from the viewer
+- Deployable to Vercel/Netlify/GitHub Pages for a shareable live link
+
+## Deliverables
+- [ ] Working interactive tool
+- [ ] 2–3 screenshots saved as PNGs (with sample data loaded — not empty states)
+- [ ] README.md with instant setup + "What I Learned About ${skill}" section
+- [ ] LINKEDIN_POST.md — a punchy LinkedIn post:
+  - Start with a hook: "I built a [tool name] in 30 minutes to learn ${skill}..."
+  - Show what it does with an example
+  - Share 2–3 insights about ${skill} you discovered
+  - End with: "Code → [GitHub link] | Try it → [live link]"
+  - Include relevant hashtags
+
+## Quality Bar
+- If a recruiter at ${company} saw the screenshot on LinkedIn, they should think: "This person actually understands ${skill} — and ships fast."
+- The UI must look intentionally designed, not thrown together. Use consistent spacing, a limited color palette, and modern typography.
+
+Build the entire project now. Every file, every line of code, and the LinkedIn post draft.`;
+    }
+
+    // ── Template 3: Before / After Showcase ──────────────────────────────
+    function _tplBeforeAfter(skill, project, company, role) {
+      return `# ⚡ 30-Minute Before/After Showcase: ${project}
+
+## The Angle
+I'm applying for "${role}" at ${company} and need to demonstrate **${skill}**. The most compelling format for LinkedIn? A visual **before/after comparison** — showing a problem without ${skill}, then the dramatic improvement with it. Recruiters love this format because the value is instantly obvious.
+
+## What to Build
+A single-page web app with a split-screen or tabbed view:
+- **LEFT / TAB 1 — "Without ${skill}"**: Show the naive/manual/slow approach. Use muted colors, maybe a red accent.
+- **RIGHT / TAB 2 — "With ${skill}"**: Show the optimized/automated/intelligent approach. Use vibrant green/blue accents, smooth animations.
+- Include real metrics or a visible difference (speed, accuracy, code size, output quality).
+
+## Architecture (Keep It Tiny)
+
+### Frontend (The Star of the Show)
+\`\`\`
+index.html          — Split layout with toggle/tabs
+style.css           — Dark theme, glassmorphism cards, gradient accents
+app.js              — Logic for both "before" and "after" scenarios
+data/sample.json    — Realistic mock data for the demo
+\`\`\`
+
+### Design Requirements
+- **Split view** or **animated toggle** between before/after — must be visually dramatic
+- Each side gets a metric banner: "Processing time: 4.2s → 0.1s" or "Accuracy: 67% → 94%"
+- Animate the transition between states (slide, morph, or counter animation for numbers)
+- Use a monospace font for code/data, Inter/Roboto for UI text
+- Bottom bar: "Built in 30 min • Demonstrating ${skill} for ${role} applications"
+
+### The ${skill} Implementation
+- Pick the single most impressive capability of ${skill}
+- The "before" version uses a naive approach (brute force, manual, unoptimized)
+- The "after" version uses ${skill} properly — with inline comments explaining what's happening
+- Both must actually run and produce visible output — not just static mockups
+
+## 30-Minute Checklist
+- [ ] Minutes 0–3: Create file structure, import fonts, set up dark theme base
+- [ ] Minutes 3–12: Build the "before" scenario (naive approach) with working output
+- [ ] Minutes 12–22: Build the "after" scenario using ${skill}, wire up the toggle
+- [ ] Minutes 22–27: Add metric banners, transition animations, and polish styling
+- [ ] Minutes 27–30: Take screenshots, write README and LinkedIn post
+
+## Deliverables
+- [ ] Working before/after comparison app
+- [ ] Screenshot showing both states side by side (1200×630px) — save as \`before_after.png\`
+- [ ] An animated GIF of the toggle transition (if possible) — \`demo.gif\`
+- [ ] README.md:
+  - Title: "${project} — ${skill} Before & After"
+  - One-command setup
+  - "The Problem" → "The Solution with ${skill}" narrative
+  - "What I Learned" (3 specific ${skill} insights)
+- [ ] LINKEDIN_POST.md:
+  - Hook: "What a difference ${skill} makes..." or "Before vs. After: ${skill} in action 👇"
+  - Embed the before/after screenshot
+  - Explain the improvement in 2 sentences
+  - Personal insight about learning ${skill}
+  - GitHub link + hashtags (#${skill.replace(/[\\s.]/g, '')} #OpenSource #LearningInPublic)
+
+## Non-Negotiables
+- ⏱️ 30 minutes max. Ship, don't perfect.
+- 🎨 Must look stunning in a LinkedIn feed — recruiters at ${company} should stop scrolling
+- 🆓 No paid APIs or keys. Mock data, free browser APIs, or local computation only
+- 📸 The screenshot alone should tell the story without reading any text
+
+Build everything now — all files, complete code, screenshot-ready UI, and the LinkedIn post.`;
+    }
+
+    // ── Template 4: Mini SaaS Landing Page + Working Feature ─────────────
+    function _tplMiniSaas(skill, project, company, role) {
+      return `# 🎯 Build a Mini SaaS Demo in 30 Minutes: ${project}
+
+## Strategy
+For the "${role}" role at ${company}, I need to show I can apply **${skill}** in a product context — not just an academic exercise. I'm building a fake SaaS product landing page with **one actually working feature** powered by ${skill}. This gives me a gorgeous screenshot for LinkedIn AND proves real implementation skill.
+
+## The Concept
+Build a sleek product landing page for a fictional micro-SaaS tool that uses ${skill}. The page has:
+1. A hero section with a catchy tagline about the product
+2. A "Try It Now" section where the ${skill}-powered feature actually works (this is the demo)
+3. Feature cards (3 cards highlighting what the "product" does)
+4. A footer with a "Built by [Your Name] to demonstrate ${skill}" credit
+
+## Exact Technical Spec
+
+### Page Structure
+\`\`\`
+┌─────────────────────────────────────────┐
+│  HERO: Product name + tagline           │
+│  "Powered by ${skill}"                  │
+│  [Try It Free →] button (scrolls down)  │
+├─────────────────────────────────────────┤
+│  LIVE DEMO SECTION                      │
+│  ┌─────────────┐  ┌─────────────────┐   │
+│  │ Input Area  │  │  Output / Result │   │
+│  │             │→ │  (animated)      │   │
+│  └─────────────┘  └─────────────────┘   │
+│  [Run Demo] button                      │
+├─────────────────────────────────────────┤
+│  3 FEATURE CARDS (glassmorphism style)  │
+│  ┌───────┐ ┌───────┐ ┌───────┐         │
+│  │ ⚡    │ │ 🔒    │ │ 📊    │         │
+│  │ Fast  │ │ Secure│ │ Smart │         │
+│  └───────┘ └───────┘ └───────┘         │
+├─────────────────────────────────────────┤
+│  FOOTER: "Demo project • ${skill}"     │
+└─────────────────────────────────────────┘
+\`\`\`
+
+### Design System
+- Background: deep navy/charcoal (#0a0f1e) with gradient orbs (purple, blue, teal)
+- Cards: glassmorphism (frosted glass with blur, subtle borders)
+- Accent: vibrant gradient (blue→purple or teal→emerald)
+- Typography: Inter or Plus Jakarta Sans from Google Fonts
+- Animations: fade-in on scroll, hover lift on cards, pulse on CTA button
+- The page should look like a real YC startup landing page
+
+### The Working Demo Section (This is Key)
+- Must actually use ${skill} — not a mockup
+- Pre-load realistic sample data so the demo looks good in screenshots
+- Show a loading state while "processing" (even if instant — add a 500ms delay for drama)
+- Display results with visual flair: color-coded output, animated counters, or card reveal
+- Include a "Copy Result" or "Download" action for polish
+
+## LinkedIn-Ready Output
+This project MUST produce visuals that look incredible on LinkedIn:
+- The hero section screenshot alone should look like a real product launch
+- The demo section in action (with results visible) is the money shot
+- Save screenshots at 1200×630px (LinkedIn preview) AND 1080×1080px (carousel post)
+
+## Deliverables
+- [ ] Complete working landing page with live demo
+- [ ] \`screenshot_hero.png\` (1200×630px — the hero section)
+- [ ] \`screenshot_demo.png\` (1200×630px — the demo with results)
+- [ ] README.md:
+  - What ${skill} capability this demonstrates
+  - One-command run: \`npx serve .\` or equivalent
+  - "Technical Deep Dive" — 4–5 sentences on how ${skill} is implemented
+  - "What I Learned" — 3 bullet points
+- [ ] LINKEDIN_POST.md:
+  - Hook: "I built a micro-SaaS demo in 30 minutes to teach myself ${skill}. Here's what happened 👇"
+  - Screenshot embed
+  - What the "product" does and how ${skill} powers it
+  - Key learning (1 surprising thing about ${skill})
+  - "Would you use this?" engagement question
+  - Link to live demo + GitHub
+
+## Rules
+- ⏱️ 30 minutes. No scope creep. One feature, one page, maximum polish.
+- 🎨 If it doesn't look like a real product, the styling needs work.
+- 🆓 No paid APIs. Mock, simulate, or use free-tier services only.
+- 🖼️ Generate the screenshots as part of the build process.
+
+Start now. Build every file, write every line, include the LinkedIn post draft.`;
+    }
+
+    // ── Template 5: Live Data Pipeline Visualizer ────────────────────────
+    function _tplLivePipeline(skill, project, company, role) {
+      return `# 📊 Build a Live Pipeline Visualizer in 30 Minutes: ${project}
+
+## The Hook
+Recruiters at ${company} reviewing "${role}" candidates want to see ${skill} applied to real-world data flows — not toy examples. I'm building a **visual data pipeline** that shows ${skill} processing data in real time, with a beautiful frontend that's screenshot-ready for LinkedIn.
+
+## What You're Building
+A single-page app that visualizes a data pipeline with ${skill} at its core:
+- Data flows in from the left (input stage)
+- Gets processed through 2–3 pipeline stages (one of which is the ${skill} stage — highlighted)
+- Results appear on the right with live metrics and visualizations
+- The whole flow is animated so it looks alive, not static
+
+## Visual Layout
+\`\`\`
+┌──────────────────────────────────────────────────┐
+│  📊 ${project}                                   │
+│  "Real-time ${skill} Pipeline"           [▶ Run] │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│  ┌────────┐    ┌──────────┐    ┌────────────┐    │
+│  │📥 Input│ →→ │⚙️ ${skill}│ →→ │📤 Output   │   │
+│  │        │    │(animated)│    │            │    │
+│  │ Raw    │    │Processing│    │ Results    │    │
+│  │ Data   │    │  Stage   │    │ + Metrics  │    │
+│  └────────┘    └──────────┘    └────────────┘    │
+│                                                  │
+│  ──────── Live Metrics ────────                  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐         │
+│  │ Items    │ │ Speed    │ │ Accuracy │         │
+│  │ 1,247   │ │ 42ms/op  │ │ 97.3%    │         │
+│  └──────────┘ └──────────┘ └──────────┘         │
+│                                                  │
+│  ──────── Output Log ────────                    │
+│  │ ✓ Processed item #1247 — confidence 0.96     │
+│  │ ✓ Processed item #1246 — confidence 0.91     │
+│  │ ...                                           │
+└──────────────────────────────────────────────────┘
+\`\`\`
+
+## Implementation Guide
+
+### Phase 1 — Skeleton (Minutes 0–5)
+- Set up HTML/CSS with the pipeline layout
+- Use CSS Grid or Flexbox for the 3-stage flow
+- Dark background, colored stage cards (input=blue, processing=purple glow, output=green)
+- Import Inter font, set up CSS custom properties for the palette
+
+### Phase 2 — Pipeline Logic (Minutes 5–18)
+- Create a data generator that produces realistic sample items every 500ms
+- Implement the ${skill} processing stage — this is where you demonstrate actual knowledge
+- Add comments explaining exactly what ${skill} is doing and why
+- Wire up the pipeline: input → process → output with animated data points moving between stages
+- Animated connector arrows or dots flowing between stages
+
+### Phase 3 — Metrics & Polish (Minutes 18–26)
+- Add live-updating metric counters (use counting animation from 0 to current value)
+- Add a scrolling output log showing each processed item
+- Pulse animation on the ${skill} stage card when processing
+- Particle or glow effects on the connector arrows
+- Add a Run/Pause button to control the pipeline
+
+### Phase 4 — LinkedIn Assets (Minutes 26–30)
+- Ensure the pipeline is running with at least 20+ items processed (metrics look impressive)
+- Take screenshots at 1200×630px
+- Record a GIF if possible (the animation is the selling point)
+- Write the LinkedIn post
+
+## Technical Rules
+- One HTML file + one CSS file + one JS file (or a single framework page)
+- Run with: \`npx serve .\` or \`python3 -m http.server 3000\`
+- No paid APIs. Generate synthetic data that looks realistic for the ${role} domain
+- All ${skill} logic must be real and commented — not faked with setTimeout
+
+## Deliverables
+- [ ] Working pipeline visualizer with live animation
+- [ ] \`pipeline_running.png\` — screenshot with pipeline active and metrics populated (1200×630px)
+- [ ] \`pipeline_demo.gif\` — animated recording of the pipeline flowing (if tooling allows)
+- [ ] README.md:
+  - Project title + one-line description
+  - What ${skill} concept this demonstrates
+  - How to run (one command)
+  - "Architecture" — brief description of the 3 pipeline stages
+  - "What I Learned About ${skill}" — 3 specific, non-obvious insights
+- [ ] LINKEDIN_POST.md:
+  - Hook: "I visualized a ${skill} pipeline in 30 minutes. Here's the result 👇"
+  - Embed the screenshot or GIF
+  - Explain what each stage does (1 sentence each)
+  - The #1 thing you learned about ${skill} that surprised you
+  - "What would you add to this pipeline?" (engagement hook)
+  - GitHub + live demo links + hashtags
+
+## Quality Check
+- ⏱️ Hard cap: 30 minutes. Better to ship a polished 2-stage pipeline than a broken 5-stage one.
+- 🎨 This must look like a monitoring dashboard at a tech company — not a CS homework project.
+- 🖼️ The screenshot alone, with zero context, should make a ${company} recruiter curious.
+- 🆓 Zero paid dependencies. Everything runs locally with no secrets.
+
+Build this entire project now. All files, all code, all assets, and the LinkedIn post.`;
+    }
+
+    function togglePocPrompt(idx) {
+      const section = document.getElementById('poc-prompt-section-' + idx);
+      if (section) {
+        section.classList.toggle('expanded');
+      }
+    }
+
+    function copyProjectPrompt(idx) {
+      const el = document.getElementById('poc-prompt-text-' + idx);
+      if (!el) return;
+      const text = el.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('btn-copy-prompt-' + idx);
+        if (btn) {
+          btn.classList.add('copied');
+          const orig = btn.innerHTML;
+          btn.innerHTML = '✅ Copied to Clipboard!';
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = orig;
+          }, 2500);
+        }
+        showToast('Project prompt copied! Paste it into your AI assistant.', 'success');
+      }).catch(() => {
+        // Fallback for older browsers
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        document.execCommand('copy');
+        sel.removeAllRanges();
+        showToast('Project prompt copied! Paste it into your AI assistant.', 'success');
+      });
     }
 
     async function runAutofillForJob(url) {

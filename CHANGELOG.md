@@ -13,7 +13,34 @@ per-file diff commands.
 
 ## [Unreleased]
 
+## [6.0.0] - 2026-10-19
+
+### Added
+
+- **Universal Native Desktop Launchers & Autonomous Cockpit (Windows, macOS & Linux)**:
+  - **macOS DMG Package** (`tools/build_mac_dmg.sh`, `desktop/package.json`): One-click installer with drag-and-drop to `/Applications`, custom high-resolution `.icns` application icon, and retina background window.
+  - **Windows NSIS Installer & Standalone Portable EXE** (`tools/package_win_exe.bat`, `tools/build_win_exe.py`): Full setup wizard with Desktop and Start Menu shortcuts, plus a zero-install portable `.exe`.
+  - **Linux AppImage & Debian Package** (`tools/build_linux_app.sh`, `tools/ai-job-auto-applier.desktop`): Portable `.AppImage` supporting all distributions (Ubuntu, Debian, Fedora, Arch) and standard Freedesktop desktop menu integration.
+  - **Offline Cross-Platform Fallback Launcher** (`tools/desktop_launcher.py`, `tools/windows_launcher.py`): Zero-dependency Tkinter GUI with process tree supervision, OS typography adaptation, and automatic port conflict resolution.
+- **Embedded Desktop Cockpit Interface** (`desktop/src/`):
+  - **Hero Engine Controller**: 1-click glowing Start/Stop button, live process ID, uptime clock, and port supervisor.
+  - **Autonomous Service Fleet Grid**: Real-time management and status cards for all 6 core services (Job Search Daemon, Camoufox Auto-Apply, Telegram Bot, Project Scaffolder, Recruiter Outreach, Google Sheets Sync).
+  - **Embedded Interactive CRM**: Operate the complete web dashboard and job pipeline directly inside the desktop window without external browser dependencies.
+  - **1-Click Self-Healing Diagnostics**: Verifies Python 3, FastAPI, Playwright, LuaLaTeX, and auto-repairs missing packages with one click.
+  - **Zero-Touch Candidate Profile Editor**: In-app management of target roles, preferred locations, company exclusion filters, Google Sheets webhook URL, and Telegram keys.
+  - **Live Console Log Stream**: Syntax-colored terminal log stream with auto-scroll, search, clear, and export to text file.
+  - **In-App Distributable Builder**: 1-click buttons to compile macOS DMG, Windows EXE, and Linux AppImage with live progress streaming to console.
+- **Multi-Resolution Cross-Platform Icon Generator** (`desktop/generate_icons.py`):
+  - Generates master 1024×1024 PNG, Windows `.ico` (16 to 256px), macOS `.icns`, and Linux Freedesktop icon suite (`16x16` through `1024x1024`) with auto-installing Pillow support.
+- **Continuous Multi-Platform CI/CD Packaging** (`.github/workflows/build-desktop.yml`):
+  - Matrix building across `macos-latest`, `windows-latest`, and `ubuntu-latest`, automatically publishing DMG, EXE, and AppImage artifacts on git tags.
+- **30-Minute AI Project Prompt Generator** (`dashboard/static/index.html`):
+  - Instant tailored project scaffold prompt templates in the dashboard drawer for missing skills, generating visual demos ready for LinkedIn.
+- **Automated Launcher Test Suite** (`tests/test_launchers.py`):
+  - 7 comprehensive tests verifying process management, schema compliance, desktop entries, permissions, and CI matrix.
+
 ## [5.1.0] - 2026-10-19
+
 
 ### Changed
 

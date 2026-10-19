@@ -46,6 +46,22 @@ install: ## Install Python dependencies
 run: ## Kill previous run, install deps, and start dashboard & browser
 	@$(PYTHON) run.py
 
+desktop: ## Start native desktop launcher
+	@$(PYTHON) run.py --desktop
+
+dmg: ## Build macOS DMG installer
+	@bash tools/build_mac_dmg.sh
+
+exe: ## Build Windows EXE installer
+	@python3 tools/build_win_exe.py
+
+linux: ## Build Linux AppImage and DEB package
+	@bash tools/build_linux_app.sh
+
+appimage: ## Build Linux AppImage package
+	@bash tools/build_linux_app.sh
+
+
 clean: ## Stop any running dashboard processes
 	@$(PYTHON) run.py --clean-only
 

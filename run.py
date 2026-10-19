@@ -172,15 +172,47 @@ def main():
     parser.add_argument("--clean-only", action="store_true", help="Kill processes on dashboard port and exit")
     parser.add_argument("--install", action="store_true", help="Install dependencies and exit")
     parser.add_argument("--test", action="store_true", help="Run automated test suite and exit")
+    parser.add_argument("--desktop", action="store_true", help="Start native Desktop Launcher GUI (Mac / Windows / Linux)")
     args = parser.parse_args()
 
     print_banner()
+
+    if args.desktop:
+        desktop_dir = REPO_ROOT / "desktop"
+        electron_bin = desktop_dir / "node_modules" / ".bin" / ("electron.cmd" if sys.platform == "win32" else "electron")
+        print("🖥️  Launching AI Job Auto-Applier Desktop Launcher...")
+
+        # If node_modules not yet installed in desktop, auto-install dependencies
+        if not (desktop_dir / "node_modules").exists():
+            import shutil
+            if shutil.which("bun"):
+                print("📦 Installing Desktop Launcher dependencies via Bun...")
+                subprocess.run(["bun", "install"], cwd=str(desktop_dir))
+            elif shutil.which("npm"):
+                print("📦 Installing Desktop Launcher dependencies via npm...")
+                subprocess.run(["npm", "install"], cwd=str(desktop_dir))
+
+        if electron_bin.exists():
+            rc = subprocess.run([str(electron_bin), "."], cwd=str(desktop_dir)).returncode
+            sys.exit(rc)
+        import shutil
+        if shutil.which("bun"):
+            rc = subprocess.run(["bun", "run", "start"], cwd=str(desktop_dir)).returncode
+            sys.exit(rc)
+        elif shutil.which("npm"):
+            rc = subprocess.run(["npm", "run", "start"], cwd=str(desktop_dir)).returncode
+            sys.exit(rc)
+        else:
+            from tools.desktop_launcher import launch_gui
+            launch_gui()
+            sys.exit(0)
 
     if args.test:
         check_and_install_dependencies()
         print("🧪 Running automated test suite...")
         test_cmd = [
             sys.executable, "-m", "pytest",
+            "tests/test_launchers.py",
             "tests/test_security_guards.py",
             "tests/test_tracker_status_vocab.py",
             "tests/test_browser_automation.py",
@@ -192,6 +224,7 @@ def main():
             "tests/test_indeed_live.py",
             "tests/test_naukri_live.py"
         ]
+
         rc = subprocess.run(test_cmd).returncode
         sys.exit(rc)
 

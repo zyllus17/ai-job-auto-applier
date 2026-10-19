@@ -2,6 +2,29 @@
 
 Step-by-step instructions for getting the AI Job Search framework running.
 
+## 0. Graphical Desktop Installers (macOS DMG, Windows EXE & Linux AppImage)
+
+For the easiest setup without manually installing developer tools, download or compile the native standalone desktop launchers:
+
+- 🍏 **macOS:** Download `desktop/dist/AI Job Auto-Applier-*.dmg` and drag to `/Applications`.
+- 🪟 **Windows:** Download `desktop/dist/AI Job Auto-Applier Setup *.exe` (or the portable `AI Job Auto-Applier *.exe`).
+- 🐧 **Linux:** Download `desktop/dist/AI Job Auto-Applier-*.AppImage` (make executable with `chmod +x` and run) or install the `.deb` package.
+
+The desktop launcher provides a unified graphical cockpit:
+- 1-Click Engine Start/Stop with process supervisor and port manager
+- Service Fleet cards for all 6 autonomous background services
+- Embedded CRM dashboard view
+- Automated 1-Click Environment Setup & Dependency Healing
+- Zero-Touch Candidate Profile editor
+
+To compile the installers locally:
+- **macOS:** `make dmg` or `bash tools/build_mac_dmg.sh`
+- **Windows:** `make exe` or `tools\package_win_exe.bat`
+- **Linux:** `make linux` or `bash tools/build_linux_app.sh`
+
+
+---
+
 ## 1. Prerequisites
 
 ### Claude Code

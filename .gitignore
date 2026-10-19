@@ -1,6 +1,18 @@
 # Dependencies
 node_modules/
+desktop/node_modules/
 bun.lock
+
+# Build & Distributables
+dist/
+build/
+desktop/dist/
+*.dmg
+*.exe
+*.AppImage
+*.deb
+*.blockmap
+
 
 # Python
 __pycache__/

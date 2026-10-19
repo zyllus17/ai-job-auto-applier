@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=AI Job Auto-Applier
+GenericName=Autonomous Job Application Cockpit
+Comment=Autonomous job search, resume tailoring, anti-detect auto-apply and daily tracking
+Exec=python3 run.py --desktop
+Icon=ai-job-auto-applier
+Terminal=false
+Categories=Utility;Development;Office;
+Keywords=jobs;ai;automation;crawler;career;
+StartupNotify=true
+StartupWMClass=AI Job Auto-Applier

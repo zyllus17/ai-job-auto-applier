@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Job Auto-Applier | Desktop Launcher</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+  <!-- Titlebar for macOS / Windows -->
+  <div class="app-titlebar">
+    <div class="titlebar-drag">
+      <div class="titlebar-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <span class="brand-title">AI Job Auto-Applier</span>
+        <span class="brand-badge">v1.0 Desktop</span>
+      </div>
+    </div>
+    <div class="titlebar-status" id="titlebar-status">
+      <div class="status-indicator status-stopped" id="status-pill">
+        <span class="indicator-dot"></span>
+        <span class="indicator-text" id="status-text">Engine Stopped</span>
+      </div>
+    </div>
+    <div class="titlebar-actions">
+      <button class="tb-btn" id="btn-quick-browser" title="Open Dashboard in Browser">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+        <span>Open Web</span>
+      </button>
+      <button class="tb-btn tb-btn-ghost" id="btn-clean-port" title="Free port 8420">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <span>Clean Port</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="cockpit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Launcher & Cockpit</span>
+        </button>
+        <button class="nav-item" data-tab="embedded-dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          <span>Interactive CRM</span>
+        </button>
+        <button class="nav-item" data-tab="onboarding">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Candidate Profile</span>
+        </button>
+        <button class="nav-item" data-tab="console">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <span>Live Console</span>
+          <span class="badge-counter" id="log-counter">0</span>
+        </button>
+        <button class="nav-item" data-tab="distributables">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <span>Installer & DMG/EXE</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Bottom Shortcuts -->
+      <div class="sidebar-footer">
+        <div class="folder-shortcuts">
+          <div class="shortcut-label">QUICK ACCESS</div>
+          <button class="folder-btn" id="btn-folder-apps" title="Open Tailored Applications Folder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span>Applications</span>
+          </button>
+          <button class="folder-btn" id="btn-folder-cv" title="Open Resumes & Cover Letters">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>CV & Letters</span>
+          </button>
+          <button class="folder-btn" id="btn-folder-logs" title="Open Log Files">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span>Logs</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      
+      <!-- ======================================================================
+           TAB 1: COCKPIT / LAUNCHER
+           ====================================================================== -->
+      <section class="tab-pane active" id="pane-cockpit">
+        <!-- Hero Engine Control Card -->
+        <div class="glass-card hero-engine-card">
+          <div class="hero-left">
+            <div class="hero-badge">
+              <span class="pulse-ring"></span>
+              <span id="hero-status-label">ENGINE READY</span>
+            </div>
+            <h1 class="hero-title">AI Job Auto-Applier</h1>
+            <p class="hero-desc">
+              Autonomous multi-portal job discovery, AI resume tailoring, Camoufox anti-detect auto-apply, and live Google Sheets tracking.
+            </p>
+            <div class="hero-meta">
+              <div class="meta-item">
+                <span class="meta-label">Local Host</span>
+                <span class="meta-value" id="meta-port">http://localhost:8420</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Process ID</span>
+                <span class="meta-value" id="meta-pid">Idle</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Uptime</span>
+                <span class="meta-value" id="meta-uptime">00:00:00</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <button class="engine-master-btn btn-start" id="btn-master-engine">
+              <div class="btn-spinner" id="master-spinner"></div>
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              <span class="btn-text" id="master-btn-text">Start Engine</span>
+            </button>
+            <div class="hero-actions">
+              <button class="sub-action-btn" id="btn-open-browser-main">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span>Launch in Browser</span>
+              </button>
+              <button class="sub-action-btn" id="btn-switch-embedded">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                <span>Switch to Embedded CRM</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 Autonomous Services Grid -->
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h2 class="section-title">Autonomous Services Fleet</h2>
+            <span class="section-subtitle">Real-time background workers orchestrating search, applications & telemetry</span>
+          </div>
+          <button class="btn-secondary-sm" id="btn-refresh-services">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            <span>Sync Status</span>
+          </button>
+        </div>
+
+        <div class="services-grid" id="services-grid">
+          <!-- Service 1: Daemon -->
+          <div class="service-card" data-service-id="job_daemon">
+            <div class="service-header">
+              <div class="service-icon icon-emerald">🔍</div>
+              <div class="service-status-pill stopped" id="badge-job_daemon">Stopped</div>
+            </div>
+            <h3 class="service-title">Job Search Daemon</h3>
+            <p class="service-desc">Continuous scraper scanning LinkedIn, FreeHire, Akademikernes & Jobindex on 15m intervals.</p>
+            <div class="service-footer">
+              <button class="service-toggle-btn" onclick="toggleService('job_daemon')">Start Service</button>
+            </div>
+          </div>
+
+          <!-- Service 2: Auto Apply -->
+          <div class="service-card" data-service-id="browser_autoapply">
+            <div class="service-header">
+              <div class="service-icon icon-orange">🌐</div>
+              <div class="service-status-pill stopped" id="badge-browser_autoapply">Stopped</div>
+            </div>
+            <h3 class="service-title">Browser Auto-Apply</h3>
+            <p class="service-desc">Camoufox anti-detect browser filling Greenhouse, Lever, Ashby, Workday forms.</p>
+            <div class="service-footer">
+              <button class="service-toggle-btn" onclick="toggleService('browser_autoapply')">Start Service</button>
+            </div>
+          </div>
+
+          <!-- Service 3: Telegram Bot -->
+          <div class="service-card" data-service-id="telegram_bot">
+            <div class="service-header">
+              <div class="service-icon icon-blue">📱</div>
+              <div class="service-status-pill stopped" id="badge-telegram_bot">Stopped</div>
+            </div>
+            <h3 class="service-title">Telegram Mobile Bot</h3>
+            <p class="service-desc">Remote-control commands (/ping, /jobs, /enable, /disable) with push notifications.</p>
+            <div class="service-footer">
+              <button class="service-toggle-btn" onclick="toggleService('telegram_bot')">Start Service</button>
+            </div>
+          </div>
+
+          <!-- Service 4: Scaffolder -->
+          <div class="service-card" data-service-id="project_scaffolder">
+            <div class="service-header">
+              <div class="service-icon icon-cyan">📦</div>
+              <div class="service-status-pill stopped" id="badge-project_scaffolder">Stopped</div>
+            </div>
+            <h3 class="service-title">Project Scaffolder</h3>
+            <p class="service-desc">Builds 1 visual mini-project per day for skill gaps to impress recruiters on LinkedIn.</p>
+            <div class="service-footer">
+              <button class="service-toggle-btn" onclick="toggleService('project_scaffolder')">Start Service</button>
+            </div>
+          </div>
+
+          <!-- Service 5: Recruiter Outreach -->
+          <div class="service-card" data-service-id="recruiter_outreach">
+            <div class="service-header">
+              <div class="service-icon icon-pink">🤝</div>
+              <div class="service-status-pill stopped" id="badge-recruiter_outreach">Stopped</div>
+            </div>
+            <h3 class="service-title">Recruiter Outreach</h3>
+            <p class="service-desc">Automated Google X-Ray search to discover hiring managers & craft tailored outreach messages.</p>
+            <div class="service-footer">
+              <button class="service-toggle-btn" onclick="toggleService('recruiter_outreach')">Start Service</button>
+            </div>
+          </div>
+
+          <!-- Service 6: Google Sheets Sync -->
+          <div class="service-card" data-service-id="sheets_sync">
+            <div class="service-header">
+              <div class="service-icon icon-purple">📊</div>
+              <div class="service-status-pill stopped" id="badge-sheets_sync">Stopped</div>
+            </div>
+            <h3 class="service-title">Google Sheets Sync</h3>
+            <p class="service-desc">Live synchronization of applications with a dedicated date tab (YYYY-MM-DD).</p>
+            <div class="service-footer">
+              <button class="service-toggle-btn" onclick="toggleService('sheets_sync')">Start Service</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Diagnostics Checklist -->
+        <div class="glass-card diagnostics-card">
+          <div class="diag-header">
+            <div>
+              <h3 class="diag-title">System Environment Health</h3>
+              <p class="diag-subtitle">Automated verification of compilers, runtimes and toolchains</p>
+            </div>
+            <button class="btn-primary-sm" id="btn-run-setup">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              <span>Auto-Install & Fix All</span>
+            </button>
+          </div>
+
+          <div class="diag-grid">
+            <div class="diag-item" id="diag-python">
+              <div class="diag-status-dot ok"></div>
+              <div class="diag-info">
+                <span class="diag-name">Python 3 Runtime</span>
+                <span class="diag-val" id="diag-python-val">Checking...</span>
+              </div>
+            </div>
+            <div class="diag-item" id="diag-deps">
+              <div class="diag-status-dot ok"></div>
+              <div class="diag-info">
+                <span class="diag-name">FastAPI & Playwright</span>
+                <span class="diag-val" id="diag-deps-val">Checking...</span>
+              </div>
+            </div>
+            <div class="diag-item" id="diag-latex">
+              <div class="diag-status-dot warn"></div>
+              <div class="diag-info">
+                <span class="diag-name">TinyTeX / LuaLaTeX</span>
+                <span class="diag-val" id="diag-latex-val">Checking...</span>
+              </div>
+            </div>
+            <div class="diag-item" id="diag-bun">
+              <div class="diag-status-dot ok"></div>
+              <div class="diag-info">
+                <span class="diag-name">Bun / Node Toolchain</span>
+                <span class="diag-val" id="diag-bun-val">Checking...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           TAB 2: EMBEDDED CRM & DASHBOARD
+           ====================================================================== -->
+      <section class="tab-pane" id="pane-embedded-dashboard">
+        <div class="embedded-header">
+          <div class="embedded-title-group">
+            <span class="live-pill">CRM LIVE</span>
+            <span class="embedded-url" id="embedded-url-display">http://localhost:8420</span>
+          </div>
+          <div class="embedded-controls">
+            <button class="tb-btn" id="btn-reload-iframe">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              <span>Reload CRM</span>
+            </button>
+            <button class="tb-btn tb-btn-primary" id="btn-popout-browser">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+              <span>Open in Browser</span>
+            </button>
+          </div>
+        </div>
+        <div class="iframe-container" id="iframe-wrap">
+          <div class="iframe-placeholder" id="iframe-placeholder">
+            <div class="placeholder-content">
+              <div class="placeholder-icon">🚀</div>
+              <h3>Engine Offline</h3>
+              <p>Start the AI Job Auto-Applier Engine to interact with your live CRM cockpit.</p>
+              <button class="btn-primary-sm" onclick="startEngineFromAnywhere()">Start Engine Now</button>
+            </div>
+          </div>
+          <iframe id="crm-iframe" src="" frameborder="0"></iframe>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           TAB 3: ZERO-TOUCH ONBOARDING / PROFILE
+           ====================================================================== -->
+      <section class="tab-pane" id="pane-onboarding">
+        <div class="page-title-wrap">
+          <h2 class="page-title">Candidate Profile & Zero-Touch Onboarding</h2>
+          <p class="page-subtitle">Configure the 3 essential setup requirements to automate tailored job matching</p>
+        </div>
+
+        <div class="onboarding-cards">
+          <!-- Step 1: Candidate Identity & Roles -->
+          <div class="glass-card form-section-card">
+            <div class="form-section-header">
+              <div class="step-num">1</div>
+              <div>
+                <h3 class="form-title">Candidate Profile & Target Roles</h3>
+                <p class="form-desc">Used by the AI engine to evaluate fit score and tailor your ModernCV</p>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>Full Name</label>
+                <input type="text" id="cfg-name" placeholder="Maruf Hassan">
+              </div>
+              <div class="form-group flex-1">
+                <label>Contact Email</label>
+                <input type="email" id="cfg-email" placeholder="contact@example.com">
+              </div>
+              <div class="form-group flex-1">
+                <label>Phone / WhatsApp</label>
+                <input type="text" id="cfg-phone" placeholder="+91 9876543210">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label>Target Roles (comma-separated)</label>
+                <input type="text" id="cfg-roles" placeholder="AI Automation Engineer, Senior Flutter Developer, Fullstack">
+              </div>
+              <div class="form-group flex-1">
+                <label>Preferred Locations</label>
+                <input type="text" id="cfg-locations" placeholder="Remote Worldwide, Remote India, Kolkata, Europe">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Core Skills & Technologies (comma-separated)</label>
+              <input type="text" id="cfg-skills" placeholder="Python, Flutter, Google Gemini, LangGraph, Camoufox, FastApi, Riverpod">
+            </div>
+
+            <div class="form-group">
+              <label>Current Employer (Company Filter - Prevents Auto-Applying)</label>
+              <input type="text" id="cfg-filter" placeholder="Floor Boss">
+            </div>
+          </div>
+
+          <!-- Step 2: Automation & Sync Settings -->
+          <div class="glass-card form-section-card">
+            <div class="form-section-header">
+              <div class="step-num">2</div>
+              <div>
+                <h3 class="form-title">Google Sheets & Notifications</h3>
+                <p class="form-desc">Real-time daily tabs (YYYY-MM-DD) and Telegram mobile alerts</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Google Apps Script Webhook URL (Optional for live Sheets sync)</label>
+              <input type="url" id="cfg-webhook" placeholder="https://script.google.com/macros/s/AKfycby.../exec">
+              <span class="field-hint">Creates a new tab automatically every day to track job titles, companies, fit scores & application status.</span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>Telegram Bot Token (Optional)</label>
+                <input type="password" id="cfg-telegram-token" placeholder="7123456789:ABCdefGHIjkl...">
+              </div>
+              <div class="form-group flex-1">
+                <label>Telegram Chat ID (Optional)</label>
+                <input type="text" id="cfg-telegram-chat" placeholder="123456789">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>Anti-Detect Browser Mode</label>
+                <select id="cfg-browser-mode">
+                  <option value="semi-auto">Semi-Auto (Pause for confirmation before submitting)</option>
+                  <option value="full-auto">Full-Auto (100% Autonomous submission)</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label>Daily Application Target</label>
+                <input type="number" id="cfg-daily-target" value="25" min="1" max="100">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions-bar">
+            <button class="btn-primary" id="btn-save-config">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              <span>Save & Apply Configuration</span>
+            </button>
+            <span class="save-status" id="save-status-msg"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           TAB 4: LIVE CONSOLE
+           ====================================================================== -->
+      <section class="tab-pane" id="pane-console">
+        <div class="console-header">
+          <div class="console-title-wrap">
+            <h2 class="page-title">Live Engine Console</h2>
+            <p class="page-subtitle">Real-time log stream from backend engine and automated processes</p>
+          </div>
+          <div class="console-actions">
+            <button class="tb-btn" id="btn-clear-logs">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              <span>Clear</span>
+            </button>
+            <button class="tb-btn" id="btn-export-logs">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export</span>
+            </button>
+            <label class="toggle-wrap">
+              <input type="checkbox" id="chk-autoscroll" checked>
+              <span>Auto-Scroll</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="console-terminal" id="console-stream">
+          <div class="console-line line-info">
+            <span class="c-time">[SYSTEM]</span>
+            <span class="c-tag tag-system">READY</span>
+            <span class="c-msg">Desktop Launcher initialized. Listening for engine telemetry...</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           TAB 5: INSTALLER & PACKAGING (DMG, EXE & APPIMAGE)
+           ====================================================================== -->
+      <section class="tab-pane" id="pane-distributables">
+        <div class="page-title-wrap">
+          <h2 class="page-title">Native Desktop Installers (Mac DMG, Windows EXE & Linux AppImage)</h2>
+          <p class="page-subtitle">Distribute AI Job Auto-Applier as a 1-click standalone application for macOS, Windows, and Linux users</p>
+        </div>
+
+        <div class="dist-grid">
+          <!-- macOS DMG Card -->
+          <div class="glass-card dist-card">
+            <div class="dist-header">
+              <div class="dist-os-icon mac-icon"></div>
+              <div>
+                <h3 class="dist-title">macOS DMG Disk Image</h3>
+                <span class="dist-badge">Apple Silicon (M1/M2/M3) & Intel x64</span>
+              </div>
+            </div>
+            <p class="dist-desc">
+              Packages the launcher into an Apple standard <code>.dmg</code> disk image with drag-and-drop to <code>/Applications</code>, custom app icon, and retina background.
+            </p>
+            <div class="dist-specs">
+              <div class="spec-row">
+                <span class="spec-k">Format</span>
+                <span class="spec-v"><code>.dmg</code> (Disk Image) & <code>.zip</code></span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-k">Build Command</span>
+                <span class="spec-v"><code>npm run build:mac</code></span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-k">Output Folder</span>
+                <span class="spec-v"><code>desktop/dist/</code></span>
+              </div>
+            </div>
+            <div class="dist-footer">
+              <button class="btn-primary" id="btn-build-mac">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                <span>Compile macOS .dmg</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Windows EXE Card -->
+          <div class="glass-card dist-card">
+            <div class="dist-header">
+              <div class="dist-os-icon win-icon">⊞</div>
+              <div>
+                <h3 class="dist-title">Windows Installer & Portable EXE</h3>
+                <span class="dist-badge">Windows 10 / 11 (64-bit)</span>
+              </div>
+            </div>
+            <p class="dist-desc">
+              Generates an NSIS setup wizard <code>.exe</code> with desktop shortcut, Start Menu entry, and a standalone portable <code>.exe</code> that runs without installation.
+            </p>
+            <div class="dist-specs">
+              <div class="spec-row">
+                <span class="spec-k">Format</span>
+                <span class="spec-v"><code>.exe</code> (NSIS Installer & Portable)</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-k">Build Command</span>
+                <span class="spec-v"><code>npm run build:win</code></span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-k">Output Folder</span>
+                <span class="spec-v"><code>desktop/dist/</code></span>
+              </div>
+            </div>
+            <div class="dist-footer">
+              <button class="btn-primary" id="btn-build-win">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                <span>Compile Windows .exe</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Linux AppImage & DEB Card -->
+          <div class="glass-card dist-card">
+            <div class="dist-header">
+              <div class="dist-os-icon linux-icon">🐧</div>
+              <div>
+                <h3 class="dist-title">Linux AppImage & DEB</h3>
+                <span class="dist-badge">Universal Linux (Ubuntu, Debian, Fedora, Arch)</span>
+              </div>
+            </div>
+            <p class="dist-desc">
+              Packages into a self-contained portable <code>.AppImage</code> that runs on all Linux distributions, along with a Debian <code>.deb</code> package for apt.
+            </p>
+            <div class="dist-specs">
+              <div class="spec-row">
+                <span class="spec-k">Format</span>
+                <span class="spec-v"><code>.AppImage</code>, <code>.deb</code> & <code>.tar.gz</code></span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-k">Build Command</span>
+                <span class="spec-v"><code>npm run build:linux</code></span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-k">Output Folder</span>
+                <span class="spec-v"><code>desktop/dist/</code></span>
+              </div>
+            </div>
+            <div class="dist-footer">
+              <button class="btn-primary" id="btn-build-linux">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                <span>Compile Linux AppImage</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Automated CI/CD Release Builder -->
+        <div class="glass-card ci-card">
+          <div class="ci-header">
+            <div class="ci-icon">⚡</div>
+            <div>
+              <h3 class="ci-title">Continuous GitHub Actions Automated Releases</h3>
+              <p class="ci-desc">Whenever you push a git tag (e.g., <code>v1.0.0</code>), GitHub Actions automatically compiles macOS <code>.dmg</code>, Windows <code>.exe</code>, and Linux <code>.AppImage</code> on cloud runners and publishes a GitHub Release for your users!</p>
+            </div>
+          </div>
+          <div class="ci-code-box">
+            <code>git tag v1.0.0 &amp;&amp; git push origin v1.0.0</code>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

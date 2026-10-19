@@ -1,0 +1,166 @@
+name: Build Desktop Launchers (DMG & EXE)
+
+on:
+  push:
+    tags:
+      - 'v*'
+    paths:
+      - 'desktop/**'
+      - '.github/workflows/build-desktop.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    name: Build macOS DMG
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python Pillow for Icon Generation
+        run: pip install Pillow
+
+      - name: Generate App Icons
+        run: python desktop/generate_icons.py
+
+      - name: Install Desktop Dependencies
+        working-directory: desktop
+        run: npm install
+
+      - name: Build macOS DMG Installer
+        working-directory: desktop
+        run: npm run build:mac
+
+      - name: Upload macOS Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macOS-DMG
+          path: desktop/dist/*.dmg
+
+  build-windows:
+    name: Build Windows EXE
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python Pillow & PyInstaller
+        run: pip install Pillow pyinstaller
+
+      - name: Generate App Icons
+        run: python desktop/generate_icons.py
+
+      - name: Install Desktop Dependencies
+        working-directory: desktop
+        run: npm install
+
+      - name: Build Windows EXE (NSIS & Portable)
+        working-directory: desktop
+        run: npm run build:win
+
+      - name: Build Standalone PyInstaller EXE Fallback
+        run: python tools/build_win_exe.py
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-EXE
+          path: |
+            desktop/dist/*.exe
+            dist/*.exe
+
+  build-linux:
+    name: Build Linux AppImage & DEB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python Pillow & PyInstaller
+        run: pip install Pillow pyinstaller
+
+      - name: Generate App Icons
+        run: python desktop/generate_icons.py
+
+      - name: Install Desktop Dependencies
+        working-directory: desktop
+        run: npm install
+
+      - name: Build Linux AppImage & DEB
+        working-directory: desktop
+        run: npm run build:linux
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux-Packages
+          path: |
+            desktop/dist/*.AppImage
+            desktop/dist/*.deb
+            desktop/dist/*.tar.gz
+
+  release:
+    name: Create GitHub Release
+    needs: [build-macos, build-windows, build-linux]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download macOS Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: macOS-DMG
+          path: release-assets/
+
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Windows-EXE
+          path: release-assets/
+
+      - name: Download Linux Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Linux-Packages
+          path: release-assets/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+

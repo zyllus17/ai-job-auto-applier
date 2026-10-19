@@ -1,0 +1,126 @@
+{
+  "name": "ai-job-auto-applier-launcher",
+  "version": "6.0.0",
+  "description": "AI Job Auto-Applier Desktop Launcher & Autonomous Operations Cockpit",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac dmg",
+    "build:win": "electron-builder --win nsis portable --x64",
+    "build:linux": "electron-builder --linux AppImage deb tar.gz",
+    "build:dir": "electron-builder --dir"
+  },
+  "keywords": [
+    "job-automation",
+    "ai",
+    "crawler",
+    "desktop-launcher"
+  ],
+  "author": "Maruf Hassan",
+  "license": "MIT",
+  "build": {
+    "appId": "com.aijobapplier.launcher",
+    "productName": "AI Job Auto-Applier",
+    "copyright": "Copyright © 2026",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../dashboard",
+        "to": "repo/dashboard",
+        "filter": ["**/*", "!**/__pycache__/**"]
+      },
+      {
+        "from": "../tools",
+        "to": "repo/tools",
+        "filter": ["**/*", "!**/__pycache__/**"]
+      },
+      {
+        "from": "../cv",
+        "to": "repo/cv"
+      },
+      {
+        "from": "../run.py",
+        "to": "repo/run.py"
+      },
+      {
+        "from": "../requirements.txt",
+        "to": "repo/requirements.txt"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "assets/icon.icns",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "title": "AI Job Auto-Applier Installer",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AI Job Auto-Applier"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "tar.gz"
+      ],
+      "category": "Utility",
+      "icon": "assets/icons",
+      "synopsis": "Autonomous Job Discovery, Resume Tailoring & Cockpit",
+      "desktop": {
+        "StartupWMClass": "AI Job Auto-Applier"
+      }
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  }
+}

@@ -49,7 +49,47 @@ Ask me only the 3 essential things you need from me, and automate all other setu
 
 ---
 
+## 🖥️ 1-Click Desktop App (macOS DMG, Windows EXE & Linux AppImage)
+
+For users who want a native, frictionless desktop experience with **zero terminal commands required**:
+
+<p align="center">
+  <b>Pre-built Installers Available:</b><br>
+  🍏 <b>macOS Disk Image:</b> <code>desktop/dist/AI Job Auto-Applier-*.dmg</code> (Drag & Drop to Applications)<br>
+  🪟 <b>Windows Setup Installer:</b> <code>desktop/dist/AI Job Auto-Applier Setup *.exe</code> (NSIS Installer with Desktop Shortcut)<br>
+  ⚡ <b>Windows Standalone Portable:</b> <code>desktop/dist/AI Job Auto-Applier *.exe</code> (Zero-Install Executable)<br>
+  🐧 <b>Linux Universal AppImage:</b> <code>desktop/dist/AI Job Auto-Applier-*.AppImage</code> (Runs on Ubuntu, Debian, Fedora, Arch)
+</p>
+
+### ✨ Desktop Launcher Superpowers:
+- 🚀 **Hero Engine Cockpit**: 1-click glowing Start/Stop button, live process ID, uptime counter, and port monitor.
+- 🎛️ **Service Fleet Grid**: Real-time cards for all 6 autonomous services (Job Search Daemon, Camoufox Auto-Apply, Telegram Bot, Project Scaffolder, Recruiter Outreach, Google Sheets Sync) with instant status pills and toggle switches.
+- 🌐 **Embedded Interactive CRM**: Operate the entire web dashboard and job pipeline directly inside the desktop window without opening an external browser.
+- 👤 **Zero-Touch Configuration**: Edit your Candidate Profile, target roles, preferred locations, company filters, Google Sheets webhook URL, and Telegram keys with 1-click validation.
+- 💻 **Live Console Stream**: Real-time terminal log viewer with syntax color-coding, auto-scroll, log search, and export to text file.
+- 🩺 **1-Click Self-Healing Diagnostics**: Automatically inspects Python 3, FastAPI, Playwright, LuaLaTeX/TinyTeX, and repairs missing dependencies automatically.
+
+### Compiling Desktop Installers Locally:
+
+```bash
+# Compile macOS .dmg (Apple Silicon & Intel)
+make dmg
+# or: bash tools/build_mac_dmg.sh
+
+# Compile Windows .exe (NSIS Installer & Portable)
+make exe
+# or on Windows: tools\package_win_exe.bat
+
+# Compile Linux .AppImage & .deb (Universal Linux)
+make linux
+# or on Linux: bash tools/build_linux_app.sh
+```
+
+
+---
+
 ## 💻 1-Command Turnkey Setup
+
 
 ### 1. Fork and clone
 
