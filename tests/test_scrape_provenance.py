@@ -79,7 +79,7 @@ class ScrapeProvenanceSpec(unittest.TestCase):
 
 
 class TestRecencyFallback(unittest.TestCase):
-    """Step 1b.3 says to scope to the last 14 days via the portal's recency
+    """Step 1b.3 says to scope to the last 30 days (1 month) via the portal's recency
     flag - but not every portal has one (jobdanmark offers no date filter or
     sort at all), which left the instruction unsatisfiable there: the agent
     either silently skipped the scoping or invented a flag, and inventing a

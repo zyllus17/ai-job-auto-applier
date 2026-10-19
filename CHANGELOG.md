@@ -13,6 +13,23 @@ per-file diff commands.
 
 ## [Unreleased]
 
+## [5.1.0] - 2026-10-19
+
+### Changed
+
+- **`/scrape` recency window widened from 14 days to 30 days (1 month)** — The job freshness
+  filter that controls how far back portal searches reach has been expanded from 2 weeks to
+  1 month. This affects three layers:
+  - **Portal CLI flags**: `--jobage 30` is now passed to LinkedIn and FreeHire (was `--jobage 14`).
+  - **Client-side date filter**: Portals without a native recency flag (e.g. jobdanmark) now
+    drop results older than 30 days instead of 14 after the call returns.
+  - **`posted_date` documentation**: The auditable freshness window referenced in the
+    `seen_jobs.json` schema is updated to reflect the 30-day scope.
+  
+  Updated in `search-queries.md` (Date Filter rule), `SKILL.md` (Step 1b.3 and `posted_date`
+  paragraph), and test docstrings in `test_scrape_contract.py` and `test_scrape_provenance.py`.
+  All 10 scraper tests pass.
+
 ## [5.0.0] - 2026-09-14
 
 ### Added

@@ -61,5 +61,5 @@ site:linkedin.com/jobs "API Integration Engineer" "Python" remote
 - Hindi & Bengali (Native)
 
 ## Date Filter
-Only include jobs posted within the last 14 days, or with active deadlines.
+Only include jobs posted within the last 30 days (1 month), or with active deadlines.
 
