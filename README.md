@@ -125,7 +125,7 @@ For users who want a native, frictionless desktop experience with **zero termina
 ### 🚀 Step-by-Step Installation Guides
 
 #### 🪟 Windows (10 / 11)
-1. **Download**: Click the [**Download for Windows**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest) button above to download `AI-Job-Auto-Applier-Setup-6.0.0.exe` (or the zero-install Portable `.exe`).
+1. **Download**: Click the [**Download for Windows**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-Setup-6.0.0.exe) button above to download `AI-Job-Auto-Applier-Setup-6.0.0.exe` (or the zero-install [Portable .exe](https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.exe)).
 2. **Run Installer**: Double-click the downloaded `.exe` file to start the setup wizard.
    > **Note on Windows SmartScreen:** Because this is an open-source project, Windows Defender SmartScreen may display:  
    > *"Windows protected your PC — Microsoft Defender SmartScreen prevented an unrecognized app from starting."*  
@@ -134,16 +134,32 @@ For users who want a native, frictionless desktop experience with **zero termina
 4. **Launch Cockpit**: Double-click the desktop shortcut. The glowing Hero Engine Cockpit opens, automatically verifies your background services, and opens the visual Web Dashboard.
 
 #### 🍏 macOS (Apple Silicon & Intel)
-1. **Download**: Click the [**Download for macOS**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest) button above to download `AI-Job-Auto-Applier-6.0.0.dmg`.
+
+##### Method 1: Standard DMG Download (Recommended)
+1. **Download**: Click the [**Download for macOS**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.dmg) button above to download `AI-Job-Auto-Applier-6.0.0.dmg`.
 2. **Open DMG**: Double-click the downloaded `.dmg` file to mount it.
-3. **Install**: Drag the **AI Job Auto-Applier** application icon into your **`/Applications`** folder.
-4. **First Launch**: Open the app from Spotlight or Launchpad.
-   > **Note on macOS Gatekeeper:** On first launch, if macOS displays:  
-   > *"AI Job Auto-Applier can't be opened because Apple cannot check it for malicious software."*  
-   > 👉 Right-click (or Control-click) the app in `/Applications`, select **Open**, and click **Open** on the confirmation prompt. This only needs to be done once.
+3. **Install**: Drag the **AI Job Auto-Applier** icon into your **`/Applications`** folder.
+4. **First Launch — macOS Gatekeeper ("App is damaged" message):**  
+   Because this is an open-source project distributed outside the Apple App Store without a paid ($99/year) Apple Developer ID certificate, macOS Gatekeeper attaches a quarantine flag to browser downloads and may display:  
+   > *"AI Job Auto-Applier is damaged and can't be opened. You should move it to the Trash."*
+   
+   **The app is completely safe and fully functional.** Fix it in seconds using either method:
+   - **Terminal (Instant Fix — 1 Command):**  
+     Run this in Terminal to clear the quarantine flag:
+     ```bash
+     xattr -cr "/Applications/AI Job Auto-Applier.app"
+     ```
+     Now open **AI Job Auto-Applier** normally from Spotlight or Launchpad. (Done once only!)
+   - **System Settings (No Terminal):**  
+     Go to **System Settings** → **Privacy & Security** → scroll to **Security** → click **"Open Anyway"**.
+
+##### Method 2: Terminal 1-Liner (Auto-installs & bypasses quarantine automatically)
+```bash
+curl -sSL https://raw.githubusercontent.com/zyllus17/ai-job-auto-applier/master/desktop/install-mac.sh | bash
+```
 
 #### 🐧 Linux (Universal AppImage & Debian/Ubuntu)
-1. **Download**: Click the [**Download for Linux**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest) button above to download `AI-Job-Auto-Applier-6.0.0.AppImage` (or `.deb`).
+1. **Download**: Click the [**Download for Linux**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.AppImage) button above to download `AI-Job-Auto-Applier-6.0.0.AppImage` (or the [.deb package](https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier_6.0.0_amd64.deb)).
 2. **Using AppImage (Universal)**:
    - In file manager: Right-click the `.AppImage` > **Properties** > **Permissions** > check **"Allow executing file as program"**.
    - Or in terminal:
