@@ -1,9 +1,41 @@
 <p align="center">
-  <h1 align="center">🤖 AI Job Auto-Applier v4: Autonomous Career Engine</h1>
+  <h1 align="center">🤖 AI Job Auto-Applier: Autonomous Career Engine</h1>
   <p align="center">
     <b>The continuous, self-driving career acquisition framework that runs locally on your laptop.</b><br>
     <i>Full Native Windows Support • Visual Web Dashboard • Anti-Detect Form Auto-Filling • 0 AI Tokens • ATS Tailored 2-Page CVs • 1-Page Cover Letters • Daily Frontend Demo Projects • Recruiter Cold Outreach • Free Self-Hosted Telegram Bot • Google Sheets Daily Tracking</i>
   </p>
+</p>
+
+<!-- 1-CLICK DESKTOP APP DOWNLOAD BUTTONS -->
+<p align="center">
+  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest" title="Download AI Job Auto-Applier for Windows (64-bit EXE)">
+    <img src="https://img.shields.io/badge/Download%20for-Windows%20(.exe)-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows (.exe)" height="48" />
+  </a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest" title="Download AI Job Auto-Applier for macOS (Universal DMG)">
+    <img src="https://img.shields.io/badge/Download%20for-macOS%20(.dmg)-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS (.dmg)" height="48" />
+  </a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest" title="Download AI Job Auto-Applier for Linux (.AppImage / .deb)">
+    <img src="https://img.shields.io/badge/Download%20for-Linux%20(.AppImage)-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Download for Linux (.AppImage)" height="48" />
+  </a>
+</p>
+
+<p align="center">
+  <b>⚡ 1-Click Direct Downloads (v6.0.0):</b><br>
+  🪟 <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-Setup-6.0.0.exe"><b>Windows Setup (.exe)</b></a> &nbsp;|&nbsp;
+  ⚡ <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.exe">Windows Portable (.exe)</a> &nbsp;|&nbsp;
+  🍏 <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.dmg"><b>macOS Universal (.dmg)</b></a> &nbsp;|&nbsp;
+  🐧 <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.AppImage"><b>Linux (.AppImage)</b></a> &nbsp;|&nbsp;
+  📦 <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier_6.0.0_amd64.deb">Debian / Ubuntu (.deb)</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest"><img src="https://img.shields.io/github/v/release/zyllus17/ai-job-auto-applier?style=flat-square&color=4f46e5&label=Latest%20Release" alt="Latest Release" /></a>
+  <a href="https://github.com/zyllus17/ai-job-auto-applier/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" alt="License" /></a>
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-brightgreen?style=flat-square" alt="Platforms" />
+  <img src="https://img.shields.io/badge/Desktop%20GUI-Electron%20%2B%20Python-orange?style=flat-square" alt="Desktop GUI" />
+  <img src="https://img.shields.io/badge/Zero--Setup-1--Click%20Install-10b981?style=flat-square" alt="Zero-Setup" />
 </p>
 
 <p align="center">
@@ -11,6 +43,7 @@
 </p>
 
 ---
+
 
 ## 🌟 Why This Exists
 
@@ -49,17 +82,88 @@ Ask me only the 3 essential things you need from me, and automate all other setu
 
 ---
 
-## 🖥️ 1-Click Desktop App (macOS DMG, Windows EXE & Linux AppImage)
+## 🖥️ 1-Click Desktop App (Windows, macOS & Linux)
 
 For users who want a native, frictionless desktop experience with **zero terminal commands required**:
 
-<p align="center">
-  <b>Pre-built Installers Available:</b><br>
-  🍏 <b>macOS Disk Image:</b> <code>desktop/dist/AI Job Auto-Applier-*.dmg</code> (Drag & Drop to Applications)<br>
-  🪟 <b>Windows Setup Installer:</b> <code>desktop/dist/AI Job Auto-Applier Setup *.exe</code> (NSIS Installer with Desktop Shortcut)<br>
-  ⚡ <b>Windows Standalone Portable:</b> <code>desktop/dist/AI Job Auto-Applier *.exe</code> (Zero-Install Executable)<br>
-  🐧 <b>Linux Universal AppImage:</b> <code>desktop/dist/AI Job Auto-Applier-*.AppImage</code> (Runs on Ubuntu, Debian, Fedora, Arch)
-</p>
+### 📥 Pre-Built Desktop Installers (v6.0.0)
+
+| Operating System | Type | Architecture | File Name | Direct Download | Quick Installation |
+|:---|:---|:---|:---|:---|:---|
+| 🪟 **Windows 10 / 11** | **Setup Wizard** (`.exe`) | 64-bit (x64) | `AI-Job-Auto-Applier-Setup-6.0.0.exe` | [**Download Setup .exe**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-Setup-6.0.0.exe) | Standard NSIS installer; creates Desktop & Start Menu shortcuts |
+| ⚡ **Windows Portable** | **Standalone Portable** (`.exe`) | 64-bit (x64) | `AI-Job-Auto-Applier-6.0.0.exe` | [**Download Portable .exe**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.exe) | Zero install: double-click and run directly anywhere without admin rights |
+| 🍏 **macOS** | **Disk Image** (`.dmg`) | Apple Silicon (M1–M4) & Intel | `AI-Job-Auto-Applier-6.0.0.dmg` | [**Download macOS .dmg**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.dmg) | Open DMG and drag `AI Job Auto-Applier` to `/Applications` |
+| 🐧 **Linux (Universal)** | **Portable AppImage** (`.AppImage`) | 64-bit (x86_64) | `AI-Job-Auto-Applier-6.0.0.AppImage` | [**Download AppImage**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.AppImage) | `chmod +x *.AppImage` and run (Ubuntu, Debian, Fedora, Arch) |
+| 📦 **Linux (Debian/Ubuntu)** | **DEB Package** (`.deb`) | 64-bit (amd64) | `AI-Job-Auto-Applier_6.0.0_amd64.deb` | [**Download .deb**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier_6.0.0_amd64.deb) | Install via `sudo dpkg -i *.deb` with native app menu entry |
+
+---
+
+### 💻 System Requirements & Prerequisites
+
+- **Windows**: Windows 10 or Windows 11 (64-bit).
+- **macOS**: macOS 11.0 (Big Sur) or newer. Universal binary natively supporting both Apple Silicon (M1, M2, M3, M4) and Intel x86_64.
+- **Linux**: Ubuntu 20.04+, Debian 11+, Fedora 36+, Arch Linux, or any modern x86_64 distribution with `glibc >= 2.28`.
+- **Python**: Python 3.10+ recommended. The desktop app includes **1-Click Self-Healing Diagnostics** that automatically detects your local Python installation and repairs missing components without manual terminal setup.
+- **Hardware**: 4 GB RAM minimum (8 GB recommended), 500 MB free disk space.
+
+---
+
+### 🚀 Step-by-Step Installation Guides
+
+#### 🪟 Windows (10 / 11)
+1. **Download**: Click the [**Download for Windows**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest) button above to download `AI-Job-Auto-Applier-Setup-6.0.0.exe` (or the zero-install Portable `.exe`).
+2. **Run Installer**: Double-click the downloaded `.exe` file to start the setup wizard.
+   > **Note on Windows SmartScreen:** Because this is an open-source project, Windows Defender SmartScreen may display:  
+   > *"Windows protected your PC — Microsoft Defender SmartScreen prevented an unrecognized app from starting."*  
+   > 👉 Simply click **More info** and then click **Run anyway**.
+3. **Finish Setup**: The installer automatically places an **AI Job Auto-Applier** shortcut on your Desktop and in your Start Menu.
+4. **Launch Cockpit**: Double-click the desktop shortcut. The glowing Hero Engine Cockpit opens, automatically verifies your background services, and opens the visual Web Dashboard.
+
+#### 🍏 macOS (Apple Silicon & Intel)
+1. **Download**: Click the [**Download for macOS**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest) button above to download `AI-Job-Auto-Applier-6.0.0.dmg`.
+2. **Open DMG**: Double-click the downloaded `.dmg` file to mount it.
+3. **Install**: Drag the **AI Job Auto-Applier** application icon into your **`/Applications`** folder.
+4. **First Launch**: Open the app from Spotlight or Launchpad.
+   > **Note on macOS Gatekeeper:** On first launch, if macOS displays:  
+   > *"AI Job Auto-Applier can't be opened because Apple cannot check it for malicious software."*  
+   > 👉 Right-click (or Control-click) the app in `/Applications`, select **Open**, and click **Open** on the confirmation prompt. This only needs to be done once.
+
+#### 🐧 Linux (Universal AppImage & Debian/Ubuntu)
+1. **Download**: Click the [**Download for Linux**](https://github.com/zyllus17/ai-job-auto-applier/releases/latest) button above to download `AI-Job-Auto-Applier-6.0.0.AppImage` (or `.deb`).
+2. **Using AppImage (Universal)**:
+   - In file manager: Right-click the `.AppImage` > **Properties** > **Permissions** > check **"Allow executing file as program"**.
+   - Or in terminal:
+     ```bash
+     chmod +x AI-Job-Auto-Applier-6.0.0.AppImage
+     ./AI-Job-Auto-Applier-6.0.0.AppImage
+     ```
+3. **Using Debian / Ubuntu (`.deb`)**:
+   - Double-click the `.deb` file in your file manager to install via Ubuntu Software / GDebi, or in terminal:
+     ```bash
+     sudo dpkg -i AI-Job-Auto-Applier_6.0.0_amd64.deb
+     ```
+   - An application entry will automatically appear in your application launcher menu.
+
+---
+
+### 🌟 What Happens on First Launch (Zero-Touch Experience)
+
+1. **Self-Healing Diagnostics**: The desktop app automatically checks for Python 3, anti-detect browser dependencies (Playwright/Camoufox), and document compilers (LuaLaTeX/XeLaTeX). If anything is missing, 1-click auto-repair resolves it.
+2. **Port Guard**: The app checks if port 8420 is available and cleanly assigns or frees it.
+3. **Engine Cockpit**: A sleek desktop window displays real-time status pills for all 6 autonomous services.
+4. **Integrated CRM Dashboard**: The full-featured web dashboard automatically loads at `http://localhost:8420` (embedded directly inside the desktop app window or in your default browser).
+5. **Ready to Roll**: Enter your profile details or paste your resume, and start matching and applying automatically!
+
+---
+
+### 🔄 Updating & Uninstalling
+
+- **Updating**: Simply download the latest release installer and run it. Your candidate profile (`documents/cv/`), personal tracking data, and configuration (`.env`) are never overwritten.
+- **Uninstalling on Windows**: Open **Windows Settings > Apps > Installed apps**, find **AI Job Auto-Applier**, and click **Uninstall**.
+- **Uninstalling on macOS**: Move `/Applications/AI Job Auto-Applier.app` to the Trash.
+- **Uninstalling on Linux**: For AppImage, simply delete the `.AppImage` file. For DEB, run `sudo dpkg -r ai-job-auto-applier`.
+
+---
 
 ### ✨ Desktop Launcher Superpowers:
 - 🚀 **Hero Engine Cockpit**: 1-click glowing Start/Stop button, live process ID, uptime counter, and port monitor.
@@ -72,18 +176,19 @@ For users who want a native, frictionless desktop experience with **zero termina
 ### Compiling Desktop Installers Locally:
 
 ```bash
-# Compile macOS .dmg (Apple Silicon & Intel)
-make dmg
-# or: bash tools/build_mac_dmg.sh
-
 # Compile Windows .exe (NSIS Installer & Portable)
 make exe
 # or on Windows: tools\package_win_exe.bat
+
+# Compile macOS .dmg (Apple Silicon & Intel)
+make dmg
+# or: bash tools/build_mac_dmg.sh
 
 # Compile Linux .AppImage & .deb (Universal Linux)
 make linux
 # or on Linux: bash tools/build_linux_app.sh
 ```
+
 
 
 ---
