@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="64" viewBox="0 0 240 64" fill="none">
+  <defs>
+    <linearGradient id="win-grad" x1="0" y1="0" x2="240" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0078D6" />
+      <stop offset="100%" stop-color="#005A9E" />
+    </linearGradient>
+    <filter id="shadow" x="-4" y="-2" width="248" height="72" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+  </defs>
+  <!-- Background Card -->
+  <rect x="2" y="2" width="236" height="60" rx="12" fill="url(#win-grad)" stroke="#38A5FF" stroke-width="1.5" filter="url(#shadow)" />
+  
+  <!-- Windows Official 4-Tile Logo -->
+  <g transform="translate(18, 18)">
+    <rect x="0" y="0" width="13" height="13" fill="#FFFFFF" rx="1" />
+    <rect x="15" y="0" width="13" height="13" fill="#FFFFFF" rx="1" />
+    <rect x="0" y="15" width="13" height="13" fill="#FFFFFF" rx="1" />
+    <rect x="15" y="15" width="13" height="13" fill="#FFFFFF" rx="1" />
+  </g>
+
+  <!-- Typography -->
+  <text x="56" y="28" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700">Download for Windows</text>
+  <text x="56" y="46" fill="#D6ECFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="500">Windows 10 / 11 • 64-bit EXE</text>
+
+  <!-- Download Arrow Icon -->
+  <g transform="translate(212, 24)" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 1v10" />
+    <path d="M1 8l3 3 3-3" />
+    <path d="M0 15h8" />
+  </g>
+</svg>

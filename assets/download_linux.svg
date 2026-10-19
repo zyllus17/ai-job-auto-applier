@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="64" viewBox="0 0 240 64" fill="none">
+  <defs>
+    <linearGradient id="linux-grad" x1="0" y1="0" x2="240" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#21262D" />
+      <stop offset="100%" stop-color="#161B22" />
+    </linearGradient>
+    <filter id="linux-shadow" x="-4" y="-2" width="248" height="72" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  <!-- Background Card -->
+  <rect x="2" y="2" width="236" height="60" rx="12" fill="url(#linux-grad)" stroke="#F5A623" stroke-width="1.5" filter="url(#linux-shadow)" />
+
+  <!-- Linux Tux Logo -->
+  <g transform="translate(18, 16)">
+    <ellipse cx="14" cy="18" rx="10" ry="12" fill="#FFFFFF" />
+    <ellipse cx="14" cy="17" rx="8" ry="10" fill="#161B22" />
+    <ellipse cx="14" cy="19" rx="6" ry="7" fill="#FFFFFF" />
+    <circle cx="11.5" cy="14" r="1.5" fill="#161B22" />
+    <circle cx="16.5" cy="14" r="1.5" fill="#161B22" />
+    <!-- Beak -->
+    <polygon points="12,17 16,17 14,21" fill="#F5A623" />
+    <!-- Feet -->
+    <ellipse cx="9" cy="28" rx="4" ry="2" fill="#F5A623" />
+    <ellipse cx="19" cy="28" rx="4" ry="2" fill="#F5A623" />
+  </g>
+
+  <!-- Typography -->
+  <text x="56" y="28" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700">Download for Linux</text>
+  <text x="56" y="46" fill="#F5A623" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="500">Universal AppImage &amp; DEB</text>
+
+  <!-- Download Arrow Icon -->
+  <g transform="translate(212, 24)" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 1v10" />
+    <path d="M1 8l3 3 3-3" />
+    <path d="M0 15h8" />
+  </g>
+</svg>

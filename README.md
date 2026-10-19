@@ -9,15 +9,15 @@
 <!-- 1-CLICK DESKTOP APP DOWNLOAD BUTTONS -->
 <p align="center">
   <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest" title="Download AI Job Auto-Applier for Windows (64-bit EXE)">
-    <img src="https://img.shields.io/badge/Download%20for-Windows%20(.exe)-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows (.exe)" height="48" />
+    <img src="assets/download_windows.png" alt="Download for Windows (.exe)" width="260" />
   </a>
-  &nbsp;&nbsp;&nbsp;
+  &nbsp;&nbsp;
   <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest" title="Download AI Job Auto-Applier for macOS (Universal DMG)">
-    <img src="https://img.shields.io/badge/Download%20for-macOS%20(.dmg)-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS (.dmg)" height="48" />
+    <img src="assets/download_mac.png" alt="Download for macOS (.dmg)" width="260" />
   </a>
-  &nbsp;&nbsp;&nbsp;
+  &nbsp;&nbsp;
   <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest" title="Download AI Job Auto-Applier for Linux (.AppImage / .deb)">
-    <img src="https://img.shields.io/badge/Download%20for-Linux%20(.AppImage)-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Download for Linux (.AppImage)" height="48" />
+    <img src="assets/download_linux.png" alt="Download for Linux (.AppImage)" width="260" />
   </a>
 </p>
 
@@ -85,6 +85,20 @@ Ask me only the 3 essential things you need from me, and automate all other setu
 ## 🖥️ 1-Click Desktop App (Windows, macOS & Linux)
 
 For users who want a native, frictionless desktop experience with **zero terminal commands required**:
+
+<p align="center">
+  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-Setup-6.0.0.exe" title="Download AI Job Auto-Applier for Windows">
+    <img src="assets/download_windows.png" alt="Download for Windows (.exe)" width="240" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.dmg" title="Download AI Job Auto-Applier for macOS">
+    <img src="assets/download_mac.png" alt="Download for macOS (.dmg)" width="240" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/zyllus17/ai-job-auto-applier/releases/latest/download/AI-Job-Auto-Applier-6.0.0.AppImage" title="Download AI Job Auto-Applier for Linux">
+    <img src="assets/download_linux.png" alt="Download for Linux (.AppImage)" width="240" />
+  </a>
+</p>
 
 ### 📥 Pre-Built Desktop Installers (v6.0.0)
 
