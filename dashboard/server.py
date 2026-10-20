@@ -110,6 +110,7 @@ class ProcessManager:
             sub_env["PYTHONUNBUFFERED"] = "1"
             process = await asyncio.create_subprocess_exec(
                 *cmd,
+                cwd=str(REPO_ROOT),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.STDOUT,
                 env=sub_env
@@ -379,6 +380,7 @@ class ProcessManager:
                 sub_env["PYTHONUNBUFFERED"] = "1"
                 proc = await asyncio.create_subprocess_exec(
                     *cmd,
+                    cwd=str(REPO_ROOT),
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.STDOUT,
                     env=sub_env
@@ -711,6 +713,13 @@ async def generate_job_outreach(idx: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get('/api/logs')
+async def get_logs_api(limit: int = 200):
+    logs = list(manager.log_buffer)
+    if limit > 0 and len(logs) > limit:
+        logs = logs[-limit:]
+    return {'logs': logs}
+
 @app.delete('/api/logs')
 async def clear_logs():
     manager.log_buffer.clear()
@@ -859,6 +868,22 @@ async def update_settings(data: SettingsInput):
             json.dump(current_profile, f, indent=2)
             
     return {"status": "success"}
+
+class LiveSearchInput(BaseModel):
+    query: str
+    location: Optional[str] = "Remote"
+    limit: Optional[int] = 15
+
+@app.post('/api/search/live')
+async def live_search_api(data: LiveSearchInput):
+    """Executes on-demand live portal search across all sources and stages high-fit matches."""
+    cmd = [
+        sys.executable, "-u", str(TOOLS_DIR / 'daemon_job_runner.py'),
+        '--once', '--limit', str(data.limit or 15),
+        '--query', data.query.strip(),
+        '--location', (data.location or 'Remote').strip()
+    ]
+    return await manager.run_oneshot_action(f"Live Portal Search: {data.query.strip()}", cmd)
 
 @app.post('/api/actions/scan-once')
 async def action_scan_once():

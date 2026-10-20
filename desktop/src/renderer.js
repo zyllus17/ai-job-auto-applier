@@ -259,24 +259,41 @@ async function syncServices() {
     const services = await window.api.getServices();
     if (!services) return;
 
-    for (const [id, s] of Object.entries(services)) {
-      const card = document.querySelector(`.service-card[data-service-id="${id}"]`);
+    const list = Array.isArray(services) ? services : Object.values(services);
+    for (const s of list) {
+      if (!s || !s.id) continue;
+      const card = document.querySelector(`.service-card[data-service-id="${s.id}"]`);
       if (!card) continue;
 
       const badge = card.querySelector('.service-status-pill');
       const toggleBtn = card.querySelector('.service-toggle-btn');
-      const isRunning = s.running;
+      const isRunning = s.status === 'running';
+      const isError = s.status === 'error';
 
-      if (isRunning) {
-        badge.className = 'service-status-pill running';
-        badge.textContent = 'Running';
-        toggleBtn.className = 'service-toggle-btn btn-active';
-        toggleBtn.textContent = 'Stop Service';
-      } else {
-        badge.className = 'service-status-pill stopped';
-        badge.textContent = 'Stopped';
-        toggleBtn.className = 'service-toggle-btn';
-        toggleBtn.textContent = 'Start Service';
+      if (badge) {
+        if (isRunning) {
+          badge.className = 'service-status-pill running';
+          badge.textContent = 'Running';
+        } else if (isError) {
+          badge.className = 'service-status-pill error';
+          badge.textContent = 'Error';
+        } else {
+          badge.className = 'service-status-pill stopped';
+          badge.textContent = 'Stopped';
+        }
+      }
+
+      if (toggleBtn && !toggleBtn.dataset.busy) {
+        if (isRunning) {
+          toggleBtn.className = 'service-toggle-btn btn-active';
+          toggleBtn.textContent = 'Stop Service';
+        } else if (isError) {
+          toggleBtn.className = 'service-toggle-btn btn-retry';
+          toggleBtn.textContent = 'Restart Service';
+        } else {
+          toggleBtn.className = 'service-toggle-btn';
+          toggleBtn.textContent = 'Start Service';
+        }
       }
     }
   } catch (e) {
@@ -295,12 +312,31 @@ window.toggleService = async function(serviceId) {
   }
   const card = document.querySelector(`.service-card[data-service-id="${serviceId}"]`);
   const badge = card?.querySelector('.service-status-pill');
+  const toggleBtn = card?.querySelector('.service-toggle-btn');
   const isRunning = badge?.classList.contains('running');
   const action = isRunning ? 'stop' : 'start';
 
+  if (toggleBtn) {
+    toggleBtn.dataset.busy = 'true';
+    toggleBtn.disabled = true;
+    toggleBtn.textContent = isRunning ? 'Stopping...' : 'Starting...';
+  }
+
   appendConsoleLog('info', `Sending ${action} command to service: ${serviceId}...`);
-  await window.api.toggleService(serviceId, action);
-  setTimeout(syncServices, 1000);
+  try {
+    const res = await window.api.toggleService(serviceId, action);
+    if (res && res.status) {
+      appendConsoleLog('success', `Service '${serviceId}' is now ${res.status}.`);
+    }
+  } catch (err) {
+    appendConsoleLog('error', `Failed to ${action} ${serviceId}: ${err.message || err}`);
+  } finally {
+    if (toggleBtn) {
+      delete toggleBtn.dataset.busy;
+      toggleBtn.disabled = false;
+    }
+    await syncServices();
+  }
 };
 
 // Console & Logs

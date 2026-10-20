@@ -488,7 +488,93 @@ def search_remoteok_jobs(query: str, seen: set = None, limit: int = 15) -> list:
         record_warning("job_daemon", f"RemoteOK API lookup warning: {e}", context={"query": query})
     return results
 
-def run_search_cycle(dry_run: bool = False, limit: int = 15) -> list:
+def fetch_freehire_jobs_py(query: str, seen: set = None, limit: int = 15) -> list:
+    """Fetch live tech jobs directly from freehire.me JSON API (Pure Python fallback)."""
+    seen = seen or set()
+    results = []
+    try:
+        import urllib.parse
+        params = urllib.parse.urlencode({
+            'q': query,
+            'limit': limit,
+            'work_mode': 'remote',
+            'include_description': 'true',
+            'description_format': 'text'
+        })
+        url = f"https://freehire.me/api/v1/agent/jobs/search?{params}"
+        req = urllib.request.Request(url, headers={'User-Agent': 'freehire-search-skill/1.0 (+https://freehire.me)'})
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            for item in data.get('data', []):
+                slug = item.get('id') or item.get('company_slug', '')
+                job_id = f"freehire_{slug}"
+                if job_id in seen:
+                    continue
+                results.append({
+                    "id": job_id,
+                    "title": item.get('title', ''),
+                    "company": item.get('company_name', item.get('company', 'Tech Company')),
+                    "url": item.get('url', ''),
+                    "description": item.get('description', ''),
+                    "location": item.get('location', 'Remote Worldwide'),
+                    "source": "FreeHire"
+                })
+                if len(results) >= limit:
+                    break
+    except Exception as e:
+        record_warning("job_daemon", f"FreeHire direct API error: {e}", context={"query": query})
+    return results
+
+def fetch_linkedin_jobs_py(query: str, location: str = "Remote", seen: set = None, limit: int = 15) -> list:
+    """Fetch live jobs from LinkedIn public search guest endpoint (Pure Python fallback)."""
+    seen = seen or set()
+    results = []
+    try:
+        import urllib.parse, html
+        params = urllib.parse.urlencode({
+            'keywords': query,
+            'location': location,
+            'f_WT': '2',
+            'start': 0
+        })
+        url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?{params}"
+        req = urllib.request.Request(url, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        })
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            body = resp.read().decode('utf-8', errors='replace')
+            chunks = body.split('data-entity-urn="urn:li:jobPosting:')[1:]
+            for c in chunks:
+                id_m = re.match(r'^(\d+)', c)
+                if not id_m: continue
+                jid = id_m.group(1)
+                job_id = f"linkedin_{jid}"
+                if job_id in seen: continue
+                title_m = re.search(r'class="base-search-card__title"[^>]*>(.*?)</h3>', c, re.DOTALL)
+                title = re.sub(r'<[^>]+>', '', title_m.group(1)).strip() if title_m else 'Software Engineer'
+                comp_m = re.search(r'class="base-search-card__subtitle"[^>]*>(.*?)</h4>', c, re.DOTALL)
+                comp = re.sub(r'<[^>]+>', '', comp_m.group(1)).strip() if comp_m else 'Tech Employer'
+                loc_m = re.search(r'class="job-search-card__location"[^>]*>(.*?)</span>', c, re.DOTALL)
+                loc = re.sub(r'<[^>]+>', '', loc_m.group(1)).strip() if loc_m else location
+                link_m = re.search(r'class="base-card__full-link[^"]*"[^>]*href="([^"]+)"', c)
+                jurl = link_m.group(1).split('?')[0] if link_m else f"https://www.linkedin.com/jobs/view/{jid}"
+                results.append({
+                    "id": job_id,
+                    "title": html.unescape(title),
+                    "company": html.unescape(comp),
+                    "url": jurl,
+                    "location": html.unescape(loc),
+                    "description": "",
+                    "source": "LinkedIn"
+                })
+                if len(results) >= limit:
+                    break
+    except Exception as e:
+        record_warning("job_daemon", f"LinkedIn direct lookup error: {e}", context={"query": query})
+    return results
+
+def run_search_cycle(dry_run: bool = False, limit: int = 15, custom_query: str = None, custom_location: str = None) -> list:
     """
     Executes one comprehensive search cycle across all 5 sources with pagination
     and error tracking.
@@ -508,12 +594,19 @@ def run_search_cycle(dry_run: bool = False, limit: int = 15) -> list:
         except Exception:
             pass
 
-    categories = get_search_categories(prof)
+    if custom_query:
+        categories = [{"query": custom_query.strip(), "location": (custom_location or "Remote").strip()}]
+    else:
+        categories = get_search_categories(prof)
+
     new_staged = []
     cycle_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f"\n[DAEMON] === Running Discovery Cycle at {cycle_time} ===")
-    target_roles_str = ", ".join(prof.get("target_roles", ["Software Engineer"]))
-    print(f"[PROFILE] Target Roles: {target_roles_str}")
+    if custom_query:
+        print(f"[SEARCH ON DEMAND] Query: '{custom_query}' | Location: '{custom_location or 'Remote'}'")
+    else:
+        target_roles_str = ", ".join(prof.get("target_roles", ["Software Engineer"]))
+        print(f"[PROFILE] Target Roles: {target_roles_str}")
 
     for cat in categories:
         if not RUNNING or is_daemon_paused():
@@ -525,8 +618,8 @@ def run_search_cycle(dry_run: bool = False, limit: int = 15) -> list:
 
         # 1. Search LinkedIn (Pages 1–3 to prevent pagination starvation)
         linkedin_cli = REPO_ROOT / ".agents/skills/linkedin-search/cli/src/cli.ts"
+        linkedin_found = 0
         if linkedin_cli.exists() and shutil.which(BUN_BIN):
-            linkedin_found = 0
             for page_num in range(1, 4):
                 if linkedin_found >= limit or not RUNNING:
                     break
@@ -600,16 +693,56 @@ def run_search_cycle(dry_run: bool = False, limit: int = 15) -> list:
                             new_staged.append(row)
 
                     if new_in_page == 0:
-                        # Page had no unseen jobs, advance to next page
                         continue
                 except Exception as e:
                     record_warning("job_daemon", f"LinkedIn search parse error on page {page_num}: {e}", context={"query": q})
                     break
 
+        # Fallback to direct Python LinkedIn search if Bun CLI was not run or found 0
+        if linkedin_found == 0 and RUNNING:
+            py_li_results = fetch_linkedin_jobs_py(q, loc, seen=seen, limit=limit)
+            for item in py_li_results:
+                job_id = item["id"]
+                if job_id in seen:
+                    continue
+                title = item.get("title", "")
+                company = item.get("company", "")
+                url = item.get("url", "")
+                desc = item.get("description", "")
+                if company_filter and company_filter.should_skip(company):
+                    continue
+                fit_score, missing_skill, suggested_project = score_job_fit(title, desc, profile=prof)
+                all_seen_dict[job_id] = {
+                    "title": title,
+                    "company": company,
+                    "url": url,
+                    "fitScore": fit_score,
+                    "date": datetime.now().strftime("%Y-%m-%d")
+                }
+                seen.add(job_id)
+                print(f"  -> [LinkedIn Direct] Found: {title} @ {company} (Fit: {fit_score}/100)")
+                if fit_score >= 70:
+                    row = {
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "company": company,
+                        "title": title,
+                        "fitScore": fit_score,
+                        "status": "Staged - Ready to Submit",
+                        "missingSkill": missing_skill,
+                        "suggestedProject": suggested_project,
+                        "location": item.get("location", loc),
+                        "url": url,
+                        "notes": f"High fit ({fit_score}%). Generated tailored CV & cover letter."
+                    }
+                    if not dry_run:
+                        stage_dir = stage_application(item, missing_skill, suggested_project, fit_score)
+                        row["notes"] += f" Staged at {stage_dir.name}"
+                    new_staged.append(row)
+
         # 2. Search FreeHire (Pages 1–2)
         freehire_cli = REPO_ROOT / ".agents/skills/freehire-search/cli/src/cli.ts"
+        freehire_found = 0
         if freehire_cli.exists() and shutil.which(BUN_BIN):
-            freehire_found = 0
             for page_num in range(1, 3):
                 if freehire_found >= limit or not RUNNING:
                     break
@@ -678,6 +811,47 @@ def run_search_cycle(dry_run: bool = False, limit: int = 15) -> list:
                 except Exception as e:
                     record_warning("job_daemon", f"FreeHire search parse error on page {page_num}: {e}", context={"query": q})
                     break
+
+        # Fallback to direct Python FreeHire search if Bun CLI was not run or found 0
+        if freehire_found == 0 and RUNNING:
+            py_fh_results = fetch_freehire_jobs_py(q, seen=seen, limit=limit)
+            for item in py_fh_results:
+                job_id = item["id"]
+                if job_id in seen:
+                    continue
+                title = item.get("title", "")
+                company = item.get("company", "")
+                url = item.get("url", "")
+                desc = item.get("description", "")
+                if company_filter and company_filter.should_skip(company):
+                    continue
+                fit_score, missing_skill, suggested_project = score_job_fit(title, desc, profile=prof)
+                all_seen_dict[job_id] = {
+                    "title": title,
+                    "company": company,
+                    "url": url,
+                    "fitScore": fit_score,
+                    "date": datetime.now().strftime("%Y-%m-%d")
+                }
+                seen.add(job_id)
+                print(f"  -> [FreeHire Direct] Found: {title} @ {company} (Fit: {fit_score}/100)")
+                if fit_score >= 70:
+                    row = {
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "company": company,
+                        "title": title,
+                        "fitScore": fit_score,
+                        "status": "Staged - Ready to Submit",
+                        "missingSkill": missing_skill,
+                        "suggestedProject": suggested_project,
+                        "location": item.get("location", "Remote Worldwide"),
+                        "url": url,
+                        "notes": f"High fit ({fit_score}%). Generated tailored CV & cover letter."
+                    }
+                    if not dry_run:
+                        stage_dir = stage_application(item, missing_skill, suggested_project, fit_score)
+                        row["notes"] += f" Staged at {stage_dir.name}"
+                    new_staged.append(row)
 
         # 3. Search Arbeitnow
         try:
@@ -841,6 +1015,8 @@ def main():
     parser.add_argument("--once", action="store_true", help="Run a single cycle and exit")
     parser.add_argument("--dry-run", action="store_true", help="Search and rank without generating application files")
     parser.add_argument("--limit", type=int, default=15, help="Max results per search category")
+    parser.add_argument("--query", "-q", help="Specific search query to run")
+    parser.add_argument("--location", "-l", default="Remote", help="Specific search location")
     args = parser.parse_args()
 
     print("=========================================================")
@@ -854,7 +1030,7 @@ def main():
 
     while RUNNING:
         try:
-            run_search_cycle(dry_run=args.dry_run, limit=args.limit)
+            run_search_cycle(dry_run=args.dry_run, limit=args.limit, custom_query=args.query, custom_location=args.location)
         except Exception as e:
             record_error("job_daemon", f"Cycle encountered unhandled exception: {e}", severity="CRITICAL")
             print(f"[ERROR] Cycle encountered error: {e}. Backing off for 60 seconds...", file=sys.stderr)

@@ -836,7 +836,7 @@
       flex-direction: column;
     }
     .ant-drawer-content-wrapper.open {
-      right: 0;
+      right: 0 !important;
     }
     .ant-drawer-header {
       padding: 20px 26px;
@@ -1249,8 +1249,11 @@
               <h1 class="ant-page-header-title">Worker Daemons & Pipeline Overview</h1>
               <div class="ant-page-header-sub">Manage 6 independent background automation workers with real-time process supervisor tracking.</div>
             </div>
-            <div style="display: flex; gap: 10px;">
-              <button class="btn-glow" style="padding: 9px 18px; font-size: 13.5px;" onclick="runAction('scan-once')">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn-glow" style="padding: 9px 18px; font-size: 13.5px;" onclick="openSearchModal()">
+                🔍 Search Live Portals
+              </button>
+              <button class="btn-glass" style="padding: 9px 18px; font-size: 13.5px;" onclick="runAction('scan-once')">
                 ▶ Run Discovery Scan
               </button>
               <button class="btn-glass" style="padding: 9px 16px; font-size: 13.5px;" onclick="runAction('scaffold')">
@@ -1324,12 +1327,17 @@
           <!-- Table Card -->
           <div class="table-card">
             <div class="table-toolbar">
-              <div class="search-box-wrap">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="job-search-input" placeholder="Search by company, role title, or skill..." oninput="fetchJobs()">
+              <div class="search-box-wrap" style="flex: 1; max-width: 440px; display: flex; gap: 8px;">
+                <div style="position: relative; flex: 1;">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" id="job-search-input" placeholder="Filter company, role title, or skill..." oninput="fetchJobs()">
+                </div>
+                <button class="btn-glow" style="padding: 0 14px; font-size: 12.5px; white-space: nowrap;" onclick="triggerLiveSearchFromFilter()">
+                  🌐 Live Search
+                </button>
               </div>
 
-              <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <span style="font-size: 13px; color: var(--text-dim);">Filter Stage:</span>
                 <button class="btn-glow stage-btn" style="padding: 5px 12px; font-size: 12px;" onclick="setFilterStage('')">All</button>
                 <button class="btn-glass stage-btn" style="padding: 5px 12px; font-size: 12px;" onclick="setFilterStage('staged')">Staged</button>
@@ -1620,6 +1628,54 @@
     </div>
     <div class="ant-drawer-footer">
       <button class="btn-glass" style="padding: 8px 18px;" onclick="closeDiagnosticsModal()">Dismiss</button>
+    </div>
+  </div>
+
+  <!-- Live Job Search Modal Drawer -->
+  <div class="ant-drawer-mask" id="search-mask" onclick="closeSearchModal()"></div>
+  <div class="ant-drawer-content-wrapper" id="search-wrapper" style="width: 520px; right: -520px;">
+    <div class="ant-drawer-header">
+      <h4 class="ant-drawer-title">🌐 Live Job Portal Search</h4>
+      <button class="btn-glass" onclick="closeSearchModal()" style="padding: 4px 10px; font-size: 14px;">✕</button>
+    </div>
+    <div class="ant-drawer-body" style="padding: 24px;">
+      <p style="color: var(--text-muted); font-size: 13.5px; line-height: 1.5; margin-bottom: 20px;">
+        Search active opportunities live across FreeHire, LinkedIn, Arbeitnow, Remotive, and RemoteOK. Matching jobs are dynamically scored (0–100) and staged directly to your pipeline.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+            Target Role / Keyword
+          </label>
+          <input type="text" id="search-query-input" class="btn-glass" style="width: 100%; padding: 10px 14px; font-size: 14px; text-align: left;" placeholder="e.g. AI Automation Engineer, Senior Flutter Developer, Python" onkeydown="if(event.key==='Enter') executeLiveSearch()">
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+            Location Preference
+          </label>
+          <select id="search-location-input" class="btn-glass" style="width: 100%; padding: 10px 14px; font-size: 14px; cursor: pointer;">
+            <option value="Remote">Remote Worldwide</option>
+            <option value="United States">United States (Remote/Hybrid)</option>
+            <option value="Europe">Europe / Relocation</option>
+            <option value="India">India (Remote/Hybrid)</option>
+          </select>
+        </div>
+
+        <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 8px; padding: 14px; margin-top: 8px;">
+          <div style="font-size: 12.5px; font-weight: 600; color: #a5b4fc; margin-bottom: 4px;">⚡ Real-Time Portals Queried:</div>
+          <div style="font-size: 12px; color: var(--text-dim); line-height: 1.5;">
+            • <b>FreeHire.me</b> (50+ ATS platforms aggregated)<br>
+            • <b>LinkedIn</b> (Guest endpoints & remote listings)<br>
+            • <b>Arbeitnow & Remotive & RemoteOK</b> (Global tech jobs)
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ant-drawer-footer" style="display: flex; justify-content: space-between; align-items: center;">
+      <button class="btn-glass" style="padding: 8px 18px;" onclick="closeSearchModal()">Cancel</button>
+      <button class="btn-glow" id="btn-exec-live-search" style="padding: 8px 22px;" onclick="executeLiveSearch()">🚀 Search Live Portals</button>
     </div>
   </div>
 
@@ -1935,17 +1991,35 @@
     async function toggleService(id) {
       const svc = state.services.find(s => s.id === id);
       if (!svc) return;
-      if (svc.status === 'error') {
-        await resetServiceError(id);
-        return;
-      }
-      const willStart = svc.status !== 'running';
-      showToast((willStart ? 'Starting ' : 'Stopping ') + svc.name + '...', 'info');
 
-      const res = await apiCall('/api/services/' + id + '/' + (willStart ? 'start' : 'stop'), 'POST');
-      if (res && res.status) {
-        showToast(svc.name + ' is now ' + res.status, res.status === 'running' ? 'success' : 'info');
-        fetchServices();
+      const switchBtn = document.getElementById('switch-' + id);
+      if (switchBtn && switchBtn.dataset.busy === 'true') return;
+      if (switchBtn) switchBtn.dataset.busy = 'true';
+
+      try {
+        if (svc.status === 'error') {
+          showToast('Resetting error and starting ' + svc.name + '...', 'info');
+          await apiCall('/api/services/' + id + '/reset', 'POST');
+          svc.status = 'idle';
+        }
+
+        const willStart = svc.status !== 'running';
+        if (switchBtn) {
+          if (willStart) switchBtn.classList.add('active');
+          else switchBtn.classList.remove('active');
+        }
+
+        showToast((willStart ? 'Starting ' : 'Stopping ') + svc.name + '...', 'info');
+
+        const res = await apiCall('/api/services/' + id + '/' + (willStart ? 'start' : 'stop'), 'POST');
+        if (res && res.status) {
+          showToast(svc.name + ' is now ' + res.status, res.status === 'running' ? 'success' : 'info');
+        }
+      } catch (err) {
+        showToast('Error toggling ' + svc.name + ': ' + (err.message || err), 'error');
+      } finally {
+        if (switchBtn) delete switchBtn.dataset.busy;
+        await fetchServices();
       }
     }
 
@@ -2994,6 +3068,72 @@ Build this entire project now. All files, all code, all assets, and the LinkedIn
     function closeDiagnosticsModal() {
       document.getElementById('diag-mask').classList.remove('open');
       document.getElementById('diag-wrapper').classList.remove('open');
+    }
+
+    // Live Job Search Modal
+    function openSearchModal(initialQuery = '') {
+      const queryInput = document.getElementById('search-query-input');
+      if (initialQuery && queryInput) {
+        queryInput.value = initialQuery;
+      } else if (queryInput && !queryInput.value) {
+        // Prepopulate with candidate's primary target role if available
+        const settingRoles = document.getElementById('setting-target-roles');
+        if (settingRoles && settingRoles.value) {
+          queryInput.value = settingRoles.value.split(',')[0].trim();
+        } else {
+          queryInput.value = 'AI Automation Engineer';
+        }
+      }
+      document.getElementById('search-mask').classList.add('open');
+      document.getElementById('search-wrapper').classList.add('open');
+      if (queryInput) {
+        setTimeout(() => queryInput.focus(), 150);
+      }
+    }
+
+    function closeSearchModal() {
+      document.getElementById('search-mask').classList.remove('open');
+      document.getElementById('search-wrapper').classList.remove('open');
+    }
+
+    async function executeLiveSearch() {
+      const query = (document.getElementById('search-query-input')?.value || '').trim();
+      const location = (document.getElementById('search-location-input')?.value || 'Remote').trim();
+      if (!query) {
+        showToast('Please enter a role or keyword to search', 'warning');
+        return;
+      }
+
+      const btn = document.getElementById('btn-exec-live-search');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ Searching Portals...';
+      }
+
+      showToast(`Initiating live search for "${query}" (${location})...`, 'info');
+      closeSearchModal();
+
+      try {
+        const res = await apiCall('/api/search/live', 'POST', { query, location, limit: 15 });
+        if (res && (res.status === 'started' || res.status === 'success' || res.status === 'dispatched')) {
+          showToast(`Search for "${query}" dispatched! Watch live stream in Console.`, 'success');
+        }
+        setTimeout(() => fetchJobs(), 3000);
+        setTimeout(() => fetchJobs(), 8000);
+      } catch (err) {
+        showToast('Search execution failed: ' + err.message, 'error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = '🚀 Search Live Portals';
+        }
+      }
+    }
+
+    function triggerLiveSearchFromFilter() {
+      const filterInput = document.getElementById('jobs-search-input');
+      const q = filterInput ? filterInput.value.trim() : '';
+      openSearchModal(q);
     }
 
     // Settings

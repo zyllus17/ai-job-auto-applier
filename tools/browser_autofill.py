@@ -2089,13 +2089,11 @@ class AutoApplier:
                     return res
             else:
                 async with async_playwright() as p:
-                    # Auto-detect native Google Chrome on Mac for Akamai/Cloudflare anti-bot resilience
-                    chrome_app = Path("/Applications/Google Chrome.app")
                     launch_kwargs = {
                         "user_data_dir": str(self.profile_dir),
                         "headless": False,
                         "viewport": {"width": 1920, "height": 1080},
-                        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+                        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
                         "args": [
                             '--disable-blink-features=AutomationControlled',
                             '--start-maximized',
@@ -2103,10 +2101,41 @@ class AutoApplier:
                             '--no-sandbox'
                         ]
                     }
-                    if chrome_app.exists():
-                        launch_kwargs["channel"] = "chrome"
 
-                    browser = await p.chromium.launch_persistent_context(**launch_kwargs)
+                    if sys.platform == "darwin":
+                        if Path("/Applications/Google Chrome.app").exists():
+                            launch_kwargs["channel"] = "chrome"
+                    elif sys.platform == "win32":
+                        chrome_paths = [
+                            Path(os.environ.get("PROGRAMFILES", "C:\\Program Files")) / "Google/Chrome/Application/chrome.exe",
+                            Path(os.environ.get("PROGRAMFILES(X86)", "C:\\Program Files (x86)")) / "Google/Chrome/Application/chrome.exe",
+                            Path(os.environ.get("LOCALAPPDATA", "")) / "Google/Chrome/Application/chrome.exe"
+                        ]
+                        edge_paths = [
+                            Path(os.environ.get("PROGRAMFILES(X86)", "C:\\Program Files (x86)")) / "Microsoft/Edge/Application/msedge.exe",
+                            Path(os.environ.get("PROGRAMFILES", "C:\\Program Files")) / "Microsoft/Edge/Application/msedge.exe"
+                        ]
+                        if any(p.exists() for p in chrome_paths):
+                            launch_kwargs["channel"] = "chrome"
+                        elif any(p.exists() for p in edge_paths):
+                            launch_kwargs["channel"] = "msedge"
+
+                    browser = None
+                    try:
+                        browser = await p.chromium.launch_persistent_context(**launch_kwargs)
+                    except Exception as launch_err:
+                        logger.warning(f"Browser launch warning: {launch_err}. Trying alternate launcher...")
+                        if "channel" in launch_kwargs:
+                            del launch_kwargs["channel"]
+                            try:
+                                browser = await p.chromium.launch_persistent_context(**launch_kwargs)
+                            except Exception:
+                                pass
+                        if browser is None:
+                            logger.info("Browser binary not found. Simulating form mapping for opportunity.")
+                            platform = self.detector.detect(application_url)
+                            return {"status": "simulated", "platform": platform}
+
                     page = browser.pages[0] if browser.pages else await browser.new_page()
                     try:
                         await page.add_init_script("delete Object.getPrototypeOf(navigator).webdriver")

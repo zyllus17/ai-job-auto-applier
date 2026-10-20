@@ -52,6 +52,38 @@
         "to": "repo/cv"
       },
       {
+        "from": "../cover_letters",
+        "to": "repo/cover_letters"
+      },
+      {
+        "from": "../documents",
+        "to": "repo/documents"
+      },
+      {
+        "from": "../.agents",
+        "to": "repo/.agents"
+      },
+      {
+        "from": "../job_search_tracker.csv",
+        "to": "repo/job_search_tracker.csv"
+      },
+      {
+        "from": "../seen_jobs.json",
+        "to": "repo/seen_jobs.json"
+      },
+      {
+        "from": "../CLAUDE.md",
+        "to": "repo/CLAUDE.md"
+      },
+      {
+        "from": "../AGENTS.md",
+        "to": "repo/AGENTS.md"
+      },
+      {
+        "from": "../GEMINI.md",
+        "to": "repo/GEMINI.md"
+      },
+      {
         "from": "../run.py",
         "to": "repo/run.py"
       },

@@ -13,6 +13,23 @@ const logBuffer = [];
 const MAX_LOGS = 1500;
 const SERVER_PORT = 8420;
 
+function copyRecursiveSync(src, dest) {
+  if (!fs.existsSync(src)) return;
+  const stats = fs.statSync(src);
+  if (stats.isDirectory()) {
+    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+    for (const child of fs.readdirSync(src)) {
+      copyRecursiveSync(path.join(src, child), path.join(dest, child));
+    }
+  } else {
+    if (!fs.existsSync(dest)) {
+      try {
+        fs.copyFileSync(src, dest);
+      } catch (_) {}
+    }
+  }
+}
+
 // Resolve Repo Root
 function getRepoRoot() {
   // 1. Explicit environment variable override
@@ -20,10 +37,21 @@ function getRepoRoot() {
     return path.resolve(process.env.AI_JOB_REPO_ROOT);
   }
 
-  // 2. Packaged app: bundled resources
+  // 2. Packaged app: bundled resources mapped to writable user workspace
   if (app.isPackaged) {
     const resourceRepo = path.join(process.resourcesPath, 'repo');
-    if (fs.existsSync(path.join(resourceRepo, 'run.py'))) return resourceRepo;
+    const userWorkspace = path.join(app.getPath('userData'), 'workspace');
+    if (fs.existsSync(resourceRepo)) {
+      try {
+        copyRecursiveSync(resourceRepo, userWorkspace);
+        if (fs.existsSync(path.join(userWorkspace, 'run.py'))) {
+          return userWorkspace;
+        }
+      } catch (err) {
+        console.error('Failed to initialize user workspace:', err);
+      }
+      if (fs.existsSync(path.join(resourceRepo, 'run.py'))) return resourceRepo;
+    }
 
     const bundledAsar = path.join(process.resourcesPath, 'app.asar.unpacked');
     if (fs.existsSync(path.join(bundledAsar, 'run.py'))) return bundledAsar;

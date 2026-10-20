@@ -364,10 +364,10 @@ body.dark-theme {
   bottom: 0;
   padding: 24px 28px;
   overflow-y: auto;
-  display: none;
+  display: none !important;
 }
 .tab-pane.active {
-  display: block;
+  display: block !important;
 }
 
 /* Glassmorphism Cards */
@@ -801,11 +801,10 @@ body.dark-theme {
    ========================================================================== */
 #pane-embedded-dashboard {
   padding: 0;
-  display: flex;
   flex-direction: column;
 }
 #pane-embedded-dashboard.active {
-  display: flex;
+  display: flex !important;
 }
 
 .embedded-header {
@@ -1027,11 +1026,10 @@ body.dark-theme {
    LIVE CONSOLE
    ========================================================================== */
 #pane-console {
-  display: flex;
   flex-direction: column;
 }
 #pane-console.active {
-  display: flex;
+  display: flex !important;
 }
 
 .console-header {
